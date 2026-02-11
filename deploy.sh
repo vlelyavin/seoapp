@@ -44,13 +44,16 @@ if ! id "$APP_USER" &>/dev/null; then
 fi
 
 # 4. Setup app directory
-echo "[4/11] Setting up app directory..."
-sudo mkdir -p "$APP_DIR"
-sudo cp -r ./* "$APP_DIR/" 2>/dev/null || true
-sudo cp .env.example "$APP_DIR/.env" 2>/dev/null || true
-sudo mkdir -p "$APP_DIR/reports" "$APP_DIR/screenshots"
-# Remove root package-lock.json to prevent Turbopack root detection issues
-sudo rm -f "$APP_DIR/package-lock.json"
+echo "[4/11] Syncing files to app directory..."
+sudo mkdir -p "$APP_DIR" "$APP_DIR/reports" "$APP_DIR/screenshots"
+# Use rsync for reliable copy (preserves structure, handles all files)
+sudo rsync -a --exclude='node_modules' --exclude='.next' --exclude='venv' \
+    --exclude='*.pyc' --exclude='__pycache__' --exclude='package-lock.json' \
+    ./ "$APP_DIR/"
+# Copy .env only if it doesn't exist yet (don't overwrite production config)
+if [ ! -f "$APP_DIR/frontend/.env" ]; then
+    sudo cp "$APP_DIR/frontend/.env.example" "$APP_DIR/frontend/.env" 2>/dev/null || true
+fi
 
 # 5. Python venv & dependencies
 echo "[5/11] Installing Python dependencies..."
