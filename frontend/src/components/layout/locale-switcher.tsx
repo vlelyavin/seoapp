@@ -1,0 +1,70 @@
+"use client";
+
+import { useLocale } from "next-intl";
+import { useRouter, usePathname } from "next/navigation";
+import { routing } from "@/i18n/routing";
+import { Globe } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { cn } from "@/lib/utils";
+
+const localeLabels: Record<string, string> = {
+  en: "EN",
+  ru: "RU",
+  uk: "UA",
+};
+
+export function LocaleSwitcher() {
+  const locale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  function switchLocale(newLocale: string) {
+    // Replace the locale segment in the pathname
+    const segments = pathname.split("/");
+    segments[1] = newLocale;
+    router.push(segments.join("/"));
+    setOpen(false);
+  }
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+      >
+        <Globe className="h-4 w-4" />
+        {localeLabels[locale]}
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full z-50 mt-1 w-32 rounded-lg border bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-900">
+          {routing.locales.map((loc) => (
+            <button
+              key={loc}
+              onClick={() => switchLocale(loc)}
+              className={cn(
+                "block w-full px-3 py-1.5 text-left text-sm",
+                loc === locale
+                  ? "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400"
+                  : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
+              )}
+            >
+              {localeLabels[loc]} — {loc === "en" ? "English" : loc === "ru" ? "Русский" : "Українська"}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

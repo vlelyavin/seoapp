@@ -399,6 +399,36 @@ def translate_analyzer_content(result: AnalyzerResult, lang: str, translator) ->
 
         # Post-process: replace remaining Ukrainian words in summary
         # (injected via {problems}, {broken}, {sections} placeholders)
+        if lang == 'en' and translated.summary:
+            _summary_word_map_en = {
+                'декілька H1': 'multiple H1',
+                'дублів H1': 'duplicate H1',
+                'порушень ієрархії': 'hierarchy violations',
+                'без H1': 'no H1',
+                'завеликі': 'too large',
+                'застарілий формат': 'outdated format',
+                'порожніх': 'empty',
+                'з малим контентом': 'with thin content',
+                'внутрішніх': 'internal',
+                'зовнішніх': 'external',
+                'глибоких сторінок': 'deep pages',
+                'сирітських': 'orphan',
+                'помилок': 'errors',
+                'попереджень': 'warnings',
+                'без viewport': 'no viewport',
+                'Flash-контент': 'Flash content',
+                'некоректний viewport': 'incorrect viewport',
+                'довгих URL': 'long URLs',
+                'великі літери': 'uppercase letters',
+                'спецсимволи': 'special characters',
+                'підкреслення': 'underscores',
+                'подвійні слеші': 'double slashes',
+                'параметри': 'parameters',
+            }
+            for ukr, eng in _summary_word_map_en.items():
+                if ukr in translated.summary:
+                    translated.summary = translated.summary.replace(ukr, eng)
+
         if lang == 'ru' and translated.summary:
             _summary_word_map = {
                 'декілька H1': 'несколько H1',
@@ -507,6 +537,21 @@ def translate_analyzer_content(result: AnalyzerResult, lang: str, translator) ->
 
     # Post-process: replace remaining Ukrainian words in issue messages
     # (speed FCP/LCP/CLS metrics, content_sections missing features, etc.)
+    if lang == 'en':
+        _issue_word_map_en = {
+            'повільний': 'slow',
+            'високий': 'high',
+            'ціль': 'target',
+            'відсутні елементи:': 'missing elements:',
+            'дати публікації': 'publication dates',
+            'категорії': 'categories',
+        }
+        for issue in translated.issues:
+            if issue.message:
+                for ukr, eng in _issue_word_map_en.items():
+                    if ukr in issue.message:
+                        issue.message = issue.message.replace(ukr, eng)
+
     if lang == 'ru':
         _issue_word_map = {
             'повільний': 'медленный',

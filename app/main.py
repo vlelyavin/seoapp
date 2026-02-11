@@ -12,6 +12,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sse_starlette.sse import EventSourceResponse
 
+from fastapi.middleware.cors import CORSMiddleware
+
 from .config import settings
 from .crawler import WebCrawler
 from .models import (
@@ -70,7 +72,8 @@ ALL_ANALYZERS = {
     "duplicates": DuplicatesAnalyzer,
     "redirects": RedirectsAnalyzer,
 }
-from .report_generator import ReportGenerator
+from .report_generator import ReportGenerator, translate_analyzer_content
+from .i18n import get_translator
 
 # Ensure directories exist
 settings.ensure_dirs()
@@ -80,6 +83,15 @@ app = FastAPI(
     title="SEO Audit Tool",
     description="Автоматичний SEO-аудит сайтів з генерацією HTML-звіту",
     version="1.0.0",
+)
+
+# CORS for development (Next.js on port 3000)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Mount static files
@@ -113,7 +125,7 @@ async def start_audit(request: AuditRequest, background_tasks: BackgroundTasks):
         url=str(request.url),
         status=AuditStatus.PENDING,
         started_at=datetime.utcnow(),
-        language=request.language if request.language in ["uk", "ru"] else "uk",
+        language=request.language if request.language in ["uk", "ru", "en"] else "uk",
     )
 
     # Store audit
@@ -167,7 +179,44 @@ async def get_audit(audit_id: str):
         "status": audit.status,
         "pages_crawled": audit.pages_crawled,
         "total_issues": audit.total_issues,
+        "critical_issues": audit.critical_issues,
+        "warnings": audit.warnings,
+        "passed_checks": audit.passed_checks,
         "report_path": audit.report_path,
+    }
+
+
+@app.get("/api/audit/{audit_id}/results")
+async def get_audit_results(audit_id: str, lang: str = "uk"):
+    """Get full analyzer results as JSON, optionally translated."""
+    if audit_id not in audits:
+        raise HTTPException(status_code=404, detail="Audit not found")
+
+    audit = audits[audit_id]
+
+    if audit.status != AuditStatus.COMPLETED:
+        raise HTTPException(status_code=400, detail="Audit not completed yet")
+
+    # Serialize results, optionally translated
+    results_dict = {}
+    translator = get_translator(lang) if lang and lang != "uk" else None
+    for name, result in audit.results.items():
+        if translator:
+            translated = translate_analyzer_content(result, lang, translator)
+            results_dict[name] = translated.model_dump()
+        else:
+            results_dict[name] = result.model_dump()
+
+    return {
+        "id": audit.id,
+        "url": audit.url,
+        "pages_crawled": audit.pages_crawled,
+        "total_issues": audit.total_issues,
+        "critical_issues": audit.critical_issues,
+        "warnings": audit.warnings,
+        "passed_checks": audit.passed_checks,
+        "results": results_dict,
+        "homepage_screenshot": audit.homepage_screenshot,
     }
 
 

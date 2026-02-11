@@ -1,0 +1,99 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String         @id @default(cuid())
+  name          String?
+  email         String         @unique
+  emailVerified DateTime?
+  password      String?
+  image         String?
+  role          String         @default("user")
+  planId        String         @default("free")
+  plan          Plan           @relation(fields: [planId], references: [id])
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  accounts      Account[]
+  sessions      Session[]
+  audits        Audit[]
+  brandSettings BrandSettings?
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Plan {
+  id             String  @id
+  name           String
+  auditsPerMonth Int
+  maxPages       Int
+  whiteLabel     Boolean @default(false)
+  price          Float   @default(0)
+  users          User[]
+}
+
+model Audit {
+  id             String    @id @default(cuid())
+  fastApiId      String
+  userId         String
+  url            String
+  status         String    @default("pending")
+  language       String    @default("en")
+  pagesCrawled   Int       @default(0)
+  totalIssues    Int       @default(0)
+  criticalIssues Int       @default(0)
+  warnings       Int       @default(0)
+  passedChecks   Int       @default(0)
+  resultJson     String?
+  reportPath     String?
+  startedAt      DateTime  @default(now())
+  completedAt    DateTime?
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model BrandSettings {
+  id           String  @id @default(cuid())
+  userId       String  @unique
+  companyName  String?
+  logoUrl      String?
+  primaryColor String  @default("#2563eb")
+  accentColor  String  @default("#7c3aed")
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 # Supported languages
-SUPPORTED_LANGUAGES = ["uk", "ru"]
+SUPPORTED_LANGUAGES = ["uk", "ru", "en"]
 DEFAULT_LANGUAGE = "uk"
 
 # Cache for loaded translations
