@@ -41,6 +41,13 @@ env/
 reports/*.html
 screenshots/*.png
 screenshots/*.jpg
+/package-lock.json
+
+# Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/prisma/dev.db
+frontend/prisma/prod.db
 
 # OS
 .DS_Store

@@ -49,6 +49,8 @@ sudo mkdir -p "$APP_DIR"
 sudo cp -r ./* "$APP_DIR/" 2>/dev/null || true
 sudo cp .env.example "$APP_DIR/.env" 2>/dev/null || true
 sudo mkdir -p "$APP_DIR/reports" "$APP_DIR/screenshots"
+# Remove root package-lock.json to prevent Turbopack root detection issues
+sudo rm -f "$APP_DIR/package-lock.json"
 
 # 5. Python venv & dependencies
 echo "[5/11] Installing Python dependencies..."
