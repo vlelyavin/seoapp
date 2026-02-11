@@ -48,8 +48,12 @@ echo "[4/11] Syncing files to app directory..."
 sudo mkdir -p "$APP_DIR" "$APP_DIR/reports" "$APP_DIR/screenshots"
 # Use rsync for reliable copy (preserves structure, handles all files)
 sudo rsync -a --exclude='node_modules' --exclude='.next' --exclude='venv' \
-    --exclude='*.pyc' --exclude='__pycache__' --exclude='package-lock.json' \
+    --exclude='.git' --exclude='*.pyc' --exclude='__pycache__' \
+    --exclude='package-lock.json' \
     ./ "$APP_DIR/"
+# Remove .git if it exists (Turbopack uses it to detect workspace root,
+# which breaks @/ path aliases when .git is in the parent of frontend/)
+sudo rm -rf "$APP_DIR/.git"
 # Copy .env only if it doesn't exist yet (don't overwrite production config)
 if [ ! -f "$APP_DIR/frontend/.env" ]; then
     sudo cp "$APP_DIR/frontend/.env.example" "$APP_DIR/frontend/.env" 2>/dev/null || true
