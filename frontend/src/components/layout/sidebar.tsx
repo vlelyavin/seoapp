@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import {
   LayoutDashboard,
   Plus,
+  CreditCard,
   Settings,
   Palette,
   Users,
@@ -37,6 +38,11 @@ export function Sidebar({ open, onClose }: SidebarProps) {
       href: `/${locale}/dashboard/audit/new`,
       label: t("newAudit"),
       icon: Plus,
+    },
+    {
+      href: `/${locale}/dashboard/plans`,
+      label: t("plans"),
+      icon: CreditCard,
     },
     {
       href: `/${locale}/dashboard/settings`,
@@ -140,14 +146,18 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
         {session?.user && (
           <div className="border-t p-3 dark:border-gray-800">
-            <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-900">
+            <Link
+              href={`/${locale}/dashboard/plans`}
+              onClick={onClose}
+              className="block rounded-lg bg-gray-50 p-3 transition-colors hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-800"
+            >
               <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                Plan
+                {t("currentPlan")}
               </p>
               <p className="text-sm font-semibold capitalize text-gray-900 dark:text-white">
                 {session.user.planId}
               </p>
-            </div>
+            </Link>
           </div>
         )}
       </aside>

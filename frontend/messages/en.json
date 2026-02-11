@@ -14,12 +14,14 @@
   "nav": {
     "dashboard": "Dashboard",
     "newAudit": "New Audit",
+    "plans": "Plans",
     "settings": "Settings",
     "branding": "Branding",
     "admin": "Admin",
     "users": "Users",
     "logout": "Sign Out",
-    "login": "Sign In"
+    "login": "Sign In",
+    "currentPlan": "Current Plan"
   },
   "auth": {
     "signIn": "Sign In",
@@ -107,11 +109,19 @@
     "free": "Free",
     "pro": "Pro",
     "agency": "Agency",
+    "title": "Pricing Plans",
+    "subtitle": "Choose the plan that fits your needs",
     "current": "Current Plan",
+    "currentPlan": "Current Plan",
     "upgrade": "Upgrade",
+    "select": "Select Plan",
+    "switching": "Switching...",
     "auditsPerMonth": "{count} audits/month",
     "maxPages": "Up to {count} pages",
     "whiteLabel": "White-label reports",
-    "perMonth": "/month"
+    "perMonth": "/month",
+    "noBilling": "Plan switching is instant. No payment processing yet.",
+    "planUpdated": "Plan updated successfully!",
+    "updateFailed": "Failed to update plan"
   }
 }
