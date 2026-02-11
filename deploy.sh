@@ -49,7 +49,7 @@ sudo mkdir -p "$APP_DIR" "$APP_DIR/reports" "$APP_DIR/screenshots"
 # Use rsync for reliable copy (preserves structure, handles all files)
 sudo rsync -a --exclude='node_modules' --exclude='.next' --exclude='venv' \
     --exclude='.git' --exclude='*.pyc' --exclude='__pycache__' \
-    --exclude='package-lock.json' \
+    --exclude='/package-lock.json' \
     ./ "$APP_DIR/"
 # Remove .git if it exists (Turbopack uses it to detect workspace root,
 # which breaks @/ path aliases when .git is in the parent of frontend/)
