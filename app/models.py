@@ -74,7 +74,7 @@ class PageData(BaseModel):
     external_links: List[LinkData] = Field(default_factory=list)
     depth: int = 0
     load_time: float = 0.0
-    html_content: Optional[str] = None
+    # html_content removed to reduce memory usage (was ~400MB for 2000 pages)
     has_noindex: bool = False
     response_headers: Dict[str, str] = Field(default_factory=dict)
     redirect_chain: List[str] = Field(default_factory=list)

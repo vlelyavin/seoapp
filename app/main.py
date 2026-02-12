@@ -483,17 +483,20 @@ async def run_audit(audit_id: str, request: AuditRequest):
             stage="crawling",
         ))
 
-        # Capture homepage screenshot
+        # Start homepage screenshot as background task (non-blocking)
+        screenshot_task = None
         try:
             from .screenshots import screenshot_capture
-            audit.homepage_screenshot = await screenshot_capture.capture_page(
-                str(request.url),
-                viewport=screenshot_capture.DESKTOP_VIEWPORT,
-                full_page=False,
-                filename=f"homepage_{audit_id}.png",
+            screenshot_task = asyncio.create_task(
+                screenshot_capture.capture_page(
+                    str(request.url),
+                    viewport=screenshot_capture.DESKTOP_VIEWPORT,
+                    full_page=False,
+                    filename=f"homepage_{audit_id}.png",
+                )
             )
         except Exception as e:
-            print(f"Homepage screenshot failed (non-fatal): {e}")
+            print(f"Homepage screenshot task failed to start (non-fatal): {e}")
 
         # Phase 2: Analysis
         audit.status = AuditStatus.ANALYZING
@@ -509,25 +512,36 @@ async def run_audit(audit_id: str, request: AuditRequest):
         selected = request.analyzers if request.analyzers else list(ALL_ANALYZERS.keys())
         analyzers = [ALL_ANALYZERS[name]() for name in selected if name in ALL_ANALYZERS]
 
-        results = {}
-        for i, analyzer in enumerate(analyzers):
-            # Set analyzer language before execution
+        # Wrapper function to run analyzer with language setting
+        async def run_analyzer(analyzer):
             analyzer.set_language(lang)
-
-            await emit_progress(ProgressEvent(
-                status=AuditStatus.ANALYZING,
-                progress=40 + ((i + 1) / len(analyzers) * 40),
-                message=t("progress.analyzing_analyzer", lang, name=analyzer.display_name),
-                pages_crawled=len(pages),
-                stage="analyzing",
-            ))
-
             try:
                 result = await analyzer.analyze(pages, str(request.url))
-                results[analyzer.name] = result
+                return analyzer.name, result, None
             except Exception as e:
                 # Log error but continue with other analyzers
                 print(f"Error in {analyzer.name}: {e}")
+                return analyzer.name, None, str(e)
+
+        # Run all analyzers concurrently
+        analyzer_tasks = [run_analyzer(analyzer) for analyzer in analyzers]
+
+        # Track progress as analyzers complete
+        results = {}
+        completed = 0
+        for coro in asyncio.as_completed(analyzer_tasks):
+            name, result, error = await coro
+            if result is not None:
+                results[name] = result
+            completed += 1
+
+            await emit_progress(ProgressEvent(
+                status=AuditStatus.ANALYZING,
+                progress=40 + (completed / len(analyzers) * 40),
+                message=t("progress.analyzing", lang),
+                pages_crawled=len(pages),
+                stage="analyzing",
+            ))
 
         audit.results = results
 
@@ -557,6 +571,14 @@ async def run_audit(audit_id: str, request: AuditRequest):
         generator = ReportGenerator()
         report_path = await generator.generate(audit)
         audit.report_path = report_path
+
+        # Await screenshot task if it was started
+        if screenshot_task is not None:
+            try:
+                audit.homepage_screenshot = await screenshot_task
+            except Exception as e:
+                print(f"Homepage screenshot failed (non-fatal): {e}")
+                audit.homepage_screenshot = None
 
         # Complete
         audit.status = AuditStatus.COMPLETED

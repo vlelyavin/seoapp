@@ -259,7 +259,7 @@ class WebCrawler:
                 h6_tags = [h.get_text(strip=True) for h in soup.find_all('h6') if h.get_text(strip=True)]
 
                 # Extract text content and count words
-                text_content = self._extract_text_content(BeautifulSoup(html, 'lxml'))
+                text_content = self._extract_text_content(soup)  # Reuse parsed soup
                 word_count = self._count_words(text_content)
 
                 # Extract images
@@ -287,7 +287,7 @@ class WebCrawler:
                     external_links=external_links,
                     depth=depth,
                     load_time=load_time,
-                    html_content=html,
+                    # html_content removed to reduce memory usage
                     has_noindex=has_noindex,
                     response_headers=response_headers,
                     redirect_chain=redirect_chain,
