@@ -14,6 +14,9 @@ export default function BrandingPage() {
   const [logoUrl, setLogoUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const isPro = session?.user?.planId === "pro" || session?.user?.planId === "agency";
 
@@ -63,6 +66,17 @@ export default function BrandingPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Show preview immediately using FileReader
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreviewUrl(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    // Clear previous errors and start upload
+    setUploadError("");
+    setUploading(true);
+
     const formData = new FormData();
     formData.append("logo", file);
 
@@ -75,8 +89,18 @@ export default function BrandingPage() {
       if (res.ok) {
         const data = await res.json();
         setLogoUrl(data.url);
+        setMessage("Logo uploaded successfully");
+      } else {
+        const data = await res.json();
+        setUploadError(data.error || "Upload failed");
+        setPreviewUrl(null); // Clear preview on error
       }
-    } catch { /* ignore */ }
+    } catch (error) {
+      setUploadError("Network error. Please try again.");
+      setPreviewUrl(null);
+    } finally {
+      setUploading(false);
+    }
   }
 
   if (!isPro) {
@@ -127,15 +151,39 @@ export default function BrandingPage() {
             {t("logo")}
           </label>
           <div className="flex items-center gap-3">
-            {logoUrl && (
-              <img src={logoUrl} alt="Logo" className="h-10 w-10 rounded object-contain" />
+            {(previewUrl || logoUrl) && (
+              <div className="relative">
+                <img
+                  src={previewUrl || logoUrl}
+                  alt="Logo"
+                  className="h-16 w-16 rounded border object-contain dark:border-gray-700"
+                />
+                {uploading && (
+                  <div className="absolute inset-0 flex items-center justify-center rounded bg-black/50">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  </div>
+                )}
+              </div>
             )}
-            <label className="flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
+            <label className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm ${
+              uploading
+                ? 'opacity-50 cursor-not-allowed'
+                : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+            } text-gray-700 dark:border-gray-700 dark:text-gray-300`}>
               <Upload className="h-4 w-4" />
-              {t("uploadLogo")}
-              <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+              {uploading ? "Uploading..." : t("uploadLogo")}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleLogoUpload}
+                disabled={uploading}
+                className="hidden"
+              />
             </label>
           </div>
+          {uploadError && (
+            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{uploadError}</p>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-4">
