@@ -1,10 +1,11 @@
 """FastAPI application for SEO Audit Tool."""
 
 import asyncio
+import time
 import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Tuple
 
 from fastapi import FastAPI, HTTPException, Request, BackgroundTasks
 from fastapi.responses import FileResponse, HTMLResponse
@@ -108,9 +109,33 @@ if static_path.exists():
 templates_path = Path(__file__).parent / "templates"
 templates = Jinja2Templates(directory=str(templates_path))
 
-# In-memory storage for audits
-audits: Dict[str, AuditResult] = {}
+
+async def cleanup_old_audits():
+    """Remove audits older than TTL to prevent memory leaks."""
+    while True:
+        await asyncio.sleep(300)  # Check every 5 minutes
+        now = time.time()
+        to_remove = [
+            aid for aid, (audit, ts) in audits.items()
+            if now - ts > AUDIT_TTL
+        ]
+        for aid in to_remove:
+            del audits[aid]
+            if aid in audit_queues:
+                del audit_queues[aid]
+            print(f"[Cleanup] Removed expired audit: {aid}")
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Start background cleanup task on app startup."""
+    asyncio.create_task(cleanup_old_audits())
+    print("[Startup] Audit cleanup task started")
+
+# In-memory storage for audits (with timestamps for TTL cleanup)
+audits: Dict[str, Tuple[AuditResult, float]] = {}  # (audit, timestamp)
 audit_queues: Dict[str, asyncio.Queue] = {}
+AUDIT_TTL = 3600  # 1 hour in seconds
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -133,8 +158,8 @@ async def start_audit(request: AuditRequest, background_tasks: BackgroundTasks):
         language=request.language if request.language in ["uk", "ru", "en"] else "uk",
     )
 
-    # Store audit
-    audits[audit_id] = audit
+    # Store audit with timestamp
+    audits[audit_id] = (audit, time.time())
     audit_queues[audit_id] = asyncio.Queue()
 
     # Run audit in background
@@ -150,13 +175,26 @@ async def audit_status(audit_id: str):
         raise HTTPException(status_code=404, detail="Audit not found")
 
     async def event_generator():
+        import json
+
         queue = audit_queues.get(audit_id)
         if not queue:
             return
 
+        start_time = time.time()
+        MAX_SSE_DURATION = 900  # 15 minutes max SSE connection
+
         while True:
+            # Check if connection is too old
+            if time.time() - start_time > MAX_SSE_DURATION:
+                yield {
+                    "event": "error",
+                    "data": json.dumps({"error": "Connection timeout"})
+                }
+                break
+
             try:
-                event = await asyncio.wait_for(queue.get(), timeout=300)
+                event = await asyncio.wait_for(queue.get(), timeout=60)  # Reduce from 300 to 60
                 yield {
                     "event": "progress",
                     "data": event.model_dump_json(),
@@ -165,7 +203,18 @@ async def audit_status(audit_id: str):
                 if event.status in [AuditStatus.COMPLETED, AuditStatus.FAILED]:
                     break
             except asyncio.TimeoutError:
-                # Send keepalive
+                # Check if audit still exists and is alive
+                if audit_id not in audits:
+                    yield {"event": "error", "data": json.dumps({"error": "Audit not found"})}
+                    break
+
+                audit, _ = audits[audit_id]
+                if audit.status in [AuditStatus.COMPLETED, AuditStatus.FAILED]:
+                    # Audit finished but no event sent - send final state
+                    yield {"event": "progress", "data": audit.model_dump_json()}
+                    break
+
+                # Send keepalive only if audit is still running
                 yield {"event": "ping", "data": "{}"}
 
     return EventSourceResponse(event_generator())
@@ -177,7 +226,7 @@ async def get_current_audit_status(audit_id: str):
     if audit_id not in audits:
         raise HTTPException(status_code=404, detail="Audit not found")
 
-    audit = audits[audit_id]
+    audit, _ = audits[audit_id]
     return audit.model_dump()
 
 
@@ -187,7 +236,7 @@ async def get_audit(audit_id: str):
     if audit_id not in audits:
         raise HTTPException(status_code=404, detail="Audit not found")
 
-    audit = audits[audit_id]
+    audit, _ = audits[audit_id]
     return {
         "id": audit.id,
         "url": audit.url,
@@ -207,7 +256,7 @@ async def get_audit_results(audit_id: str, lang: str = "uk"):
     if audit_id not in audits:
         raise HTTPException(status_code=404, detail="Audit not found")
 
-    audit = audits[audit_id]
+    audit, _ = audits[audit_id]
 
     if audit.status != AuditStatus.COMPLETED:
         raise HTTPException(status_code=400, detail="Audit not completed yet")
@@ -247,7 +296,7 @@ async def download_report(audit_id: str, format: str = "html"):
     if audit_id not in audits:
         raise HTTPException(status_code=404, detail="Audit not found")
 
-    audit = audits[audit_id]
+    audit, _ = audits[audit_id]
 
     if audit.status != AuditStatus.COMPLETED:
         raise HTTPException(status_code=400, detail="Audit not completed yet")
@@ -307,141 +356,153 @@ async def download_report(audit_id: str, format: str = "html"):
 async def run_audit(audit_id: str, request: AuditRequest):
     """Background task to run the full audit."""
     queue = audit_queues[audit_id]
-    audit = audits[audit_id]
+    audit, _ = audits[audit_id]
 
     # Get language for progress messages
     lang = audit.language if audit.language else "uk"
 
     try:
-        # Phase 1: Crawling
-        audit.status = AuditStatus.CRAWLING
-        await queue.put(ProgressEvent(
-            status=AuditStatus.CRAWLING,
-            progress=0,
-            message=t("progress.crawling_start", lang),
-            stage="crawling",
-        ))
-
-        pages: Dict[str, PageData] = {}
-
-        max_pages = request.max_pages or settings.MAX_PAGES
-
-        async def progress_callback(page: PageData):
-            progress = min(len(pages) / max_pages * 40, 40)
+        async with asyncio.timeout(settings.TOTAL_TIMEOUT):
+            # Phase 1: Crawling
+            audit.status = AuditStatus.CRAWLING
             await queue.put(ProgressEvent(
                 status=AuditStatus.CRAWLING,
-                progress=progress,
-                message=t("progress.crawling_pages", lang, count=len(pages)),
-                current_url=page.url,
+                progress=0,
+                message=t("progress.crawling_start", lang),
+                stage="crawling",
+            ))
+
+            pages: Dict[str, PageData] = {}
+
+            max_pages = request.max_pages or settings.MAX_PAGES
+
+            async def progress_callback(page: PageData):
+                progress = min(len(pages) / max_pages * 40, 40)
+                await queue.put(ProgressEvent(
+                    status=AuditStatus.CRAWLING,
+                    progress=progress,
+                    message=t("progress.crawling_pages", lang, count=len(pages)),
+                    current_url=page.url,
+                    pages_crawled=len(pages),
+                    stage="crawling",
+                ))
+
+            crawler = WebCrawler(
+                str(request.url),
+                max_pages=max_pages,
+                progress_callback=progress_callback,
+            )
+
+            async for page in crawler.crawl():
+                pages[page.url] = page
+
+            audit.pages_crawled = len(pages)
+            audit.pages = pages
+
+            await queue.put(ProgressEvent(
+                status=AuditStatus.CRAWLING,
+                progress=40,
+                message=t("progress.crawling_complete", lang, count=len(pages)),
                 pages_crawled=len(pages),
                 stage="crawling",
             ))
 
-        crawler = WebCrawler(
-            str(request.url),
-            max_pages=max_pages,
-            progress_callback=progress_callback,
-        )
+            # Capture homepage screenshot
+            try:
+                from .screenshots import screenshot_capture
+                audit.homepage_screenshot = await screenshot_capture.capture_page(
+                    str(request.url),
+                    viewport=screenshot_capture.DESKTOP_VIEWPORT,
+                    full_page=False,
+                    filename=f"homepage_{audit_id}.png",
+                )
+            except Exception as e:
+                print(f"Homepage screenshot failed (non-fatal): {e}")
 
-        async for page in crawler.crawl():
-            pages[page.url] = page
-
-        audit.pages_crawled = len(pages)
-        audit.pages = pages
-
-        await queue.put(ProgressEvent(
-            status=AuditStatus.CRAWLING,
-            progress=40,
-            message=t("progress.crawling_complete", lang, count=len(pages)),
-            pages_crawled=len(pages),
-            stage="crawling",
-        ))
-
-        # Capture homepage screenshot
-        try:
-            from .screenshots import screenshot_capture
-            audit.homepage_screenshot = await screenshot_capture.capture_page(
-                str(request.url),
-                viewport=screenshot_capture.DESKTOP_VIEWPORT,
-                full_page=False,
-                filename=f"homepage_{audit_id}.png",
-            )
-        except Exception as e:
-            print(f"Homepage screenshot failed (non-fatal): {e}")
-
-        # Phase 2: Analysis
-        audit.status = AuditStatus.ANALYZING
-        await queue.put(ProgressEvent(
-            status=AuditStatus.ANALYZING,
-            progress=40,
-            message=t("progress.analyzing_start", lang),
-            pages_crawled=len(pages),
-            stage="analyzing",
-        ))
-
-        # Filter analyzers by request selection (None = all)
-        selected = request.analyzers if request.analyzers else list(ALL_ANALYZERS.keys())
-        analyzers = [ALL_ANALYZERS[name]() for name in selected if name in ALL_ANALYZERS]
-
-        results = {}
-        for i, analyzer in enumerate(analyzers):
-            # Set analyzer language before execution
-            analyzer.set_language(lang)
-
+            # Phase 2: Analysis
+            audit.status = AuditStatus.ANALYZING
             await queue.put(ProgressEvent(
                 status=AuditStatus.ANALYZING,
-                progress=40 + ((i + 1) / len(analyzers) * 40),
-                message=t("progress.analyzing_analyzer", lang, name=analyzer.display_name),
+                progress=40,
+                message=t("progress.analyzing_start", lang),
                 pages_crawled=len(pages),
                 stage="analyzing",
             ))
 
-            try:
-                result = await analyzer.analyze(pages, str(request.url))
-                results[analyzer.name] = result
-            except Exception as e:
-                # Log error but continue with other analyzers
-                print(f"Error in {analyzer.name}: {e}")
+            # Filter analyzers by request selection (None = all)
+            selected = request.analyzers if request.analyzers else list(ALL_ANALYZERS.keys())
+            analyzers = [ALL_ANALYZERS[name]() for name in selected if name in ALL_ANALYZERS]
 
-        audit.results = results
+            results = {}
+            for i, analyzer in enumerate(analyzers):
+                # Set analyzer language before execution
+                analyzer.set_language(lang)
 
-        # Calculate totals
-        for result in results.values():
-            for issue in result.issues:
-                if issue.severity == SeverityLevel.ERROR:
-                    audit.critical_issues += issue.count
-                elif issue.severity == SeverityLevel.WARNING:
-                    audit.warnings += issue.count
-                audit.total_issues += issue.count
+                await queue.put(ProgressEvent(
+                    status=AuditStatus.ANALYZING,
+                    progress=40 + ((i + 1) / len(analyzers) * 40),
+                    message=t("progress.analyzing_analyzer", lang, name=analyzer.display_name),
+                    pages_crawled=len(pages),
+                    stage="analyzing",
+                ))
 
-        audit.passed_checks = len(analyzers) - sum(
-            1 for r in results.values() if r.severity in [SeverityLevel.ERROR, SeverityLevel.WARNING]
-        )
+                try:
+                    result = await analyzer.analyze(pages, str(request.url))
+                    results[analyzer.name] = result
+                except Exception as e:
+                    # Log error but continue with other analyzers
+                    print(f"Error in {analyzer.name}: {e}")
 
-        # Phase 3: Generate Report
-        audit.status = AuditStatus.GENERATING_REPORT
+            audit.results = results
+
+            # Calculate totals
+            for result in results.values():
+                for issue in result.issues:
+                    if issue.severity == SeverityLevel.ERROR:
+                        audit.critical_issues += issue.count
+                    elif issue.severity == SeverityLevel.WARNING:
+                        audit.warnings += issue.count
+                    audit.total_issues += issue.count
+
+            audit.passed_checks = len(analyzers) - sum(
+                1 for r in results.values() if r.severity in [SeverityLevel.ERROR, SeverityLevel.WARNING]
+            )
+
+            # Phase 3: Generate Report
+            audit.status = AuditStatus.GENERATING_REPORT
+            await queue.put(ProgressEvent(
+                status=AuditStatus.GENERATING_REPORT,
+                progress=85,
+                message=t("progress.generating_report", lang),
+                pages_crawled=len(pages),
+                stage="report",
+            ))
+
+            generator = ReportGenerator()
+            report_path = await generator.generate(audit)
+            audit.report_path = report_path
+
+            # Complete
+            audit.status = AuditStatus.COMPLETED
+            audit.completed_at = datetime.utcnow()
+
+            await queue.put(ProgressEvent(
+                status=AuditStatus.COMPLETED,
+                progress=100,
+                message=t("progress.completed", lang),
+                pages_crawled=len(pages),
+                stage="complete",
+            ))
+
+    except asyncio.TimeoutError:
+        audit.status = AuditStatus.FAILED
+        audit.error_message = "Audit timed out after 10 minutes"
+
         await queue.put(ProgressEvent(
-            status=AuditStatus.GENERATING_REPORT,
-            progress=85,
-            message=t("progress.generating_report", lang),
-            pages_crawled=len(pages),
-            stage="report",
-        ))
-
-        generator = ReportGenerator()
-        report_path = await generator.generate(audit)
-        audit.report_path = report_path
-
-        # Complete
-        audit.status = AuditStatus.COMPLETED
-        audit.completed_at = datetime.utcnow()
-
-        await queue.put(ProgressEvent(
-            status=AuditStatus.COMPLETED,
-            progress=100,
-            message=t("progress.completed", lang),
-            pages_crawled=len(pages),
-            stage="complete",
+            status=AuditStatus.FAILED,
+            progress=0,
+            message=t("progress.failed", lang, error="Audit timed out after 10 minutes"),
+            stage="error",
         ))
 
     except Exception as e:

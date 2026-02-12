@@ -1,6 +1,8 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import type { ProgressEvent } from "@/types/audit";
 
 interface AuditProgressViewProps {
@@ -8,6 +10,8 @@ interface AuditProgressViewProps {
 }
 
 export function AuditProgressView({ progress }: AuditProgressViewProps) {
+  const router = useRouter();
+  const locale = useLocale();
   const pct = progress?.progress || 0;
   const message = progress?.message || "Connecting...";
   const stage = progress?.stage || "crawling";
@@ -21,6 +25,13 @@ export function AuditProgressView({ progress }: AuditProgressViewProps) {
 
   return (
     <div className="mx-auto max-w-xl py-16">
+      <button
+        onClick={() => router.push(`/${locale}/dashboard`)}
+        className="mb-4 flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to Dashboard
+      </button>
       <div className="rounded-xl border bg-white p-8 dark:border-gray-800 dark:bg-gray-900">
         <div className="mb-6 flex items-center justify-center">
           <Loader2 className="h-10 w-10 animate-spin text-gray-900 dark:text-white" />

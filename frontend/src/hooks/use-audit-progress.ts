@@ -7,7 +7,7 @@ const MAX_SSE_RETRIES = 2;
 const SSE_RETRY_DELAY = 2000; // 2 seconds
 const POLL_INTERVAL = 2000; // 2 seconds
 
-export function useAuditProgress(fastApiId: string | null) {
+export function useAuditProgress(fastApiId: string | null, auditId: string | null) {
   const [progress, setProgress] = useState<ProgressEvent | null>(null);
   const [connected, setConnected] = useState(false);
   const [done, setDone] = useState(false);
@@ -17,14 +17,14 @@ export function useAuditProgress(fastApiId: string | null) {
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const startPolling = useCallback(() => {
-    if (!fastApiId || isPolling) return;
+    if (!auditId || isPolling) return;
 
     console.log('[SSE] Falling back to polling');
     setIsPolling(true);
 
     const poll = async () => {
       try {
-        const res = await fetch(`/api/audit/${fastApiId}/progress`);
+        const res = await fetch(`/api/audit/${auditId}/progress`);
         if (res.ok) {
           const data: ProgressEvent = await res.json();
           setProgress(data);
@@ -50,7 +50,7 @@ export function useAuditProgress(fastApiId: string | null) {
     // Poll immediately, then every 2 seconds
     poll();
     pollIntervalRef.current = setInterval(poll, POLL_INTERVAL);
-  }, [fastApiId, isPolling]);
+  }, [auditId, isPolling]);
 
   const connect = useCallback(() => {
     if (!fastApiId || isPolling) return;

@@ -10,7 +10,10 @@ import {
   ChevronDown,
   Search,
   Filter,
+  ArrowLeft,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import { AnalyzerSection } from "./analyzer-section";
 import { cn } from "@/lib/utils";
 import type { AuditResults, SeverityLevel, AnalyzerResult } from "@/types/audit";
@@ -25,6 +28,8 @@ interface AuditResultsViewProps {
 type FilterMode = "all" | "error" | "warning" | "success";
 
 export function AuditResultsView({ results, meta, auditId }: AuditResultsViewProps) {
+  const router = useRouter();
+  const locale = useLocale();
   const [filter, setFilter] = useState<FilterMode>("all");
   const [search, setSearch] = useState("");
   const [exportOpen, setExportOpen] = useState(false);
@@ -84,9 +89,19 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
   ];
 
   return (
-    <div className="flex gap-6">
-      {/* Left sidebar nav */}
-      <aside className="hidden w-56 shrink-0 xl:block">
+    <div>
+      {/* Back button */}
+      <button
+        onClick={() => router.push(`/${locale}/dashboard`)}
+        className="mb-4 flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to Dashboard
+      </button>
+
+      <div className="flex gap-6">
+        {/* Left sidebar nav */}
+        <aside className="hidden w-56 shrink-0 xl:block">
         <div className="sticky top-20 space-y-1">
           <p className="mb-2 px-2 text-xs font-medium uppercase text-gray-400 dark:text-gray-500">
             Sections
@@ -194,6 +209,7 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
             </div>
           ))
         )}
+        </div>
       </div>
     </div>
   );

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
+import Link from "next/link";
 import { useAuditProgress } from "@/hooks/use-audit-progress";
 import { AuditProgressView } from "@/components/audit/audit-progress";
 import { AuditResultsView } from "@/components/audit/audit-results";
@@ -31,7 +32,7 @@ export default function AuditPage({
     });
   }, [params, searchParams]);
 
-  const { progress, connected, done } = useAuditProgress(fastApiId);
+  const { progress, connected, done } = useAuditProgress(fastApiId, auditId);
 
   // Check if audit is in progress when opening without fastApiId
   useEffect(() => {
@@ -123,9 +124,29 @@ export default function AuditPage({
     loadCached();
   }, [auditId, locale, fastApiId]);
 
+  // Breadcrumbs component
+  const Breadcrumbs = () => (
+    <nav className="mb-6 flex items-center gap-2 text-sm">
+      <Link href={`/${locale}/dashboard`} className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
+        Dashboard
+      </Link>
+      <span className="text-gray-400">/</span>
+      <Link href={`/${locale}/dashboard`} className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
+        Audits
+      </Link>
+      <span className="text-gray-400">/</span>
+      <span className="font-medium text-gray-900 dark:text-white">Current Audit</span>
+    </nav>
+  );
+
   // Still in progress - show progress if we have fastApiId and audit is not done yet
   if (fastApiId && !done) {
-    return <AuditProgressView progress={progress} />;
+    return (
+      <div>
+        <Breadcrumbs />
+        <AuditProgressView progress={progress} />
+      </div>
+    );
   }
 
   // Failed
@@ -146,11 +167,14 @@ export default function AuditPage({
   // Results loaded
   if (results && auditMeta) {
     return (
-      <AuditResultsView
-        results={results}
-        meta={auditMeta}
-        auditId={auditId}
-      />
+      <div>
+        <Breadcrumbs />
+        <AuditResultsView
+          results={results}
+          meta={auditMeta}
+          auditId={auditId}
+        />
+      </div>
     );
   }
 
