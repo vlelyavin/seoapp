@@ -55,7 +55,9 @@ class SocialTagsAnalyzer(BaseAnalyzer):
                 continue
 
             total_pages += 1
-            soup = BeautifulSoup(page.html_content, 'lxml')
+            soup = page.get_soup()
+            if soup is None:
+                continue
 
             # Check Open Graph tags
             og_title = soup.find('meta', attrs={'property': 'og:title'})

@@ -6,6 +6,9 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, HttpUrl, Field
 import uuid
 
+# Import BeautifulSoup for HTML caching
+from bs4 import BeautifulSoup
+
 
 class AuditStatus(str, Enum):
     """Status of an audit job."""
@@ -79,6 +82,36 @@ class PageData(BaseModel):
     response_headers: Dict[str, str] = Field(default_factory=dict)
     redirect_chain: List[str] = Field(default_factory=list)
     final_url: Optional[str] = None
+
+    # Cached parsed HTML (not serialized)
+    _soup_cache: Optional[BeautifulSoup] = None
+
+    class Config:
+        arbitrary_types_allowed = True
+        # Exclude _soup_cache from JSON serialization
+        fields = {'_soup_cache': {'exclude': True}}
+
+    def get_soup(self) -> Optional[BeautifulSoup]:
+        """Get cached BeautifulSoup object or create new one if needed.
+
+        Returns:
+            BeautifulSoup object or None if no html_content available
+        """
+        if self.html_content is None:
+            return None
+
+        if self._soup_cache is None:
+            self._soup_cache = BeautifulSoup(self.html_content, 'lxml')
+
+        return self._soup_cache
+
+    def set_soup(self, soup: BeautifulSoup) -> None:
+        """Cache BeautifulSoup object for reuse.
+
+        Args:
+            soup: Parsed BeautifulSoup object
+        """
+        self._soup_cache = soup
 
 
 class AuditIssue(BaseModel):

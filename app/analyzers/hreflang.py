@@ -58,8 +58,9 @@ class HreflangAnalyzer(BaseAnalyzer):
             if page.status_code != 200 or not page.html_content:
                 continue
 
-            from bs4 import BeautifulSoup
-            soup = BeautifulSoup(page.html_content, 'lxml')
+            soup = page.get_soup()
+            if soup is None:
+                continue
 
             page_hreflangs: Dict[str, str] = {}
 

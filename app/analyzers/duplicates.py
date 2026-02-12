@@ -30,9 +30,12 @@ class DuplicatesAnalyzer(BaseAnalyzer):
     def theory(self) -> str:
         return self.t("analyzer_content.duplicates.theory")
 
-    def _extract_text(self, html_content: str) -> str:
-        """Extract and normalize text from HTML."""
-        soup = BeautifulSoup(html_content, "lxml")
+    def _extract_text(self, soup: 'BeautifulSoup') -> str:
+        """Extract and normalize text from parsed HTML soup.
+
+        Args:
+            soup: BeautifulSoup object (cached from PageData)
+        """
         # Remove script and style elements
         for element in soup(["script", "style", "noscript"]):
             element.decompose()
@@ -90,7 +93,11 @@ class DuplicatesAnalyzer(BaseAnalyzer):
             if page.status_code != 200 or page.word_count <= 50 or not page.html_content:
                 continue
 
-            text = self._extract_text(page.html_content)
+            soup = page.get_soup()
+            if soup is None:
+                continue
+
+            text = self._extract_text(soup)
             shingles = self._create_shingles(text, shingle_size=3)
             if not shingles:
                 continue

@@ -258,8 +258,8 @@ class WebCrawler:
                 h5_tags = [h.get_text(strip=True) for h in soup.find_all('h5') if h.get_text(strip=True)]
                 h6_tags = [h.get_text(strip=True) for h in soup.find_all('h6') if h.get_text(strip=True)]
 
-                # Extract text content and count words
-                text_content = self._extract_text_content(BeautifulSoup(html, 'lxml'))
+                # Extract text content and count words (reuse parsed soup)
+                text_content = self._extract_text_content(soup)
                 word_count = self._count_words(text_content)
 
                 # Extract images
@@ -268,7 +268,7 @@ class WebCrawler:
                 # Extract links
                 internal_links, external_links = self._extract_links(soup, url)
 
-                return PageData(
+                page_data = PageData(
                     url=url,
                     status_code=response.status,
                     title=title,
@@ -293,6 +293,11 @@ class WebCrawler:
                     redirect_chain=redirect_chain,
                     final_url=final_url,
                 )
+
+                # Cache the parsed soup for analyzers to reuse
+                page_data.set_soup(soup)
+
+                return page_data
 
             except Exception as e:
                 return PageData(url=url, status_code=0, depth=depth)

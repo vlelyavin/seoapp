@@ -55,7 +55,10 @@ class SchemaAnalyzer(BaseAnalyzer):
                 continue
 
             total_pages += 1
-            soup = BeautifulSoup(page.html_content, 'lxml')
+            soup = page.get_soup()
+            if soup is None:
+                continue
+
             page_has_schema = False
 
             # Find JSON-LD blocks

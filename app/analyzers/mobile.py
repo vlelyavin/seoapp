@@ -44,8 +44,9 @@ class MobileAnalyzer(BaseAnalyzer):
             if page.status_code != 200 or not page.html_content:
                 continue
 
-            from bs4 import BeautifulSoup
-            soup = BeautifulSoup(page.html_content, 'lxml')
+            soup = page.get_soup()
+            if soup is None:
+                continue
 
             # Check for viewport meta tag (case-insensitive name attribute)
             viewport_meta = soup.find('meta', attrs={'name': lambda v: v and v.lower() == 'viewport'})
