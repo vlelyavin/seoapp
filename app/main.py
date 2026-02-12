@@ -121,8 +121,10 @@ async def cleanup_old_audits():
         ]
         for aid in to_remove:
             del audits[aid]
-            if aid in audit_queues:
-                del audit_queues[aid]
+            if aid in broadcast_channels:
+                del broadcast_channels[aid]
+            if aid in audit_progress_history:
+                del audit_progress_history[aid]
             print(f"[Cleanup] Removed expired audit: {aid}")
 
 
@@ -132,9 +134,43 @@ async def startup_event():
     asyncio.create_task(cleanup_old_audits())
     print("[Startup] Audit cleanup task started")
 
+# Broadcast channel for progress events (supports multiple subscribers)
+class BroadcastChannel:
+    """Broadcast channel that supports multiple subscribers."""
+    def __init__(self):
+        self.subscribers: Set[asyncio.Queue] = set()
+        self._lock = asyncio.Lock()
+
+    async def broadcast(self, event: ProgressEvent):
+        """Send event to all subscribers."""
+        async with self._lock:
+            dead_subs = set()
+            for sub_queue in self.subscribers:
+                try:
+                    sub_queue.put_nowait(event)
+                except Exception:
+                    dead_subs.add(sub_queue)
+
+            # Clean up dead subscribers
+            self.subscribers -= dead_subs
+
+    async def subscribe(self) -> asyncio.Queue:
+        """Create new subscriber queue."""
+        queue = asyncio.Queue()
+        async with self._lock:
+            self.subscribers.add(queue)
+        return queue
+
+    async def unsubscribe(self, queue: asyncio.Queue):
+        """Remove subscriber queue."""
+        async with self._lock:
+            self.subscribers.discard(queue)
+
+
 # In-memory storage for audits (with timestamps for TTL cleanup)
 audits: Dict[str, Tuple[AuditResult, float]] = {}  # (audit, timestamp)
-audit_queues: Dict[str, asyncio.Queue] = {}
+broadcast_channels: Dict[str, BroadcastChannel] = {}
+audit_progress_history: Dict[str, List[ProgressEvent]] = {}  # Store last N events
 AUDIT_TTL = 3600  # 1 hour in seconds
 
 
@@ -160,7 +196,8 @@ async def start_audit(request: AuditRequest, background_tasks: BackgroundTasks):
 
     # Store audit with timestamp
     audits[audit_id] = (audit, time.time())
-    audit_queues[audit_id] = asyncio.Queue()
+    broadcast_channels[audit_id] = BroadcastChannel()
+    audit_progress_history[audit_id] = []
 
     # Run audit in background
     background_tasks.add_task(run_audit, audit_id, request)
@@ -175,47 +212,66 @@ async def audit_status(audit_id: str):
         raise HTTPException(status_code=404, detail="Audit not found")
 
     async def event_generator():
+        """Generate SSE events with history replay support."""
         import json
 
-        queue = audit_queues.get(audit_id)
-        if not queue:
+        channel = broadcast_channels.get(audit_id)
+        if not channel:
+            yield {"event": "error", "data": json.dumps({"error": "Broadcast channel not found"})}
             return
 
-        start_time = time.time()
-        MAX_SSE_DURATION = 900  # 15 minutes max SSE connection
+        # Subscribe to broadcast channel
+        queue = await channel.subscribe()
 
-        while True:
-            # Check if connection is too old
-            if time.time() - start_time > MAX_SSE_DURATION:
-                yield {
-                    "event": "error",
-                    "data": json.dumps({"error": "Connection timeout"})
-                }
-                break
-
-            try:
-                event = await asyncio.wait_for(queue.get(), timeout=60)  # Reduce from 300 to 60
+        try:
+            # First, send historical events for reconnection support
+            history = audit_progress_history.get(audit_id, [])
+            for event in history:
                 yield {
                     "event": "progress",
                     "data": event.model_dump_json(),
                 }
 
-                if event.status in [AuditStatus.COMPLETED, AuditStatus.FAILED]:
-                    break
-            except asyncio.TimeoutError:
-                # Check if audit still exists and is alive
-                if audit_id not in audits:
-                    yield {"event": "error", "data": json.dumps({"error": "Audit not found"})}
+            # Stream new events
+            start_time = time.time()
+            MAX_SSE_DURATION = 900  # 15 minutes max SSE connection
+
+            while True:
+                # Check if connection is too old
+                if time.time() - start_time > MAX_SSE_DURATION:
+                    yield {
+                        "event": "error",
+                        "data": json.dumps({"error": "Connection timeout"})
+                    }
                     break
 
-                audit, _ = audits[audit_id]
-                if audit.status in [AuditStatus.COMPLETED, AuditStatus.FAILED]:
-                    # Audit finished but no event sent - send final state
-                    yield {"event": "progress", "data": audit.model_dump_json()}
-                    break
+                try:
+                    event = await asyncio.wait_for(queue.get(), timeout=60)
+                    yield {
+                        "event": "progress",
+                        "data": event.model_dump_json(),
+                    }
 
-                # Send keepalive only if audit is still running
-                yield {"event": "ping", "data": "{}"}
+                    if event.status in [AuditStatus.COMPLETED, AuditStatus.FAILED]:
+                        break
+                except asyncio.TimeoutError:
+                    # Check if audit still exists and is alive
+                    if audit_id not in audits:
+                        yield {"event": "error", "data": json.dumps({"error": "Audit not found"})}
+                        break
+
+                    audit, _ = audits[audit_id]
+                    if audit.status in [AuditStatus.COMPLETED, AuditStatus.FAILED]:
+                        # Audit finished but no event sent - send final state
+                        yield {"event": "progress", "data": audit.model_dump_json()}
+                        break
+
+                    # Send keepalive ping
+                    yield {"event": "ping", "data": "{}"}
+
+        finally:
+            # Always unsubscribe on disconnect
+            await channel.unsubscribe(queue)
 
     return EventSourceResponse(event_generator())
 
@@ -258,8 +314,21 @@ async def get_audit_results(audit_id: str, lang: str = "uk"):
 
     audit, _ = audits[audit_id]
 
+    # Instead of returning 400, return partial status if in progress
     if audit.status != AuditStatus.COMPLETED:
-        raise HTTPException(status_code=400, detail="Audit not completed yet")
+        from fastapi.responses import JSONResponse
+        return JSONResponse(
+            status_code=202,  # 202 Accepted
+            content={
+                "status": audit.status.value,
+                "partial": True,
+                "message": "Audit in progress",
+                "progress": {
+                    "pages_crawled": audit.pages_crawled,
+                    "current_step": audit.status.value
+                }
+            }
+        )
 
     # Serialize results, optionally translated
     results_dict = {}
@@ -355,17 +424,26 @@ async def download_report(audit_id: str, format: str = "html"):
 
 async def run_audit(audit_id: str, request: AuditRequest):
     """Background task to run the full audit with 10-minute timeout."""
-    queue = audit_queues[audit_id]
+    channel = broadcast_channels[audit_id]
     audit, _ = audits[audit_id]
 
     # Get language for progress messages
     lang = audit.language if audit.language else "uk"
 
+    # Helper function to emit progress events
+    async def emit_progress(event: ProgressEvent):
+        """Broadcast event and store in history."""
+        await channel.broadcast(event)
+        # Store in history (keep last 50 events)
+        history = audit_progress_history.get(audit_id, [])
+        history.append(event)
+        audit_progress_history[audit_id] = history[-50:]
+
     try:
         async with asyncio.timeout(settings.TOTAL_TIMEOUT):  # Requires Python 3.11+
             # Phase 1: Crawling
             audit.status = AuditStatus.CRAWLING
-            await queue.put(ProgressEvent(
+            await emit_progress(ProgressEvent(
                 status=AuditStatus.CRAWLING,
                 progress=0,
                 message=t("progress.crawling_start", lang),
@@ -377,7 +455,7 @@ async def run_audit(audit_id: str, request: AuditRequest):
 
             async def progress_callback(page: PageData):
                 progress = min(len(pages) / max_pages * 40, 40)
-                await queue.put(ProgressEvent(
+                await emit_progress(ProgressEvent(
                     status=AuditStatus.CRAWLING,
                     progress=progress,
                     message=t("progress.crawling_pages", lang, count=len(pages)),
@@ -398,7 +476,7 @@ async def run_audit(audit_id: str, request: AuditRequest):
             audit.pages_crawled = len(pages)
             audit.pages = pages
 
-            await queue.put(ProgressEvent(
+            await emit_progress(ProgressEvent(
                 status=AuditStatus.CRAWLING,
                 progress=40,
                 message=t("progress.crawling_complete", lang, count=len(pages)),
@@ -420,7 +498,7 @@ async def run_audit(audit_id: str, request: AuditRequest):
 
             # Phase 2: Analysis
             audit.status = AuditStatus.ANALYZING
-            await queue.put(ProgressEvent(
+            await emit_progress(ProgressEvent(
                 status=AuditStatus.ANALYZING,
                 progress=40,
                 message=t("progress.analyzing_start", lang),
@@ -437,7 +515,7 @@ async def run_audit(audit_id: str, request: AuditRequest):
                 # Set analyzer language before execution
                 analyzer.set_language(lang)
 
-                await queue.put(ProgressEvent(
+                await emit_progress(ProgressEvent(
                     status=AuditStatus.ANALYZING,
                     progress=40 + ((i + 1) / len(analyzers) * 40),
                     message=t("progress.analyzing_analyzer", lang, name=analyzer.display_name),
@@ -469,7 +547,7 @@ async def run_audit(audit_id: str, request: AuditRequest):
 
             # Phase 3: Generate Report
             audit.status = AuditStatus.GENERATING_REPORT
-            await queue.put(ProgressEvent(
+            await emit_progress(ProgressEvent(
                 status=AuditStatus.GENERATING_REPORT,
                 progress=85,
                 message=t("progress.generating_report", lang),
@@ -485,7 +563,7 @@ async def run_audit(audit_id: str, request: AuditRequest):
             audit.status = AuditStatus.COMPLETED
             audit.completed_at = datetime.utcnow()
 
-            await queue.put(ProgressEvent(
+            await emit_progress(ProgressEvent(
                 status=AuditStatus.COMPLETED,
                 progress=100,
                 message=t("progress.completed", lang),
@@ -497,7 +575,7 @@ async def run_audit(audit_id: str, request: AuditRequest):
         audit.status = AuditStatus.FAILED
         audit.error_message = "Audit timed out after 10 minutes"
 
-        await queue.put(ProgressEvent(
+        await emit_progress(ProgressEvent(
             status=AuditStatus.FAILED,
             progress=0,
             message=t("progress.failed", lang, error="Audit timed out after 10 minutes"),
@@ -508,7 +586,7 @@ async def run_audit(audit_id: str, request: AuditRequest):
         audit.status = AuditStatus.FAILED
         audit.error_message = str(e)
 
-        await queue.put(ProgressEvent(
+        await emit_progress(ProgressEvent(
             status=AuditStatus.FAILED,
             progress=0,
             message=t("progress.failed", lang, error=str(e)),

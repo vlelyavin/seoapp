@@ -325,6 +325,52 @@ Step-by-step workflow:
    - `/app/locales/uk.json`
    - `/app/locales/ru.json`
 
+### Translation Key Structure Rules
+
+**CRITICAL:** Always follow the three-section structure for analyzer translations:
+
+```
+analyzer_content.{analyzer_name}/
+├── issues/           # Issue messages shown to users
+│   ├── {key}        # Main issue message
+│   ├── {key}_details        # ❌ INCORRECT - don't add _details suffix here
+│   └── {key}_recommendation # ❌ INCORRECT - don't add _recommendation suffix here
+├── details/          # Detailed explanations (separate section)
+│   └── {key}        # ✓ CORRECT - matches issue key name
+└── recommendations/  # Fix suggestions (separate section)
+    └── {key}        # ✓ CORRECT - matches issue key name
+```
+
+**Correct Pattern:**
+```python
+# In analyzer code (e.g., robots.py):
+issues.append(self.create_issue(
+    category="no_robots_txt",
+    message=self.t("analyzer_content.robots.issues.no_robots_txt"),
+    details=self.t("analyzer_content.robots.details.no_robots_txt"),  # ✓ CORRECT
+    recommendation=self.t("analyzer_content.robots.recommendations.no_robots_txt"),  # ✓ CORRECT
+))
+```
+
+**Incorrect Pattern (DO NOT USE):**
+```python
+# ❌ WRONG - don't suffix with _details or _recommendation in the issues section
+details=self.t("analyzer_content.robots.issues.no_robots_txt_details"),  # ❌ WRONG
+recommendation=self.t("analyzer_content.robots.issues.no_robots_txt_recommendation"),  # ❌ WRONG
+```
+
+**Key Naming Conventions:**
+- `analyzer_content.{name}.issues.{key}` - Short issue message (e.g., "robots.txt missing: {count} pages")
+- `analyzer_content.{name}.details.{key}` - Longer explanation of why this is a problem
+- `analyzer_content.{name}.recommendations.{key}` - Specific steps to fix the issue
+- `tables.{field_name}` - Table column headers (e.g., `tables.url`, `tables.problem`)
+- Status labels go in issues section: `analyzer_content.{name}.issues.status_{label}`
+
+**Reference Implementations:**
+- ✓ [app/analyzers/schema.py](app/analyzers/schema.py) - Correct pattern (lines 111-112, 121-123)
+- ✓ [app/analyzers/social_tags.py](app/analyzers/social_tags.py) - Correct pattern
+- ⚠️ [app/analyzers/robots.py](app/analyzers/robots.py) - Used incorrect pattern (now fixed in translations)
+
 ### Modifying Subscription Plans
 
 1. Update Prisma schema: `/frontend/prisma/schema.prisma`

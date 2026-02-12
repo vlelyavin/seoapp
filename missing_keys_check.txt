@@ -1,0 +1,69 @@
+Loaded translation keys:
+  Ukrainian (uk): 971 keys
+  English (en):   774 keys
+  Russian (ru):   774 keys
+
+Found 21 analyzer files
+
+Total unique translation keys used in analyzers: 494
+
+================================================================================
+MISSING TRANSLATION KEYS SUMMARY
+================================================================================
+
+Keys used in code but MISSING from translation files:
+  Ukrainian (uk): 11 keys
+  English (en):   135 keys
+  Russian (ru):   135 keys
+
+Keys in UK.json but MISSING from other languages:
+  Missing in EN:  200 keys
+  Missing in RU:  200 keys
+
+TOTAL KEYS TO ADD:
+  Ukrainian:  11 keys
+  English:    335 keys (135 used + 200 from UK)
+  Russian:    335 keys (135 used + 200 from UK)
+
+================================================================================
+MISSING KEYS BY ANALYZER (sorted by count)
+================================================================================
+
+favicon: 6 missing keys
+  Type A: issues.{key}_details (should be details.{key}):
+    - analyzer_content.favicon.issues.no_apple_details
+    - analyzer_content.favicon.issues.no_ico_details
+    - analyzer_content.favicon.issues.old_format_details
+  Type B: issues.{key}_recommendation (should be recommendations.{key}):
+    - analyzer_content.favicon.issues.no_apple_recommendation
+    - analyzer_content.favicon.issues.no_ico_recommendation
+    - analyzer_content.favicon.issues.old_format_recommendation
+
+robots: 3 missing keys
+  Type B: issues.{key}_recommendation (should be recommendations.{key}):
+    - analyzer_content.robots.issues.canonical_issues_recommendation
+    - analyzer_content.robots.issues.noindex_pages_recommendation
+    - analyzer_content.robots.issues.robots_errors_recommendation
+
+meta_tags: 1 missing keys
+  Type D: Problem descriptions:
+    - analyzer_content.meta_tags.issues.problem_missing_description
+
+security: 1 missing keys
+  Type D: Status/dynamic labels:
+    - analyzer_content.security.issues.status_unknown
+
+================================================================================
+WORKING ANALYZERS (no missing keys): 17
+================================================================================
+Traceback (most recent call last):
+  File "c:\Users\User\Documents\work\projects\audit-maker\scripts\find_missing_translations.py", line 251, in <module>
+    main()
+    ~~~~^^
+  File "c:\Users\User\Documents\work\projects\audit-maker\scripts\find_missing_translations.py", line 184, in main
+    print(f"  \u2713 {name}")
+    ~~~~~^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\encodings\cp1251.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2713' in position 2: character maps to <undefined>

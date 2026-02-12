@@ -24,6 +24,7 @@ export default function AuditPage({
   const [results, setResults] = useState<AuditResults | null>(null);
   const [auditMeta, setAuditMeta] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
+  const [pageError, setPageError] = useState<string | null>(null);
 
   useEffect(() => {
     params.then(({ id }) => {
@@ -32,33 +33,52 @@ export default function AuditPage({
     });
   }, [params, searchParams]);
 
-  const { progress, connected, done } = useAuditProgress(fastApiId, auditId);
+  const { progress, connected, done, error, isStalled } = useAuditProgress(fastApiId, auditId);
 
   // Check if audit is in progress when opening without fastApiId
   useEffect(() => {
     if (!auditId || fastApiId) return;
 
+    let isMounted = true;
+
     async function checkAuditStatus() {
       try {
         const res = await fetch(`/api/audit/${auditId}`);
-        if (res.ok) {
-          const audit = await res.json();
-          console.log('[Audit] Status check:', { status: audit.status, fastApiId: audit.fastApiId, startedAt: audit.startedAt });
+        if (!res.ok || !isMounted) return;
 
-          // Redirect only if audit is truly in progress (not completed)
-          const isInProgress = ['crawling', 'analyzing', 'generating_report', 'screenshots'].includes(audit.status);
+        const audit = await res.json();
+        console.log('[Audit] Status check:', { status: audit.status, fastApiId: audit.fastApiId, startedAt: audit.startedAt });
 
-          if (audit.fastApiId && isInProgress) {
-            console.log('[Audit] Redirecting to progress view');
-            router.push(`/${locale}/dashboard/audit/${auditId}?fastApiId=${audit.fastApiId}`);
-          }
+        // Determine if audit is in progress
+        const isInProgress = ['crawling', 'analyzing', 'generating_report', 'screenshots'].includes(audit.status);
+
+        if (audit.fastApiId && isInProgress) {
+          // Audit is in progress - add fastApiId to URL
+          console.log('[Audit] Redirecting to progress view');
+          router.push(`/${locale}/dashboard/audit/${auditId}?fastApiId=${audit.fastApiId}`);
+        } else if (audit.status === 'completed') {
+          // Audit completed - load cached results (handled by loadCached effect)
+          setLoading(true);
+        } else if (audit.status === 'failed') {
+          setPageError("Audit failed");
+          setLoading(false);
+        } else if (!audit.fastApiId) {
+          // No fastApiId means audit was never started or cleaned up
+          setPageError("Audit not found or expired");
+          setLoading(false);
         }
       } catch (err) {
         console.error('[Audit] Status check failed:', err);
+        setPageError("Failed to check audit status");
+        setLoading(false);
       }
     }
 
     checkAuditStatus();
+
+    return () => {
+      isMounted = false;
+    };
   }, [auditId, fastApiId, locale, router]);
 
   // Handle locale changes during active audit
@@ -83,6 +103,12 @@ export default function AuditPage({
     async function fetchResults() {
       try {
         const res = await fetch(`/api/audit/${auditId}/results?lang=${locale}`);
+
+        // If 202 status, audit still in progress - wait longer
+        if (res.status === 202) {
+          return;
+        }
+
         if (res.ok) {
           const data = await res.json();
           setResults(data.results);
@@ -110,6 +136,13 @@ export default function AuditPage({
     async function loadCached() {
       try {
         const res = await fetch(`/api/audit/${auditId}/results?lang=${locale}`);
+
+        // If 202 status, audit still in progress - don't load
+        if (res.status === 202) {
+          setLoading(false);
+          return;
+        }
+
         if (res.ok) {
           const data = await res.json();
           setResults(data.results);
@@ -144,6 +177,24 @@ export default function AuditPage({
     return (
       <div>
         <Breadcrumbs />
+        {error && (
+          <div className="mb-4 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+            <p className="text-yellow-500">{error}</p>
+          </div>
+        )}
+        {isStalled && (
+          <div className="mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+            <p className="text-red-500">
+              Connection lost. The audit may still be running in the background.
+              <button
+                onClick={() => window.location.reload()}
+                className="ml-2 underline hover:text-red-600"
+              >
+                Refresh to reconnect
+              </button>
+            </p>
+          </div>
+        )}
         <AuditProgressView progress={progress} />
       </div>
     );
@@ -174,6 +225,27 @@ export default function AuditPage({
           meta={auditMeta}
           auditId={auditId}
         />
+      </div>
+    );
+  }
+
+  // Page error
+  if (pageError) {
+    return (
+      <div className="mx-auto max-w-2xl py-12 text-center">
+        <div className="mb-4 text-5xl">&#10060;</div>
+        <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+          Error
+        </h1>
+        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+          {pageError}
+        </p>
+        <Link
+          href={`/${locale}/dashboard`}
+          className="mt-4 inline-block text-blue-500 hover:text-blue-600"
+        >
+          Return to Dashboard
+        </Link>
       </div>
     );
   }

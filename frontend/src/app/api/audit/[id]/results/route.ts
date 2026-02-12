@@ -32,14 +32,26 @@ export async function GET(
     `/api/audit/${audit.fastApiId}/results?lang=${lang}`
   );
 
+  const data = await fastapiRes.json();
+
+  // If partial results (audit still in progress), return 202
+  if (data.partial) {
+    return NextResponse.json(
+      {
+        error: "Audit in progress",
+        status: data.status,
+        progress: data.progress
+      },
+      { status: 202 }  // 202 Accepted instead of 400
+    );
+  }
+
   if (!fastapiRes.ok) {
     return NextResponse.json(
       { error: "Results not available yet" },
       { status: fastapiRes.status }
     );
   }
-
-  const data = await fastapiRes.json();
 
   // Update audit in DB with results
   await prisma.audit.update({

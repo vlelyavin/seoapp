@@ -146,112 +146,55 @@
   "analyzers": {
     "cms": {
       "name": "CMS / Platform",
-      "description": "Detection of the content management system or website platform.",
-      "confidence": "Впевненість: {percent}%",
-      "detected": "Визначено: {cms}",
-      "multiple_detected": "Також виявлені ознаки: {cms_list}",
-      "not_detected": "CMS не визначено",
-      "possibly": "Probably: {cms}",
-      "probably": "Ймовірно: {cms}"
+      "description": "Detection of the content management system or website platform."
     },
     "meta_tags": {
       "name": "Meta Tags",
-      "description": "Meta tags are important for SEO and search result appearance.",
-      "description_too_long": "Description занадто довгий",
-      "description_too_short": "Description занадто короткий",
-      "duplicate_descriptions": "Duplicate descriptions",
-      "duplicate_titles": "Duplicate titles",
-      "missing_description": "Missingй meta description",
-      "missing_title": "Missingй title",
-      "title_too_long": "Title too long",
-      "title_too_short": "Title too short"
+      "description": "Meta tags are important for SEO and search result appearance."
     },
     "headings": {
       "name": "Headings H1-H6",
-      "description": "Analysis of H1-H6 headings: presence, uniqueness, and proper hierarchy.",
-      "duplicate_h1": "Дублікати H1",
-      "h1_too_long": "H1 занадто довгий",
-      "hierarchy_violation": "Hierarchy violation заголовків",
-      "missing_h1": "Missing H1",
-      "multiple_h1": "Multiple H1"
+      "description": "Analysis of H1-H6 headings: presence, uniqueness, and proper hierarchy."
     },
     "page_404": {
       "name": "404 Page",
-      "description": "A custom 404 page improves user experience.",
-      "missing": "Відсутня кастомна сторінка 404",
-      "no_home_link": "Page 404 без посилання на головну",
-      "no_navigation": "Page 404 без навігації",
-      "no_search": "Page 404 без пошуку",
-      "wrong_status": "Неправильний HTTP статус"
+      "description": "A custom 404 page improves user experience."
     },
     "speed": {
       "name": "Page Speed",
-      "description": "Page speed affects ranking and user experience.",
-      "cls_high": "{device} CLS високий",
-      "desktop_score_critical": "Критично низький Desktop Score",
-      "desktop_score_low": "Низький Desktop Score",
-      "fcp_slow": "{device} FCP повільний",
-      "lcp_slow": "{device} LCP повільний",
-      "mobile_score_critical": "Критично низький Mobile Score",
-      "mobile_score_low": "Низький Mobile Score"
+      "description": "Page speed affects ranking and user experience."
     },
     "images": {
       "name": "Images",
-      "description": "Image optimization is important for speed and SEO.",
-      "empty_alt": "Зображення з порожнім alt",
-      "large_images": "Великі зображення",
-      "missing_alt": "Зображення без alt",
-      "no_webp": "Missing WebP зображення"
+      "description": "Image optimization is important for speed and SEO."
     },
     "content": {
       "name": "Content",
-      "description": "Quality content is the foundation of successful SEO.",
-      "no_structured_data": "Відсутня структурована розмітка",
-      "thin_content": "Тонкий контент"
+      "description": "Quality content is the foundation of successful SEO."
     },
     "links": {
       "name": "Broken Links",
-      "description": "Broken links harm SEO and user experience.",
-      "broken_external": "Биті зовнішні посилання",
-      "broken_internal": "Биті внутрішні посилання"
+      "description": "Broken links harm SEO and user experience."
     },
     "favicon": {
       "name": "Favicon",
-      "description": "A favicon helps identify the website in the browser.",
-      "missing": "Фавікон відсутній",
-      "no_apple_touch": "Apple Touch Icon missing",
-      "no_ico": "Missingй /favicon.ico"
+      "description": "A favicon helps identify the website in the browser."
     },
     "external_links": {
       "name": "External Links",
-      "description": "Analysis of outbound links to other websites.",
-      "commercial_no_nofollow": "Комерційні посилання без nofollow",
-      "many_dofollow": "Багато dofollow посилань"
+      "description": "Analysis of outbound links to other websites."
     },
     "robots": {
       "name": "Indexation",
-      "description": "Configuration of robots.txt and sitemap.xml.",
-      "canonical_issues": "Проблеми з canonical",
-      "files": "Files",
-      "no_robots": "Файл robots.txt відсутній",
-      "no_sitemap": "Файл sitemap.xml відсутній",
-      "noindex_pages": "Pages with noindex",
-      "sitemap_errors": "Проблеми з sitemap"
+      "description": "Configuration of robots.txt and sitemap.xml."
     },
     "structure": {
       "name": "Site Structure",
-      "description": "Site structure affects indexation.",
-      "deep_pages": "Глибоко вкладені сторінки",
-      "orphan_pages": "Сирітські сторінки"
+      "description": "Site structure affects indexation."
     },
     "content_sections": {
       "name": "Informational Sections",
-      "description": "Detection of blog, news, FAQ, and help sections.",
-      "blog_detected": "Виявлено блог/новини",
-      "faq_detected": "Виявлено FAQ/довідку",
-      "faq_no_schema": "FAQ без Schema.org розмітки",
-      "no_blog": "Блог/новини не виявлено",
-      "no_faq": "FAQ не виявлено"
+      "description": "Detection of blog, news, FAQ, and help sections."
     },
     "schema": {
       "name": "Structured Data",
@@ -326,29 +269,7 @@
         "short_description": "Description too short: {count} pages",
         "long_description": "Description too long: {count} pages",
         "duplicate_title": "Duplicate Titles: {count} duplicate groups",
-        "duplicate_description": "Duplicate Descriptions: {count} duplicate groups",
-        "duplicate_description_details": "Duplicate Descriptions: {count} duplicate groups",
-        "duplicate_description_recommendation": "Duplicate Descriptions: {count} duplicate groups",
-        "duplicate_title_details": "Duplicate Titles: {count} duplicate groups",
-        "duplicate_title_recommendation": "Duplicate Titles: {count} duplicate groups",
-        "long_description_details": "Description too long: {count} pages",
-        "long_description_recommendation": "Description too long: {count} pages",
-        "long_title_details": "Title too long: {count} pages",
-        "long_title_recommendation": "Title too long: {count} pages",
-        "missing_description_details": "Missing Description: {count} pages",
-        "missing_description_recommendation": "Missing Description: {count} pages",
-        "missing_title_details": "Missing Title: {count} pages",
-        "missing_title_recommendation": "Missing Title: {count} pages",
-        "problem_duplicate_title": "Duplicate Title",
-        "problem_long_title": "Title too long",
-        "problem_missing_description": "Missing Description",
-        "problem_missing_title": "Missing Title",
-        "problem_short_title": "Title too short",
-        "short_description_details": "Description too short: {count} pages",
-        "short_description_recommendation": "Description too short: {count} pages",
-        "short_title_details": "Title too short: {count} pages",
-        "short_title_recommendation": "Title too short: {count} pages",
-        "table_title": "Problematic Pages"
+        "duplicate_description": "Duplicate Descriptions: {count} duplicate groups"
       },
       "details": {
         "missing_title": "Title is an important ranking factor. Every page should have a unique Title.",
@@ -385,25 +306,7 @@
         "h1_too_long": "H1 too long: {count} pages",
         "duplicate_h1": "Duplicate H1: {count} groups",
         "empty_h1": "Empty H1: {count} pages",
-        "hierarchy_violation": "Heading hierarchy violation: {count} pages",
-        "duplicate_h1_details": "Duplicate H1: {count} groups",
-        "duplicate_h1_recommendation": "Duplicate H1: {count} groups",
-        "empty_h1_details": "Empty H1: {count} pages",
-        "empty_h1_recommendation": "Empty H1: {count} pages",
-        "empty_value": "Empty value",
-        "h1_too_long_details": "H1 too long: {count} pages",
-        "h1_too_long_recommendation": "H1 too long: {count} pages",
-        "hierarchy_violation_details": "Heading hierarchy violation: {count} pages",
-        "hierarchy_violation_recommendation": "Heading hierarchy violation: {count} pages",
-        "missing_h1_details": "Missing H1: {count} pages",
-        "missing_h1_recommendation": "Missing H1: {count} pages",
-        "multiple_h1_details": "Multiple H1: {count} pages",
-        "multiple_h1_recommendation": "Multiple H1: {count} pages",
-        "problem_empty_h1": "Empty H1",
-        "problem_hierarchy_skip": "Hierarchy violation",
-        "problem_missing_h1": "Missing H1",
-        "problem_multiple_h1": "Multiple H1",
-        "table_title": "Heading Issues"
+        "hierarchy_violation": "Heading hierarchy violation: {count} pages"
       },
       "details": {
         "missing_h1": "Every page should have one H1 heading.",
@@ -517,20 +420,7 @@
         "large_size": "Large images (>400 KB): {count}",
         "critical_size": "Very large images (>1 MB): {count}",
         "legacy_format": "Outdated image format: {count}",
-        "images_ok": "All images are optimized",
-        "critical_size_details": "Very large images (>1 MB): {count}",
-        "critical_size_recommendation": "Very large images (>1 MB): {count}",
-        "empty_alt_details": "Images with empty alt: {count}",
-        "empty_alt_recommendation": "Images with empty alt: {count}",
-        "large_size_details": "Large images (>400 KB): {count}",
-        "large_size_recommendation": "Large images (>400 KB): {count}",
-        "legacy_format_details": "Outdated image format: {count}",
-        "legacy_format_recommendation": "Outdated image format: {count}",
-        "missing_alt_details": "Images without alt: {count}",
-        "missing_alt_recommendation": "Images without alt: {count}",
-        "problem_critical_size": "Critical size",
-        "problem_large_size": "Large size",
-        "table_title": "Problematic Images"
+        "images_ok": "All images are optimized"
       },
       "details": {
         "missing_alt": "The alt attribute is important for accessibility and SEO. Search engines use alt text to understand image content.",
@@ -560,17 +450,7 @@
         "empty_pages": "Empty pages: {count}",
         "no_structured_data": "Schema.org structured data is missing",
         "has_structured_data": "Schema.org structured data detected",
-        "content_ok": "Content is fine",
-        "empty_pages_details": "Empty pages: {count}",
-        "empty_pages_recommendation": "Empty pages: {count}",
-        "has_structured_data_details": "Schema.org structured data detected",
-        "no_structured_data_details": "Schema.org structured data is missing",
-        "no_structured_data_recommendation": "Schema.org structured data is missing",
-        "status_empty": "Empty",
-        "status_thin": "Thin Content",
-        "table_title": "Pages with thin content",
-        "thin_content_details": "Pages with thin content: {count}",
-        "thin_content_recommendation": "Pages with thin content: {count}"
+        "content_ok": "Content is fine"
       },
       "details": {
         "thin_content": "Pages with little text may be demoted in search rankings.",
@@ -595,14 +475,7 @@
       "issues": {
         "broken_internal": "Broken internal links: {count}",
         "broken_external": "Broken external links: {count}",
-        "no_broken_links": "No broken links detected",
-        "broken_external_details": "Broken external links: {count}",
-        "broken_external_recommendation": "Broken external links: {count}",
-        "broken_internal_details": "Broken internal links: {count}",
-        "broken_internal_recommendation": "Broken internal links: {count}",
-        "table_title": "Broken links",
-        "type_external": "External",
-        "type_internal": "Internal"
+        "no_broken_links": "No broken links detected"
       },
       "details": {
         "broken_internal": "Internal links to non-existent pages harm SEO and user experience.",
@@ -627,41 +500,20 @@
         "missing_favicon": "Favicon is missing",
         "no_favicon_ico": "/favicon.ico is missing",
         "no_apple_touch_icon": "Apple Touch Icon is missing",
-        "old_favicon_format": "SVG or PNG format is recommended",
-        "favicon_ok_details": "Favicon is configured correctly",
-        "missing": "Favicon missing",
-        "missing_favicon_details": "Favicon is missing",
-        "missing_favicon_recommendation": "Favicon is missing",
-        "no_apple": "Apple Touch Icon missing",
-        "no_apple_details": "Apple Touch Icon missing",
-        "no_apple_recommendation": "Apple Touch Icon missing",
-        "no_apple_touch_icon_details": "Apple Touch Icon is missing",
-        "no_apple_touch_icon_recommendation": "Apple Touch Icon is missing",
-        "no_favicon_ico_details": "/favicon.ico is missing",
-        "no_favicon_ico_recommendation": "/favicon.ico is missing",
-        "no_ico": ".ico file missing",
-        "no_ico_details": ".ico file missing",
-        "no_ico_recommendation": ".ico file missing",
-        "old_favicon_format_details": "SVG or PNG format is recommended",
-        "old_favicon_format_recommendation": "SVG or PNG format is recommended",
-        "old_format": "Outdated format",
-        "old_format_details": "Outdated format",
-        "old_format_recommendation": "Outdated format"
+        "old_favicon_format": "SVG or PNG format is recommended"
       },
       "details": {
         "favicon_ok": "The favicon helps users recognize your website.",
         "missing_favicon": "Without a favicon, the website looks less professional.",
         "no_favicon_ico": "Some browsers look for favicon.ico in the website root.",
         "no_apple_touch_icon": "Apple Touch Icon is needed for proper display on iOS devices.",
-        "old_favicon_format": "SVG favicons scale without quality loss and support dark mode.",
-        "missing": "Favicon is a small icon displayed in browser bookmarks and tabs."
+        "old_favicon_format": "SVG favicons scale without quality loss and support dark mode."
       },
       "recommendations": {
         "missing_favicon": "Create and add a favicon to the website.",
         "no_favicon_ico": "Add a favicon.ico file to the website root.",
         "no_apple_touch_icon": "Add an Apple Touch Icon (180x180) for iOS devices.",
-        "old_favicon_format": "Add an SVG version of the favicon.",
-        "missing": "Add a favicon in PNG or ICO format to the root directory of the site."
+        "old_favicon_format": "Add an SVG version of the favicon."
       }
     },
     "external_links": {
@@ -711,37 +563,7 @@
         "pages_not_in_sitemap": "Pages not included in sitemap: {count}",
         "sitemap_old_lastmod": "Outdated lastmod dates in sitemap: {count} URLs",
         "noindex_pages": "Pages with noindex: {count}",
-        "canonical_issues": "Canonical issues: {count}",
-        "canonical_issues_details": "Canonical issues: {count}",
-        "canonical_issues_recommendation": "Canonical issues: {count}",
-        "count_items": "Number of items",
-        "empty_sitemap_details": "Sitemap is empty",
-        "empty_sitemap_recommendation": "Sitemap is empty",
-        "no_robots_txt_details": "robots.txt file is missing",
-        "no_robots_txt_recommendation": "robots.txt file is missing",
-        "no_sitemap_details": "sitemap.xml file is missing",
-        "no_sitemap_in_robots_details": "Sitemap is not referenced in robots.txt",
-        "no_sitemap_in_robots_recommendation": "Sitemap is not referenced in robots.txt",
-        "no_sitemap_recommendation": "sitemap.xml file is missing",
-        "noindex_pages_details": "Pages with noindex: {count}",
-        "noindex_pages_label": "Pages with noindex",
-        "noindex_pages_recommendation": "Pages with noindex: {count}",
-        "none": "None",
-        "pages_not_in_sitemap_details": "Pages not included in sitemap: {count}",
-        "pages_not_in_sitemap_recommendation": "Pages not included in sitemap: {count}",
-        "robots_errors": "Errors in robots.txt: {count}",
-        "robots_errors_recommendation": "Errors in robots.txt: {count}",
-        "robots_txt_errors_details": "Errors in robots.txt: {count}",
-        "robots_txt_errors_recommendation": "Errors in robots.txt: {count}",
-        "sitemap_errors_details": "Sitemap issues: {count}",
-        "sitemap_errors_recommendation": "Sitemap issues: {count}",
-        "sitemap_old_lastmod_details": "Outdated lastmod dates in sitemap: {count} URLs",
-        "sitemap_old_lastmod_recommendation": "Outdated lastmod dates in sitemap: {count} URLs",
-        "sitemap_urls_not_found_details": "URLs in sitemap not found on the website: {count}",
-        "sitemap_urls_not_found_recommendation": "URLs in sitemap not found on the website: {count}",
-        "status_exists": "Exists",
-        "status_missing": "Missing",
-        "table_title": "Indexation Status"
+        "canonical_issues": "Canonical issues: {count}"
       },
       "details": {
         "no_robots_txt": "Without robots.txt, search crawlers will index all accessible pages.",
@@ -904,26 +726,7 @@
         "missing_x_content_type": "X-Content-Type-Options is missing",
         "missing_x_frame": "X-Frame-Options is missing",
         "missing_csp": "Content-Security-Policy is missing",
-        "security_ok": "HTTPS and security are in order",
-        "missing_csp_details": "Content-Security-Policy is missing",
-        "missing_csp_recommendation": "Content-Security-Policy is missing",
-        "missing_hsts_details": "HSTS header is missing",
-        "missing_hsts_recommendation": "HSTS header is missing",
-        "missing_x_content_type_details": "X-Content-Type-Options is missing",
-        "missing_x_content_type_recommendation": "X-Content-Type-Options is missing",
-        "missing_x_frame_details": "X-Frame-Options is missing",
-        "missing_x_frame_recommendation": "X-Frame-Options is missing",
-        "mixed_content_details": "Mixed content: {count} pages",
-        "mixed_content_recommendation": "Mixed content: {count} pages",
-        "no_https_details": "The website does not use HTTPS",
-        "no_https_recommendation": "The website does not use HTTPS",
-        "security_ok_details": "HTTPS and security are in order",
-        "status_check_failed": "Check failed",
-        "status_invalid": "Invalid",
-        "status_missing": "Missing",
-        "status_present": "Present",
-        "status_unknown": "Unknown",
-        "table_title": "Security Headers"
+        "security_ok": "HTTPS and security are in order"
       },
       "details": {
         "no_https": "HTTPS has been a Google ranking factor since 2014. Without an SSL certificate, the website is marked as insecure.",
@@ -955,14 +758,7 @@
         "viewport_ok": "All pages have a correct viewport",
         "missing_viewport": "{count} pages without viewport",
         "bad_viewport": "Incorrect viewport: {count} pages",
-        "flash_content": "Flash content: {count} pages",
-        "bad_viewport_details": "Incorrect viewport: {count} pages",
-        "bad_viewport_recommendation": "Incorrect viewport: {count} pages",
-        "flash_content_details": "Flash content: {count} pages",
-        "flash_content_recommendation": "Flash content: {count} pages",
-        "missing_viewport_details": "{count} pages without viewport",
-        "missing_viewport_recommendation": "{count} pages without viewport",
-        "viewport_ok_details": "All pages have a correct viewport"
+        "flash_content": "Flash content: {count} pages"
       },
       "details": {
         "viewport_ok": "The viewport meta tag is properly configured on all pages.",
@@ -1113,13 +909,6 @@
     "link": "Link",
     "found_on": "Found on",
     "problem": "Issue",
-    "description": "Description",
-    "header": "Header",
-    "image_url": "Image URL",
-    "length": "Length",
-    "page": "Page",
-    "size": "Size",
-    "value": "Value",
-    "word_count": "Word count"
+    "description": "Description"
   }
 }
