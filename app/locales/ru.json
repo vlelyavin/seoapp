@@ -21,6 +21,7 @@
     "crawling_pages": "Отсканировано {count} страниц",
     "crawling_complete": "Сканирование завершено. Найдено {count} страниц.",
     "analyzing_start": "Анализируем страницы...",
+    "analyzing": "Анализ...",
     "analyzing_analyzer": "Анализ: {name}...",
     "generating_report": "Генерируем отчёт...",
     "completed": "Аудит завершён!",

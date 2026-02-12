@@ -21,7 +21,7 @@ export function IssueCard({ issue }: IssueCardProps) {
         onClick={() => hasDetails && setExpanded(!expanded)}
         className={cn(
           "flex w-full items-center gap-2 px-3 py-2 text-left text-sm",
-          hasDetails && "cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50"
+          hasDetails && "cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800/50"
         )}
       >
         <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", {
@@ -34,7 +34,7 @@ export function IssueCard({ issue }: IssueCardProps) {
           {issue.message}
         </span>
         {issue.count > 1 && (
-          <span className="shrink-0 rounded-full bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+          <span className="shrink-0 rounded-full border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-xs text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
             {issue.count}
           </span>
         )}
@@ -56,7 +56,7 @@ export function IssueCard({ issue }: IssueCardProps) {
           )}
 
           {issue.recommendation && (
-            <div className="mb-2 rounded bg-gray-100 px-2 py-1.5 text-xs text-gray-900 dark:bg-gray-900 dark:text-white">
+            <div className="mb-2 rounded border border-gray-200 bg-gray-50 px-2 py-1.5 text-xs text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
               <span className="font-medium">Recommendation: </span>
               {issue.recommendation}
             </div>
@@ -64,7 +64,7 @@ export function IssueCard({ issue }: IssueCardProps) {
 
           {issue.affected_urls.length > 0 && (
             <div>
-              <p className="mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">
+              <p className="mb-1 text-xs font-medium text-gray-700 dark:text-gray-400">
                 Affected URLs ({issue.affected_urls.length}):
               </p>
               <ul className="max-h-40 space-y-0.5 overflow-y-auto">

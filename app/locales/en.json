@@ -21,6 +21,7 @@
     "crawling_pages": "Crawled {count} pages",
     "crawling_complete": "Crawling complete. Found {count} pages.",
     "analyzing_start": "Analyzing pages...",
+    "analyzing": "Analyzing...",
     "analyzing_analyzer": "Analysis: {name}...",
     "generating_report": "Generating report...",
     "completed": "Audit complete!",

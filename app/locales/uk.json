@@ -20,6 +20,7 @@
     "crawling_pages": "Скановано {count} сторінок",
     "crawling_complete": "Сканування завершено. Знайдено {count} сторінок.",
     "analyzing_start": "Аналізуємо сторінки...",
+    "analyzing": "Аналіз...",
     "analyzing_analyzer": "Аналіз: {name}...",
     "generating_report": "Генеруємо звіт...",
     "completed": "Аудит завершено!",

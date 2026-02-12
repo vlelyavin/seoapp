@@ -73,7 +73,7 @@ export function AnalyzerSection({ result }: AnalyzerSectionProps) {
 
       {/* Content */}
       {expanded && (
-        <div className="border-t bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
+        <div className="border-t border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
           {/* Description */}
           {result.description && (
             <p className="mb-3 text-sm text-gray-600 dark:text-gray-400">
@@ -93,7 +93,7 @@ export function AnalyzerSection({ result }: AnalyzerSectionProps) {
               </button>
               {showTheory && (
                 <div
-                  className="mt-2 rounded-lg bg-gray-100 p-3 text-xs leading-relaxed text-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                  className="mt-2 rounded-lg border border-gray-200 bg-gray-50 p-3 text-xs leading-relaxed text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
                   dangerouslySetInnerHTML={{ __html: result.theory }}
                 />
               )}

@@ -11,6 +11,7 @@ import {
   Search,
   Filter,
   ArrowLeft,
+  Loader2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
@@ -33,6 +34,7 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
   const [filter, setFilter] = useState<FilterMode>("all");
   const [search, setSearch] = useState("");
   const [exportOpen, setExportOpen] = useState(false);
+  const [exportingFormat, setExportingFormat] = useState<string | null>(null);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const pagesCrawled = (meta.pages_crawled as number) || 0;
@@ -74,11 +76,33 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
 
   async function handleExport(format: string) {
     setExportOpen(false);
-    const url = `/api/audit/${auditId}/export?format=${format}`;
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "";
-    a.click();
+    setExportingFormat(format);
+
+    try {
+      const url = `/api/audit/${auditId}/export?format=${format}`;
+
+      // Fetch to monitor completion
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Export failed');
+
+      // Create download link
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = downloadUrl;
+
+      // Extract filename from content-disposition header or create default
+      const contentDisposition = response.headers.get('content-disposition');
+      const filenameMatch = contentDisposition?.match(/filename="?([^"]+)"?/);
+      a.download = filenameMatch ? filenameMatch[1] : `audit.${format}`;
+
+      a.click();
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Export failed:', error);
+    } finally {
+      setExportingFormat(null);
+    }
   }
 
   const filterButtons: { key: FilterMode; label: string; icon: React.ReactNode }[] = [
@@ -103,7 +127,7 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
         {/* Left sidebar nav */}
         <aside className="hidden w-56 shrink-0 xl:block">
         <div className="sticky top-20 space-y-1">
-          <p className="mb-2 px-2 text-xs font-medium uppercase text-gray-400 dark:text-gray-500">
+          <p className="mb-2 px-2 text-xs font-medium uppercase text-gray-600 dark:text-gray-500">
             Sections
           </p>
           {Object.entries(results).map(([name, result]) => (
@@ -139,7 +163,7 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
 
         {/* Filter bar */}
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-1 rounded-lg bg-gray-100 p-1 dark:bg-gray-800">
+          <div className="flex items-center gap-1 rounded-lg border border-gray-200 bg-gray-100 p-1 dark:border-gray-700 dark:bg-gray-800">
             {filterButtons.map((fb) => (
               <button
                 key={fb.key}
@@ -147,7 +171,7 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
                 className={cn(
                   "flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
                   filter === fb.key
-                    ? "bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-white"
+                    ? "border border-gray-300 bg-white text-gray-900 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     : "text-gray-500 hover:text-gray-700 dark:text-gray-400"
                 )}
               >
@@ -164,22 +188,38 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search issues..."
-              className="w-full rounded-lg border py-1.5 pl-8 pr-3 text-sm outline-none focus:border-gray-500 focus:ring-2 focus:ring-gray-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-white dark:focus:ring-white/20"
+              className="w-full rounded-lg border py-1.5 pl-8 pr-3 text-sm outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-400/30 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-white dark:focus:ring-white/20"
             />
           </div>
 
           {/* Export dropdown */}
           <div className="relative ml-auto">
             <button
+              type="button"
+              disabled={exportingFormat !== null}
               onClick={() => setExportOpen(!exportOpen)}
-              className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+              className={cn(
+                "flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium",
+                exportingFormat
+                  ? "cursor-not-allowed opacity-50 border-gray-300 text-gray-500 dark:border-gray-600 dark:text-gray-500"
+                  : "text-gray-700 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+              )}
             >
-              <Download className="h-4 w-4" />
-              Export
-              <ChevronDown className="h-3.5 w-3.5" />
+              {exportingFormat ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Generating {exportingFormat.toUpperCase()}...
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4" />
+                  Export
+                  <ChevronDown className="h-3.5 w-3.5" />
+                </>
+              )}
             </button>
-            {exportOpen && (
-              <div className="absolute right-0 top-full z-10 mt-1 w-40 rounded-lg border bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-900">
+            {exportOpen && !exportingFormat && (
+              <div className="absolute right-0 top-full z-10 mt-1 w-40 rounded-lg border border-gray-200 bg-gray-50 py-1 shadow-lg dark:border-gray-700 dark:bg-gray-900">
                 {["html", "pdf", "docx"].map((fmt) => (
                   <button
                     key={fmt}

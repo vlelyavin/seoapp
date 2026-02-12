@@ -58,7 +58,7 @@ export function AuditProgressView({ progress }: AuditProgressViewProps) {
           {/* Progress track with embedded milestones */}
           <div className="relative pb-10">
             {/* Background track */}
-            <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+            <div className="h-2 w-full rounded-full bg-gray-300 dark:bg-gray-700">
               {/* Animated progress fill */}
               <div
                 className="h-full rounded-full bg-gray-900 dark:bg-white transition-all duration-500"
@@ -72,8 +72,8 @@ export function AuditProgressView({ progress }: AuditProgressViewProps) {
               style={{ height: '8px', top: '0' }}
             >
               {stages.slice(0, -1).map((s, i) => {
-                const startPos = ((i + 1) / stages.length) * 100;
-                const endPos = ((i + 2) / stages.length) * 100;
+                const startPos = (i / (stages.length - 1)) * 100;
+                const endPos = ((i + 1) / (stages.length - 1)) * 100;
                 const currentStageIndex = stages.findIndex((x) => x.key === stage);
                 const isCompleted = currentStageIndex > i;
 
@@ -84,22 +84,25 @@ export function AuditProgressView({ progress }: AuditProgressViewProps) {
                     y1="50%"
                     x2={`${endPos}%`}
                     y2="50%"
-                    stroke={isCompleted ? "#16a34a" : "#d1d5db"}
                     strokeWidth="2"
-                    className="transition-colors duration-300 dark:stroke-gray-600"
-                    style={isCompleted ? {} : { stroke: 'currentColor' }}
+                    className={cn(
+                      "transition-colors duration-300",
+                      isCompleted
+                        ? "stroke-green-600 dark:stroke-green-400"
+                        : "stroke-gray-300 dark:stroke-gray-600"
+                    )}
                   />
                 );
               })}
             </svg>
 
             {/* Milestone markers positioned absolutely */}
-            <div className="absolute inset-0 flex items-start">
+            <div className="absolute inset-0">
               {stages.map((s, i) => {
                 const isActive = s.key === stage;
                 const currentStageIndex = stages.findIndex((x) => x.key === stage);
                 const isPast = currentStageIndex > i;
-                const position = ((i + 1) / stages.length) * 100;
+                const position = (i / (stages.length - 1)) * 100;
 
                 return (
                   <div
@@ -115,7 +118,7 @@ export function AuditProgressView({ progress }: AuditProgressViewProps) {
                           ? "border-green-600 bg-green-600 text-white dark:border-green-400 dark:bg-green-400"
                           : isActive
                             ? "border-gray-900 bg-gray-900 text-white dark:border-white dark:bg-white dark:text-black animate-pulse"
-                            : "border-gray-300 bg-white text-gray-400 dark:border-gray-600 dark:bg-gray-900"
+                            : "border-gray-400 bg-white text-gray-400 dark:border-gray-600 dark:bg-gray-900"
                       )}
                     >
                       {isPast ? (
@@ -131,7 +134,7 @@ export function AuditProgressView({ progress }: AuditProgressViewProps) {
                         "absolute top-8 whitespace-nowrap text-xs",
                         isActive
                           ? "font-medium text-gray-900 dark:text-white"
-                          : "text-gray-500 dark:text-gray-400"
+                          : "text-gray-600 dark:text-gray-400"
                       )}
                     >
                       {s.label}
