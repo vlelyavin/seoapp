@@ -353,8 +353,16 @@ async def download_report(audit_id: str, format: str = "html"):
         raise HTTPException(status_code=400, detail=f"Unsupported format: {format}. Use html, pdf, or docx.")
 
 
-async def run_audit_with_timeout(audit_id: str, request: AuditRequest, queue, audit, lang):
-    """Core audit logic with timeout wrapper for Python 3.7+ compatibility."""
+async def run_audit(audit_id: str, request: AuditRequest):
+    """Background task to run the full audit with 10-minute timeout."""
+    queue = audit_queues[audit_id]
+    audit, _ = audits[audit_id]
+
+    # Get language for progress messages
+    lang = audit.language if audit.language else "uk"
+
+    try:
+        async with asyncio.timeout(settings.TOTAL_TIMEOUT):  # Requires Python 3.11+
             # Phase 1: Crawling
             audit.status = AuditStatus.CRAWLING
             await queue.put(ProgressEvent(
@@ -365,7 +373,6 @@ async def run_audit_with_timeout(audit_id: str, request: AuditRequest, queue, au
             ))
 
             pages: Dict[str, PageData] = {}
-
             max_pages = request.max_pages or settings.MAX_PAGES
 
             async def progress_callback(page: PageData):
@@ -485,32 +492,6 @@ async def run_audit_with_timeout(audit_id: str, request: AuditRequest, queue, au
                 pages_crawled=len(pages),
                 stage="complete",
             ))
-        audit.status = AuditStatus.FAILED
-        audit.error_message = "Audit timed out after 10 minutes"
-
-        await queue.put(ProgressEvent(
-            status=AuditStatus.FAILED,
-            progress=0,
-            message=t("progress.failed", lang, error="Audit timed out after 10 minutes"),
-            stage="error",
-        ))
-
-
-
-async def run_audit(audit_id: str, request: AuditRequest):
-    """Background task to run the full audit."""
-    queue = audit_queues[audit_id]
-    audit, _ = audits[audit_id]
-
-    # Get language for progress messages
-    lang = audit.language if audit.language else "uk"
-
-    try:
-        # Use asyncio.wait_for() for Python 3.7+ compatibility (instead of asyncio.timeout which requires 3.11+)
-        await asyncio.wait_for(
-            run_audit_with_timeout(audit_id, request, queue, audit, lang),
-            timeout=settings.TOTAL_TIMEOUT
-        )
 
     except asyncio.TimeoutError:
         audit.status = AuditStatus.FAILED

@@ -10,7 +10,7 @@ set -e
 APP_DIR="/var/www/seo-audit"
 FRONTEND_DIR="$APP_DIR/frontend"
 APP_USER="seo-audit"
-PYTHON_VERSION="python3"
+PYTHON_VERSION="python3.11"
 NODE_MAJOR=20
 
 echo "=== SEO Audit Tool - Deployment ==="
@@ -19,7 +19,7 @@ echo "=== SEO Audit Tool - Deployment ==="
 echo "[1/11] Installing system dependencies..."
 sudo apt-get update
 sudo apt-get install -y \
-    python3 python3-venv python3-pip \
+    python3.11 python3.11-venv python3.11-dev \
     libpango-1.0-0 libpangocairo-1.0-0 \
     libgdk-pixbuf2.0-0 libffi-dev shared-mime-info \
     ca-certificates curl gnupg
