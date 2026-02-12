@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { useAuditProgress } from "@/hooks/use-audit-progress";
 import { AuditProgressView } from "@/components/audit/audit-progress";
@@ -14,7 +14,9 @@ export default function AuditPage({
   params: Promise<{ id: string }>;
 }) {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const locale = useLocale();
+  const prevLocaleRef = useRef(locale);
 
   const [auditId, setAuditId] = useState<string>("");
   const [fastApiId, setFastApiId] = useState<string | null>(null);
@@ -29,7 +31,40 @@ export default function AuditPage({
     });
   }, [params, searchParams]);
 
-  const { progress, done } = useAuditProgress(fastApiId);
+  const { progress, connected, done } = useAuditProgress(fastApiId);
+
+  // Check if audit is in progress when opening without fastApiId
+  useEffect(() => {
+    if (!auditId || fastApiId) return;
+
+    async function checkAuditStatus() {
+      try {
+        const res = await fetch(`/api/audit/${auditId}`);
+        if (res.ok) {
+          const audit = await res.json();
+          // If audit is still in progress, redirect with fastApiId to show progress
+          if (audit.fastApiId && ['crawling', 'analyzing', 'generating_report'].includes(audit.status)) {
+            router.push(`/${locale}/dashboard/audit/${auditId}?fastApiId=${audit.fastApiId}`);
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    checkAuditStatus();
+  }, [auditId, fastApiId, locale, router]);
+
+  // Handle locale changes during active audit
+  useEffect(() => {
+    if (prevLocaleRef.current !== locale && fastApiId && !done) {
+      // Language changed during active audit - show brief loading state
+      setLoading(true);
+      const timer = setTimeout(() => setLoading(false), 300);
+      return () => clearTimeout(timer);
+    }
+    prevLocaleRef.current = locale;
+  }, [locale, fastApiId, done]);
 
   // When audit completes, fetch results
   useEffect(() => {
@@ -77,8 +112,10 @@ export default function AuditPage({
     loadCached();
   }, [auditId, locale, fastApiId]);
 
-  // Still in progress
-  if (fastApiId && !done) {
+  // Still in progress - show progress if we have fastApiId and either:
+  // - audit is not done yet, OR
+  // - we're still connected to SSE (handles brief disconnect during language switch)
+  if (fastApiId && (!done || connected)) {
     return <AuditProgressView progress={progress} />;
   }
 

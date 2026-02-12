@@ -49,12 +49,12 @@ export function AuditProgressView({ progress }: AuditProgressViewProps) {
         </div>
 
         {/* Stage indicators */}
-        <div className="flex items-center justify-center gap-8 md:gap-16">
+        <div className="flex items-center justify-between">
           {stages.map((s, i) => {
             const isActive = s.key === stage;
             const isPast = stages.findIndex((x) => x.key === stage) > i;
             return (
-              <div key={s.key} className="flex flex-col items-center gap-1">
+              <div key={s.key} className="flex w-24 flex-col items-center gap-1">
                 <div
                   className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium ${
                     isPast
@@ -67,7 +67,7 @@ export function AuditProgressView({ progress }: AuditProgressViewProps) {
                   {isPast ? "\u2713" : i + 1}
                 </div>
                 <span
-                  className={`text-xs ${
+                  className={`whitespace-nowrap text-xs ${
                     isActive
                       ? "font-medium text-gray-900 dark:text-white"
                       : "text-gray-400"

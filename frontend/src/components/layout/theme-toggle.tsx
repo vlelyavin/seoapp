@@ -6,10 +6,28 @@ import { Moon, Sun, Monitor } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
+
+  // Force theme application if needed
+  useEffect(() => {
+    if (!mounted || !resolvedTheme) return;
+
+    const html = document.documentElement;
+    const shouldBeDark = resolvedTheme === 'dark';
+    const isDark = html.classList.contains('dark');
+
+    if (shouldBeDark && !isDark) {
+      console.log('[Theme] Forcing dark mode application');
+      html.classList.add('dark');
+    } else if (!shouldBeDark && isDark) {
+      console.log('[Theme] Forcing light mode application');
+      html.classList.remove('dark');
+    }
+  }, [resolvedTheme, mounted]);
+
   if (!mounted) return <div className="w-9 h-9" />;
 
   const items = [
@@ -18,12 +36,24 @@ export function ThemeToggle() {
     { value: "system", icon: Monitor },
   ] as const;
 
+  const handleThemeChange = (newTheme: string) => {
+    console.log('[Theme] Changing theme to:', newTheme);
+    setTheme(newTheme);
+
+    // Verify theme was applied
+    setTimeout(() => {
+      const htmlClass = document.documentElement.className;
+      console.log('[Theme] HTML classes after change:', htmlClass);
+      console.log('[Theme] localStorage theme:', localStorage.getItem('theme'));
+    }, 100);
+  };
+
   return (
     <div className="flex items-center gap-1 rounded-lg bg-gray-100 p-1 dark:bg-[#1a1a1a]">
       {items.map(({ value, icon: Icon }) => (
         <button
           key={value}
-          onClick={() => setTheme(value)}
+          onClick={() => handleThemeChange(value)}
           className={cn(
             "rounded-md p-1.5 transition-colors",
             theme === value

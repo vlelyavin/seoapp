@@ -128,5 +128,667 @@
     "noBilling": "Смена плана происходит мгновенно. Оплата пока не подключена.",
     "planUpdated": "План успешно обновлён!",
     "updateFailed": "Не удалось обновить план"
+  },
+  "analyzer_content": {
+    "cms": {
+      "display_name": "CMS / Платформа",
+      "description": "Определение системы управления контентом или платформы сайта.",
+      "theory": "<strong>CMS (Content Management System)</strong> — система управления контентом для создания и управления сайтом.\n\n<strong>Популярные CMS:</strong>\n• <strong>WordPress</strong> — самая популярная (~40% сайтов), требует SEO-плагинов\n• <strong>Shopify</strong> — платформа для e-commerce\n• <strong>Tilda</strong> — конструктор сайтов\n• <strong>OpenCart/PrestaShop</strong> — интернет-магазины\n• <strong>1C-Bitrix</strong> — популярная CMS в СНГ\n\n<strong>Почему важно знать CMS:</strong>\n• Помогает подобрать инструменты оптимизации и определить типичные проблемы\n• Влияет на выбор хостинга и серверных настроек",
+      "summary": {
+        "cms_detected": "Судя по всему, используется {cms}",
+        "cms_unknown": "Платформу не удалось определить"
+      },
+      "issues": {
+        "cms_detected": "Судя по всему, на сайте используется {cms}",
+        "multiple_cms": "Также обнаружены признаки: {cms_list}",
+        "cms_unknown": "CMS не определена"
+      },
+      "details": {
+        "cms_detected": "Обнаруженные признаки: {evidence}",
+        "multiple_cms": "Сайт может использовать несколько технологий или гибридную архитектуру.",
+        "cms_unknown": "Сайт может использовать кастомную разработку или неизвестную CMS."
+      },
+      "recommendations": {
+        "cms_detected": "Ознакомьтесь с SEO-рекомендациями для вашей платформы."
+      }
+    },
+    "meta_tags": {
+      "display_name": "Мета-теги",
+      "description": "Мета-теги Title и Description влияют на ранжирование и кликабельность в поисковой выдаче.",
+      "theory": "<strong>Title (заголовок страницы)</strong> — отображается в результатах поиска как заголовок сниппета. Один из важнейших факторов ранжирования.\n\n<strong>Оптимальная длина:</strong> 50-60 символов (~600px). Каждая страница должна иметь уникальный Title с основным ключевым словом в начале.\n\n<strong>Description (мета-описание)</strong> — отображается под заголовком в выдаче. Не влияет на ранжирование напрямую, но влияет на CTR.\n\n<strong>Оптимальная длина:</strong> 150-160 символов (~920px). Описывайте содержание кратко, включайте призыв к действию.",
+      "summary": {
+        "missing": "Отсутствуют мета-теги: {missing_titles} Title, {missing_descriptions} Description",
+        "duplicates": "Дубликаты: {duplicate_titles} Title, {duplicate_descriptions} Description",
+        "all_ok": "Все {total_pages} страниц имеют корректные мета-теги"
+      },
+      "issues": {
+        "missing_title": "Отсутствует Title: {count} страниц",
+        "missing_description": "Отсутствует Description: {count} страниц",
+        "short_title": "Слишком короткий Title: {count} страниц",
+        "long_title": "Слишком длинный Title: {count} страниц",
+        "short_description": "Слишком короткий Description: {count} страниц",
+        "long_description": "Слишком длинный Description: {count} страниц",
+        "duplicate_title": "Дубли Title: {count} групп дубликатов",
+        "duplicate_description": "Дубли Description: {count} групп дубликатов"
+      },
+      "details": {
+        "missing_title": "Title является важным фактором ранжирования. Каждая страница должна иметь уникальный Title.",
+        "missing_description": "Meta Description влияет на кликабельность в поисковой выдаче.",
+        "short_title": "Оптимальная длина Title: 50-60 символов.",
+        "long_title": "Оптимальная длина Title: 50-60 символов. Длинный Title будет обрезан в выдаче.",
+        "short_description": "Оптимальная длина Description: 150-160 символов.",
+        "long_description": "Оптимальная длина Description: 150-160 символов.",
+        "duplicate_title": "Дубли Title усложняют понимание поисковыми системами уникальности контента.",
+        "duplicate_description": "Уникальный Description повышает кликабельность в выдаче."
+      },
+      "recommendations": {
+        "missing_title": "Добавьте уникальный тег <title> для каждой страницы.",
+        "missing_description": "Добавьте уникальный мета-тег description для каждой страницы.",
+        "short_title": "Расширьте Title, включив больше ключевых слов.",
+        "long_title": "Сократите Title до 60 символов.",
+        "short_description": "Расширьте Description, описав содержание страницы подробнее.",
+        "long_description": "Сократите Description до 160 символов.",
+        "duplicate_title": "Создайте уникальный Title для каждой страницы.",
+        "duplicate_description": "Создайте уникальный Description для каждой страницы."
+      }
+    },
+    "headings": {
+      "display_name": "Заголовки H1-H6",
+      "description": "Анализ заголовков H1-H6: наличие, уникальность и правильная иерархия.",
+      "theory": "<strong>Заголовки H1-H6</strong> — иерархия заголовков для структурирования контента страницы.\n\n<strong>Правила:</strong>\n• <strong>Ровно один H1</strong> на страницу (несколько — размывают фокус)\n• H1 уникальный для каждой страницы, 20-70 символов\n• <strong>Иерархия H1 → H2 → H3</strong> — не пропускайте уровни (H1 → H3 без H2 — нарушение)\n• H2 используйте для основных разделов, H3 для подразделов",
+      "summary": {
+        "problems_found": "Найдены проблемы: {problems}",
+        "all_ok": "Все {total_pages} страниц имеют корректный H1"
+      },
+      "issues": {
+        "missing_h1": "Отсутствует H1: {count} страниц",
+        "multiple_h1": "Несколько H1: {count} страниц",
+        "h1_too_long": "Слишком длинный H1: {count} страниц",
+        "duplicate_h1": "Дубли H1: {count} групп",
+        "empty_h1": "Пустой H1: {count} страниц",
+        "hierarchy_violation": "Нарушение иерархии заголовков: {count} страниц"
+      },
+      "details": {
+        "missing_h1": "Каждая страница должна иметь один заголовок H1.",
+        "multiple_h1": "На странице должен быть только один H1. Несколько H1 могут запутать поисковые системы.",
+        "h1_too_long": "Оптимальная длина H1: 20-70 символов.",
+        "duplicate_h1": "Дубли H1 на разных страницах снижают уникальность контента.",
+        "empty_h1": "H1 без текста не несёт SEO-ценности.",
+        "hierarchy_violation": "Пропуск уровней заголовков (например, H1 → H3 без H2) нарушает семантику."
+      },
+      "recommendations": {
+        "missing_h1": "Добавьте заголовок H1 на каждую страницу.",
+        "multiple_h1": "Оставьте только один H1 на странице, остальные измените на H2-H6.",
+        "h1_too_long": "Сократите H1 до 70 символов.",
+        "duplicate_h1": "Создайте уникальный H1 для каждой страницы.",
+        "empty_h1": "Заполните H1 релевантным текстом с ключевыми словами.",
+        "hierarchy_violation": "Соблюдайте последовательную иерархию: H1 → H2 → H3 → H4."
+      }
+    },
+    "page_404": {
+      "display_name": "Страница 404",
+      "description": "Кастомная страница 404 улучшает пользовательский опыт при переходе на несуществующую страницу.",
+      "theory": "<strong>Страница 404</strong> отображается когда запрошенная страница не найдена.\n\n<strong>Что должна содержать:</strong>\n• Понятное сообщение об ошибке\n• Ссылку на главную и навигацию сайта\n• Поиск по сайту (опционально)\n\n<strong>Технические требования:</strong>\n• HTTP статус 404 (не 200 и не редирект — иначе «soft 404»)\n• Тот же дизайн, что и на остальном сайте",
+      "summary": {
+        "ok": "Страница 404 настроена корректно",
+        "missing": "Нужно создать или исправить страницу 404",
+        "needs_improvement": "Страница 404 есть, но требует улучшений",
+        "check_failed": "Не удалось проверить страницу 404"
+      },
+      "issues": {
+        "custom_404_ok": "Кастомная страница 404 настроена корректно",
+        "no_custom_404": "Отсутствует кастомная страница 404",
+        "wrong_404_status": "Страница 404 возвращает неправильный HTTP статус",
+        "404_no_navigation": "Страница 404 не содержит навигации",
+        "404_no_home_link": "Страница 404 не содержит ссылки на главную",
+        "404_no_search": "Страница 404 не содержит поиска",
+        "404_check_failed": "Не удалось проверить страницу 404"
+      },
+      "details": {
+        "custom_404_ok": "Кастомная страница 404 помогает удержать пользователей на сайте.",
+        "no_custom_404": "Стандартная страница 404 браузера не содержит навигации по вашему сайту.",
+        "wrong_404_status": "Страница 404 должна возвращать HTTP статус 404, а не 200 или редирект.",
+        "404_no_navigation": "Добавьте навигационное меню для помощи пользователям.",
+        "404_no_home_link": "Ссылка на главную помогает пользователям вернуться к основному контенту.",
+        "404_no_search": "Поиск помогает пользователям найти нужную информацию.",
+        "404_check_failed": "Произошла ошибка при проверке страницы 404."
+      },
+      "recommendations": {
+        "no_custom_404": "Создайте кастомную страницу 404 с навигацией и полезными ссылками.",
+        "wrong_404_status": "Настройте сервер для возврата правильного статуса 404.",
+        "404_no_navigation": "Добавьте меню сайта на страницу 404.",
+        "404_no_home_link": "Добавьте заметную ссылку на главную страницу.",
+        "404_no_search": "Рассмотрите добавление поиска на страницу 404.",
+        "404_check_failed": "Проверьте доступность сайта."
+      }
+    },
+    "speed": {
+      "display_name": "Скорость загрузки",
+      "description": "Скорость загрузки влияет на ранжирование в Google и пользовательский опыт.",
+      "theory": "<strong>Core Web Vitals</strong> — метрики Google для оценки пользовательского опыта. Являются фактором ранжирования.\n\n<strong>Основные метрики:</strong>\n• <strong>LCP (Largest Contentful Paint)</strong> — время загрузки основного контента. Хорошо: < 2.5с\n• <strong>FID (First Input Delay)</strong> — задержка первого взаимодействия. Хорошо: < 100мс\n• <strong>CLS (Cumulative Layout Shift)</strong> — визуальная стабильность. Хорошо: < 0.1\n\n<strong>PageSpeed Score:</strong> 90-100 отлично, 50-89 требует улучшения, 0-49 плохо. Каждая секунда задержки снижает конверсию на ~7%.",
+      "summary": {
+        "ok": "Скорость в норме. Mobile: {mobile}/100, Desktop: {desktop}/100",
+        "needs_optimization": "Нужна оптимизация. Mobile: {mobile}/100, Desktop: {desktop}/100",
+        "critical": "Критические проблемы скорости. Mobile: {mobile}/100, Desktop: {desktop}/100",
+        "failed": "Не удалось получить данные о скорости"
+      },
+      "issues": {
+        "pagespeed_unavailable": "Не удалось получить данные PageSpeed Insights",
+        "mobile_score_critical": "Критически низкий Mobile Score: {count}/100",
+        "mobile_score_low": "Низкий Mobile Score: {count}/100",
+        "desktop_score_critical": "Критически низкий Desktop Score: {count}/100",
+        "desktop_score_low": "Низкий Desktop Score: {count}/100"
+      },
+      "details": {
+        "pagespeed_unavailable": "API может быть недоступен или URL заблокирован.",
+        "mobile_score_critical": "Мобильная версия сайта загружается очень медленно.",
+        "mobile_score_low": "Есть значительный потенциал для улучшения мобильной скорости.",
+        "desktop_score_critical": "Десктопная версия сайта загружается очень медленно.",
+        "desktop_score_low": "Есть потенциал для улучшения десктопной скорости.",
+        "mobile_fcp_slow": "First Contentful Paint измеряет время до появления первого контента.",
+        "desktop_fcp_slow": "First Contentful Paint измеряет время до появления первого контента.",
+        "mobile_lcp_slow": "Largest Contentful Paint измеряет время загрузки самого большого элемента.",
+        "desktop_lcp_slow": "Largest Contentful Paint измеряет время загрузки самого большого элемента.",
+        "mobile_cls_high": "Cumulative Layout Shift измеряет визуальную стабильность страницы.",
+        "desktop_cls_high": "Cumulative Layout Shift измеряет визуальную стабильность страницы."
+      },
+      "recommendations": {
+        "pagespeed_unavailable": "Проверьте URL вручную на https://pagespeed.web.dev/",
+        "mobile_score_critical": "Срочно оптимизируйте: сожмите изображения, минифицируйте CSS/JS, используйте кеширование.",
+        "mobile_score_low": "Оптимизируйте изображения, уменьшите количество запросов, используйте lazy loading.",
+        "desktop_score_critical": "Проверьте серверный ответ, оптимизируйте ресурсы.",
+        "desktop_score_low": "Оптимизируйте критический путь рендеринга.",
+        "mobile_fcp_slow": "Оптимизируйте критический CSS, используйте preload для шрифтов.",
+        "desktop_fcp_slow": "Оптимизируйте критический CSS, используйте preload для шрифтов.",
+        "mobile_lcp_slow": "Оптимизируйте изображения, используйте CDN, ускорьте серверный ответ.",
+        "desktop_lcp_slow": "Оптимизируйте изображения, используйте CDN, ускорьте серверный ответ.",
+        "mobile_cls_high": "Задайте размеры для изображений и рекламных блоков, избегайте динамического контента.",
+        "desktop_cls_high": "Задайте размеры для изображений и рекламных блоков, избегайте динамического контента."
+      }
+    },
+    "images": {
+      "display_name": "Изображения",
+      "description": "Оптимизация изображений важна для скорости загрузки и SEO.",
+      "theory": "<strong>Alt-текст</strong> — описывает изображение для поисковых систем, скринридеров и случаев, когда изображение не загрузилось.\n\n<strong>Правила Alt:</strong>\n• Краткое описание до 125 символов с ключевыми словами (без спама)\n• Не начинайте с «Изображение...» или «Фото...»\n• Для декоративных изображений — пустой <code>alt=\"\"</code>\n\n<strong>Форматы изображений:</strong>\n• <strong>WebP/AVIF</strong> — на 25-50% меньше JPEG, рекомендованы\n• <strong>JPEG</strong> — фотографии, <strong>PNG</strong> — прозрачность, <strong>SVG</strong> — векторная графика\n• Изображения больше 200 KB замедляют загрузку — сжимайте и адаптируйте размер",
+      "summary": {
+        "all_ok": "Все {count} изображений оптимизированы",
+        "problems": "Найдено {count} изображений. Проблемы: {problems}"
+      },
+      "issues": {
+        "missing_alt": "Изображения без alt: {count} шт.",
+        "empty_alt": "Изображения с пустым alt: {count} шт.",
+        "large_size": "Большие изображения (>400 KB): {count} шт.",
+        "critical_size": "Очень большие изображения (>1 MB): {count} шт.",
+        "legacy_format": "Устаревший формат изображений: {count} шт.",
+        "images_ok": "Все изображения оптимизированы"
+      },
+      "details": {
+        "missing_alt": "Атрибут alt важен для доступности и SEO. Поисковые системы используют alt для понимания содержания изображений.",
+        "empty_alt": "Пустой alt допустим только для декоративных изображений.",
+        "large_size": "Большие изображения замедляют загрузку, особенно на мобильных устройствах.",
+        "critical_size": "Изображения больше 1 MB критически замедляют загрузку страницы.",
+        "legacy_format": "Форматы JPEG и PNG можно заменить на WebP или AVIF для лучшего сжатия."
+      },
+      "recommendations": {
+        "missing_alt": "Добавьте описательный атрибут alt ко всем изображениям.",
+        "empty_alt": "Заполните alt описанием изображения или отметьте как декоративное (role='presentation').",
+        "large_size": "Оптимизируйте изображения или используйте lazy loading.",
+        "critical_size": "Уменьшите размер изображений через сжатие и/или изменение разрешения.",
+        "legacy_format": "Конвертируйте изображения в формат WebP. Это может уменьшить размер на 25-35%."
+      }
+    },
+    "content": {
+      "display_name": "Контент",
+      "description": "Качественный и уникальный контент — основа успешного SEO.",
+      "summary": {
+        "all_ok": "Все {total_pages} страниц имеют достаточно контента. Среднее количество слов: {avg_words}",
+        "problems": "Проблемы с контентом: {problems}. Среднее количество слов: {avg_words}"
+      },
+      "theory": "<strong>Качество контента</strong> — один из важнейших факторов ранжирования.\n\n<strong>Минимальные требования к объёму:</strong>\n• <strong>Карточки товаров:</strong> 300-500 символов — описание, характеристики\n• <strong>Категории:</strong> 1500-2500 символов — SEO-текст с ключевыми словами\n• <strong>Статьи блога:</strong> 3000-5000+ символов\n• <strong>Главная страница:</strong> 1000-2000 символов\n\n<strong>Тонкий контент (Thin Content):</strong>\nСтраницы с минимальным или неуникальным текстом могут не попасть в индекс или попасть под фильтр Panda.\n• Пишите уникальный контент с ключевыми словами (без переспама)\n• Добавляйте полезную информацию: таблицы, списки, FAQ",
+      "issues": {
+        "thin_content": "Страницы с тонким контентом: {count} шт.",
+        "empty_pages": "Пустые страницы: {count} шт.",
+        "no_structured_data": "Отсутствует структурированная разметка Schema.org",
+        "has_structured_data": "Обнаружена структурированная разметка Schema.org",
+        "content_ok": "Контент в норме"
+      },
+      "details": {
+        "thin_content": "Страницы с малым количеством текста могут быть понижены в ранжировании.",
+        "empty_pages": "Страницы без текстового контента не несут ценности для поисковых систем.",
+        "no_structured_data": "Структурированная разметка помогает поисковым системам понять контент.",
+        "has_structured_data": "Структурированная разметка может дать расширенные сниппеты в выдаче."
+      },
+      "recommendations": {
+        "thin_content": "Дополните страницы полезным контентом (минимум 300 слов).",
+        "empty_pages": "Добавьте уникальный текстовый контент или настройте noindex для этих страниц.",
+        "no_structured_data": "Добавьте разметку Schema.org для основных страниц."
+      }
+    },
+    "links": {
+      "display_name": "Битые ссылки",
+      "description": "Битые ссылки негативно влияют на SEO и пользовательский опыт.",
+      "theory": "<strong>Битые ссылки (Broken Links)</strong> — ссылки, ведущие на несуществующие страницы. Тратят краулинговый бюджет и прерывают передачу PageRank.\n\n<strong>Типы:</strong>\n• Внутренние — на страницы вашего сайта\n• Внешние — на другие сайты\n\n<strong>Как исправить:</strong>\n• Удалите ссылку или замените на рабочую\n• Настройте редирект 301 для удалённых страниц",
+      "summary": {
+        "no_broken": "Проверено {internal} внутренних и {external} внешних ссылок. Проблем не найдено.",
+        "broken_found": "Найдено битых ссылок: {broken}"
+      },
+      "issues": {
+        "broken_internal": "Битые внутренние ссылки: {count} шт.",
+        "broken_external": "Битые внешние ссылки: {count} шт.",
+        "no_broken_links": "Битых ссылок не обнаружено"
+      },
+      "details": {
+        "broken_internal": "Внутренние ссылки на несуществующие страницы вредят SEO и пользовательскому опыту.",
+        "broken_external": "Ссылки на несуществующие внешние ресурсы могут разочаровать пользователей."
+      },
+      "recommendations": {
+        "broken_internal": "Исправьте или удалите битые ссылки. Настройте редиректы для удалённых страниц.",
+        "broken_external": "Обновите или удалите битые внешние ссылки."
+      }
+    },
+    "favicon": {
+      "display_name": "Фавикон",
+      "description": "Фавикон помогает узнавать сайт во вкладках браузера и закладках.",
+      "theory": "<strong>Фавикон (Favicon)</strong> — иконка сайта во вкладках браузера, закладках и мобильной выдаче. Повышает узнаваемость и CTR.\n\n<strong>Рекомендуемые форматы:</strong>\n• /favicon.ico — классический формат, 16x16 или 32x32\n• PNG — для современных браузеров\n• Apple Touch Icon — для iOS устройств (180x180)\n\n<strong>Как добавить:</strong>\n• Поместите favicon.ico в корень сайта\n• Добавьте link-теги в head для разных форматов",
+      "summary": {
+        "ok": "Фавикон настроен корректно",
+        "missing": "Фавикон отсутствует",
+        "needs_improvement": "Фавикон есть, но можно улучшить"
+      },
+      "issues": {
+        "favicon_ok": "Фавикон настроен корректно",
+        "missing_favicon": "Фавикон отсутствует",
+        "no_favicon_ico": "Отсутствует /favicon.ico",
+        "no_apple_touch_icon": "Отсутствует Apple Touch Icon",
+        "old_favicon_format": "Рекомендуется SVG или PNG формат"
+      },
+      "details": {
+        "favicon_ok": "Фавикон помогает пользователям узнавать ваш сайт.",
+        "missing_favicon": "Без фавикона сайт выглядит менее профессионально.",
+        "no_favicon_ico": "Некоторые браузеры ищут favicon.ico в корне сайта.",
+        "no_apple_touch_icon": "Apple Touch Icon нужен для красивого отображения на iOS устройствах.",
+        "old_favicon_format": "SVG фавиконы масштабируются без потери качества и поддерживают тёмную тему."
+      },
+      "recommendations": {
+        "missing_favicon": "Создайте и добавьте фавикон на сайт.",
+        "no_favicon_ico": "Добавьте файл favicon.ico в корень сайта.",
+        "no_apple_touch_icon": "Добавьте Apple Touch Icon (180x180) для iOS устройств.",
+        "old_favicon_format": "Добавьте SVG версию фавикона."
+      }
+    },
+    "external_links": {
+      "display_name": "Внешние ссылки",
+      "description": "Анализ исходящих ссылок на другие сайты.",
+      "theory": "<strong>Внешние ссылки</strong> — ссылки с вашего сайта на другие сайты. Передают часть PageRank, ссылки на авторитетные источники повышают доверие.\n\n<strong>Атрибуты rel:</strong>\n• <code>rel=\"nofollow\"</code> — не передавать PageRank\n• <code>rel=\"sponsored\"</code> — для рекламных/оплаченных ссылок\n• <code>rel=\"ugc\"</code> — для пользовательского контента\n\n<strong>Рекомендации:</strong>\n• Коммерческие/партнёрские ссылки — nofollow или sponsored\n• Авторитетные источники — можно dofollow\n• Следите за балансом dofollow/nofollow",
+      "summary": {
+        "ok": "Найдено {count} внешних ссылок на {domains} доменов",
+        "with_warnings": "Найдено {count} внешних ссылок. Предупреждений: {warnings}, инфо: {info}"
+      },
+      "issues": {
+        "external_links_found": "Найдено внешних ссылок: {count}",
+        "commercial_no_nofollow": "Коммерческие ссылки без nofollow: {count} шт.",
+        "many_dofollow": "Большинство внешних ссылок без nofollow ({count})",
+        "many_links_same_domain": "Много ссылок на {domain}: {count} шт.",
+        "external_links_ok": "Внешние ссылки в норме"
+      },
+      "details": {
+        "commercial_no_nofollow": "Ссылки на коммерческие/партнёрские сайты рекомендуется отмечать rel='nofollow' или rel='sponsored'.",
+        "many_dofollow": "Большое количество dofollow ссылок передаёт ваш 'link juice' другим сайтам.",
+        "many_links_same_domain": "Найдено много ссылок на один домен."
+      },
+      "recommendations": {
+        "commercial_no_nofollow": "Добавьте rel='nofollow' или rel='sponsored' к коммерческим ссылкам.",
+        "many_dofollow": "Рассмотрите добавление nofollow к менее важным внешним ссылкам.",
+        "many_links_same_domain": "Убедитесь, что это намеренно и ссылки релевантны."
+      }
+    },
+    "robots": {
+      "display_name": "Индексация",
+      "description": "Правильная настройка robots.txt и sitemap.xml обеспечивает эффективную индексацию сайта.",
+      "theory": "<strong>Robots.txt</strong> — файл, управляющий доступом поисковых роботов к страницам сайта.\n\n<strong>Основные директивы:</strong>\n• <code>User-agent: *</code> — правила для всех роботов\n• <code>Disallow: /admin/</code> — запрет индексации пути\n• <code>Allow: /</code> — разрешение индексации\n• <code>Sitemap: URL</code> — ссылка на карту сайта\n\n<strong>Sitemap.xml</strong> — список страниц для индексации. Помогает роботам найти все страницы и ускоряет индексацию нового контента.\n\n<strong>Рекомендации:</strong>\n• Всегда имейте robots.txt и sitemap.xml\n• Укажите sitemap в robots.txt\n• Не блокируйте CSS/JS файлы\n• Подайте sitemap в Google Search Console",
+      "summary": {
+        "ok": "Настройки индексации в порядке",
+        "problems": "Проблемы с индексацией: {problems}"
+      },
+      "issues": {
+        "robots_ok": "robots.txt настроен корректно",
+        "no_robots_txt": "Файл robots.txt отсутствует",
+        "robots_txt_errors": "Ошибки в robots.txt: {count} шт.",
+        "no_sitemap_in_robots": "Sitemap не указан в robots.txt",
+        "sitemap_ok": "sitemap.xml найден",
+        "no_sitemap": "Файл sitemap.xml отсутствует",
+        "sitemap_errors": "Проблемы с sitemap: {count} шт.",
+        "empty_sitemap": "Sitemap пустой",
+        "sitemap_urls_not_found": "URL в sitemap не найдены на сайте: {count} шт.",
+        "pages_not_in_sitemap": "Страницы не включены в sitemap: {count} шт.",
+        "sitemap_old_lastmod": "Устаревшие даты lastmod в sitemap: {count} URL",
+        "noindex_pages": "Страницы с noindex: {count} шт.",
+        "canonical_issues": "Проблемы с canonical: {count} шт."
+      },
+      "details": {
+        "no_robots_txt": "Без robots.txt поисковые роботы индексируют все доступные страницы.",
+        "robots_txt_errors": "Синтаксические ошибки могут привести к неправильной интерпретации файла.",
+        "no_sitemap_in_robots": "Рекомендуется указать путь к sitemap в robots.txt.",
+        "no_sitemap": "Без sitemap.xml поисковым системам сложнее найти все страницы.",
+        "sitemap_errors": "Проблемы с файлом sitemap могут препятствовать индексации.",
+        "empty_sitemap": "Sitemap не содержит URL-адресов.",
+        "sitemap_urls_not_found": "Эти URL указаны в sitemap, но не были найдены краулером или возвращают ошибку.",
+        "pages_not_in_sitemap": "Эти страницы найдены на сайте, но отсутствуют в sitemap.xml.",
+        "sitemap_old_lastmod": "Более половины URL имеют lastmod старше 6 месяцев. Обновите даты или контент.",
+        "noindex_pages": "Эти страницы не будут индексироваться поисковыми системами.",
+        "canonical_issues": "Проблемы с canonical могут привести к дублированию контента."
+      },
+      "recommendations": {
+        "no_robots_txt": "Создайте файл robots.txt и укажите в нём sitemap.",
+        "robots_txt_errors": "Исправьте синтаксические ошибки в robots.txt.",
+        "no_sitemap_in_robots": "Добавьте строку 'Sitemap: https://yoursite.com/sitemap.xml' в robots.txt.",
+        "no_sitemap": "Создайте sitemap.xml со всеми важными страницами сайта.",
+        "sitemap_errors": "Проверьте валидность sitemap.xml.",
+        "empty_sitemap": "Добавьте URL-адреса страниц в sitemap.xml.",
+        "sitemap_urls_not_found": "Проверьте эти URL и удалите несуществующие из sitemap.",
+        "pages_not_in_sitemap": "Добавьте важные страницы в sitemap для лучшей индексации.",
+        "sitemap_old_lastmod": "Обновите lastmod даты в sitemap при изменении контента страниц."
+      }
+    },
+    "structure": {
+      "display_name": "Структура сайта",
+      "description": "Правильная структура сайта обеспечивает эффективную индексацию и хороший пользовательский опыт.",
+      "theory": "<strong>Структура сайта</strong> — организация страниц и связей между ними.\n\n<strong>Глубина вложенности (Click Depth):</strong>\n• Важные страницы должны быть на глубине 1-3 клика\n• Страницы на глубине 4+ хуже индексируются\n\n<strong>Сиротские страницы (Orphan Pages):</strong>\n• Страницы без единой внутренней ссылки — поисковые роботы могут их не найти\n\n<strong>Рекомендации:</strong>\n• Используйте breadcrumbs и внутренние ссылки в контенте\n• Проверяйте на сиротские страницы регулярно",
+      "summary": {
+        "ok": "Структура сайта оптимальна. Максимальная глубина: {depth} уровней.",
+        "problems": "Максимальная глубина: {depth}. Проблемы: {problems}"
+      },
+      "issues": {
+        "deep_pages": "Глубоко вложенные страницы: {count} шт.",
+        "orphan_pages": "Сиротские страницы (без входящих ссылок): {count} шт.",
+        "few_internal_links": "Страницы с малым количеством ссылок: {count} шт.",
+        "very_deep_structure": "Слишком глубокая структура сайта",
+        "structure_ok": "Структура сайта оптимальна"
+      },
+      "details": {
+        "deep_pages": "Эти страницы находятся на глубине более 3 кликов от главной. Это усложняет их нахождение для пользователей и поисковых систем.",
+        "orphan_pages": "На эти страницы нет ссылок с других страниц сайта. Поисковым системам будет сложно их найти.",
+        "few_internal_links": "Страницы с малым количеством внутренних ссылок могут иметь меньшее влияние на навигацию.",
+        "very_deep_structure": "Поисковые системы могут не индексировать страницы на большой глубине."
+      },
+      "recommendations": {
+        "deep_pages": "Пересмотрите структуру навигации и добавьте ссылки на эти страницы ближе к главной.",
+        "orphan_pages": "Добавьте внутренние ссылки на эти страницы из релевантных разделов сайта.",
+        "few_internal_links": "Рассмотрите возможность добавления ссылок на связанные страницы.",
+        "very_deep_structure": "Перестройте структуру сайта, чтобы все важные страницы были доступны за 3-4 клика."
+      }
+    },
+    "content_sections": {
+      "display_name": "Информационные разделы",
+      "description": "Обнаружение блога, новостей, FAQ и справочных разделов сайта.",
+      "theory": "<strong>Информационные разделы</strong> — страницы с полезным контентом, привлекающие органический трафик.\n\n<strong>Типы разделов:</strong>\n• <strong>Блог/Новости</strong> — статьи, обновления, экспертный контент\n• <strong>FAQ</strong> — часто задаваемые вопросы и ответы (может появляться в rich snippets)\n• <strong>База знаний/Справка</strong> — документация, инструкции",
+      "summary": {
+        "detected": "Обнаружено: {sections}",
+        "not_detected": "Информационные разделы не обнаружены"
+      },
+      "issues": {
+        "blog_detected": "Обнаружен блог/новости: {count} страниц",
+        "faq_detected": "Обнаружен FAQ/справка: {count} страниц",
+        "faq_has_schema": "FAQ с Schema.org разметкой: {count} страниц",
+        "faq_no_schema": "FAQ без Schema.org разметки",
+        "blog_missing_features": "Блог: отсутствуют некоторые элементы",
+        "no_blog": "Блог/новости не обнаружены",
+        "no_faq": "FAQ не обнаружен"
+      },
+      "details": {
+        "blog_detected": "Наличие блога помогает привлекать органический трафик.",
+        "faq_detected": "FAQ помогает пользователям находить ответы и может появляться в rich snippets.",
+        "faq_has_schema": "FAQ может появляться в rich snippets Google.",
+        "faq_no_schema": "Разметка FAQPage позволяет отображать FAQ в результатах поиска Google.",
+        "blog_missing_features": "Эти элементы улучшают SEO и пользовательский опыт блога.",
+        "no_blog": "Информационный контент помогает привлекать органический трафик и строить экспертность.",
+        "no_faq": "Раздел FAQ помогает отвечать на частые вопросы пользователей."
+      },
+      "recommendations": {
+        "faq_no_schema": "Добавьте Schema.org FAQPage разметку к страницам с FAQ.",
+        "blog_missing_features": "Добавьте отсутствующие элементы к страницам блога.",
+        "no_blog": "Рассмотрите создание блога с полезными статьями для вашей аудитории.",
+        "no_faq": "Рассмотрите создание раздела FAQ с разметкой Schema.org."
+      }
+    },
+    "schema": {
+      "display_name": "Структурированные данные",
+      "description": "Анализ разметки Schema.org и структурированных данных на страницах сайта.",
+      "theory": "<strong>Schema.org</strong> — стандарт разметки структурированных данных, помогающий поисковым системам лучше понимать содержание страниц.\n\n<strong>Основные типы:</strong>\n• <strong>JSON-LD</strong> — рекомендуемый Google формат (скрипт в head)\n• <strong>Microdata</strong> — атрибуты itemscope/itemprop в HTML\n\n<strong>Популярные типы:</strong>\n• Organization — информация о компании\n• Product — товары с ценами и отзывами\n• BreadcrumbList — хлебные крошки\n• Article — статьи и новости\n• FAQPage — страницы FAQ",
+      "summary": {
+        "found": "Найдено {types} типов Schema.org на {pages} страницах",
+        "missing": "Структурированные данные отсутствуют"
+      },
+      "issues": {
+        "has_structured_data": "Найдено {count} типов Schema.org",
+        "no_structured_data": "Структурированные данные отсутствуют на {count} страницах",
+        "missing_organization": "Разметка Organization отсутствует на главной странице",
+        "missing_breadcrumbs": "Разметка BreadcrumbList отсутствует",
+        "json_ld_errors": "Ошибки в JSON-LD разметке на {count} страницах"
+      },
+      "details": {
+        "has_structured_data": "JSON-LD и Microdata разметка обнаружена на страницах сайта.",
+        "no_structured_data": "Страницы без разметки Schema.org не получат расширенные сниппеты в выдаче.",
+        "missing_organization": "Schema типа Organization помогает Google отобразить информацию о компании в Knowledge Panel.",
+        "missing_breadcrumbs": "Хлебные крошки (BreadcrumbList) улучшают навигацию в поисковой выдаче.",
+        "json_ld_errors": "Найдены блоки JSON-LD с некорректным синтаксисом."
+      },
+      "recommendations": {
+        "has_structured_data": "Продолжайте использовать структурированные данные и расширяйте покрытие.",
+        "no_structured_data": "Добавьте JSON-LD разметку на все важные страницы сайта.",
+        "missing_organization": "Добавьте JSON-LD разметку Organization с названием, логотипом и контактами на главную страницу.",
+        "missing_breadcrumbs": "Добавьте JSON-LD разметку BreadcrumbList для отображения пути страницы в результатах поиска.",
+        "json_ld_errors": "Проверьте и исправьте синтаксис JSON-LD. Используйте валидатор Google Rich Results Test."
+      }
+    },
+    "social_tags": {
+      "display_name": "Социальные мета-теги",
+      "description": "Анализ Open Graph и Twitter Card тегов для корректного отображения в социальных сетях.",
+      "theory": "<strong>Open Graph (OG)</strong> — протокол разметки, контролирующий отображение страницы при распространении в Facebook, LinkedIn, Telegram и других платформах.\n\n<strong>Обязательные OG-теги:</strong>\n• og:title — заголовок (до 60 символов)\n• og:description — описание (до 200 символов)\n• og:image — изображение 1200x630 px\n\n<strong>Twitter Cards:</strong>\n• twitter:card — тип карточки (summary_large_image)\n• Если OG-теги есть, Twitter может использовать их как запасные",
+      "summary": {
+        "stats": "OG теги: {og}/{total} страниц. Twitter Cards: {twitter}/{total2}",
+        "no_pages": "Нет страниц для анализа"
+      },
+      "issues": {
+        "og_tags_ok": "Open Graph теги присутствуют на всех {count} страницах",
+        "missing_og_tags": "Open Graph теги отсутствуют на {count} страницах",
+        "missing_og_image": "Отсутствует og:image на {count} страницах",
+        "missing_og_description": "Отсутствует og:description на {count} страницах",
+        "missing_twitter_card": "Twitter Card теги отсутствуют на {count} страницах"
+      },
+      "details": {
+        "og_tags_ok": "Все страницы имеют корректные OG теги для отображения в социальных сетях.",
+        "missing_og_tags": "Страницы без OG тегов будут некорректно отображаться при распространении в социальных сетях.",
+        "missing_og_image": "Без og:image социальные сети могут выбрать случайное изображение или не показать превью.",
+        "missing_og_description": "Без og:description социальные сети используют обычный meta description или фрагмент текста.",
+        "missing_twitter_card": "Без twitter:card ссылки в Twitter/X будут отображаться без расширенного превью."
+      },
+      "recommendations": {
+        "og_tags_ok": "Продолжайте поддерживать OG теги актуальными.",
+        "missing_og_tags": "Добавьте мета-теги og:title, og:description и og:image на все страницы.",
+        "missing_og_image": "Добавьте og:image размером 1200x630 px для каждой страницы.",
+        "missing_og_description": "Добавьте og:description с кратким привлекательным описанием страницы (до 200 символов).",
+        "missing_twitter_card": "Добавьте <meta name=\"twitter:card\" content=\"summary_large_image\"> для расширенных превью."
+      }
+    },
+    "security": {
+      "display_name": "HTTPS и безопасность",
+      "description": "Проверка HTTPS, заголовков безопасности и смешанного контента.",
+      "theory": "<strong>HTTPS как фактор ранжирования.</strong> С 2014 года Google учитывает HTTPS как сигнал ранжирования.\n\n<strong>Заголовки безопасности:</strong>\n• <strong>HSTS</strong> — принуждает браузер использовать HTTPS\n• <strong>X-Content-Type-Options: nosniff</strong> — предотвращает MIME-sniffing\n• <strong>X-Frame-Options</strong> — защита от clickjacking\n• <strong>Content-Security-Policy</strong> — контроль источников ресурсов\n\n<strong>Смешанный контент:</strong> HTTP-ресурсы на HTTPS-страницах блокируются браузерами.",
+      "summary": {
+        "ok": "HTTPS и безопасность в норме",
+        "problems": "Найдены проблемы: {problems}"
+      },
+      "issues": {
+        "no_https": "Сайт не использует HTTPS",
+        "mixed_content": "Смешанный контент: {count} страниц",
+        "missing_hsts": "Отсутствует заголовок HSTS",
+        "missing_x_content_type": "Отсутствует X-Content-Type-Options",
+        "missing_x_frame": "Отсутствует X-Frame-Options",
+        "missing_csp": "Отсутствует Content-Security-Policy",
+        "security_ok": "HTTPS и безопасность в норме"
+      },
+      "details": {
+        "no_https": "HTTPS является фактором ранжирования Google с 2014 года. Без SSL-сертификата сайт помечается как небезопасный.",
+        "mixed_content": "Найдены HTTP-ресурсы (изображения, скрипты, стили) на HTTPS-страницах. Браузеры могут блокировать такие ресурсы.",
+        "missing_hsts": "HSTS принуждает браузер всегда использовать HTTPS-соединение.",
+        "missing_x_content_type": "Заголовок X-Content-Type-Options: nosniff предотвращает MIME-sniffing атаки.",
+        "missing_x_frame": "Заголовок X-Frame-Options защищает от clickjacking-атак.",
+        "missing_csp": "CSP контролирует, из каких источников разрешено загружать ресурсы на странице.",
+        "security_ok": "Сайт использует HTTPS, основные заголовки безопасности присутствуют, смешанный контент не обнаружен."
+      },
+      "recommendations": {
+        "no_https": "Установите SSL-сертификат и настройте перенаправление с HTTP на HTTPS.",
+        "mixed_content": "Замените все HTTP-ссылки на ресурсы на HTTPS или используйте протокол-относительные URL.",
+        "missing_hsts": "Добавьте заголовок: Strict-Transport-Security: max-age=31536000; includeSubDomains",
+        "missing_x_content_type": "Добавьте заголовок: X-Content-Type-Options: nosniff",
+        "missing_x_frame": "Добавьте заголовок: X-Frame-Options: DENY или SAMEORIGIN",
+        "missing_csp": "Настройте Content-Security-Policy для контроля источников ресурсов."
+      }
+    },
+    "mobile": {
+      "display_name": "Мобильная адаптивность",
+      "description": "Проверка базовых требований к мобильной версии сайта.",
+      "theory": "<strong>Mobile-First Indexing</strong> — с 2019 года Google индексирует мобильную версию сайта как основную.\n\n<strong>Ключевые требования:</strong>\n• <strong>Viewport</strong> — мета-тег <code>&lt;meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"&gt;</code>\n• <strong>Адаптивный дизайн</strong> — CSS media queries для разных экранов\n• <strong>Без Flash</strong> — Flash не поддерживается мобильными браузерами",
+      "summary": {
+        "ok": "Все {count} страниц имеют viewport",
+        "problems": "Проблемы: {problems}"
+      },
+      "issues": {
+        "viewport_ok": "Все страницы имеют корректный viewport",
+        "missing_viewport": "{count} страниц без viewport",
+        "bad_viewport": "Некорректный viewport: {count} страниц",
+        "flash_content": "Flash-контент: {count} страниц"
+      },
+      "details": {
+        "viewport_ok": "Мета-тег viewport настроен правильно на всех страницах.",
+        "missing_viewport": "Без мета-тега viewport мобильные браузеры отображают страницу в масштабе десктопа.",
+        "bad_viewport": "Viewport не содержит width=device-width, что может вызвать проблемы с масштабированием.",
+        "flash_content": "Flash не поддерживается мобильными браузерами и большинством современных десктопных браузеров."
+      },
+      "recommendations": {
+        "missing_viewport": "Добавьте <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> в <head>.",
+        "bad_viewport": "Убедитесь, что viewport содержит width=device-width.",
+        "flash_content": "Замените Flash-контент на HTML5, CSS3 или JavaScript."
+      }
+    },
+    "url_quality": {
+      "display_name": "Качество URL",
+      "description": "Анализ структуры и качества URL-адресов страниц сайта.",
+      "theory": "<strong>SEO-дружественные URL</strong> — важный фактор ранжирования и юзабилити.\n\n<strong>Правила:</strong>\n• Длина до 75 символов, только строчные латинские буквы\n• Дефисы для разделения слов (не подчёркивания)\n• Без спецсимволов, кириллицы и лишних параметров\n• Без двойных слэшей и trailing slash",
+      "summary": {
+        "ok": "Все URL качественные",
+        "problems": "Найдены проблемы: {problems}"
+      },
+      "issues": {
+        "urls_ok": "Все URL соответствуют стандартам",
+        "long_urls": "Длинные URL: {count} страниц",
+        "uppercase_urls": "URL с заглавными буквами: {count}",
+        "special_chars": "URL со спецсимволами: {count}",
+        "underscores": "URL с подчёркиваниями: {count}",
+        "dynamic_params": "URL с параметрами: {count}",
+        "double_slashes": "Двойные слэши в URL: {count}"
+      },
+      "details": {
+        "urls_ok": "Структура URL-адресов сайта соответствует рекомендациям SEO.",
+        "long_urls": "URL с длиной пути более 75 символов хуже воспринимаются пользователями и поисковыми системами.",
+        "uppercase_urls": "URL с заглавными буквами могут создавать дубли страниц.",
+        "special_chars": "Non-ASCII символы в URL кодируются в процентный формат, что затрудняет чтение.",
+        "underscores": "Google рекомендует использовать дефисы вместо подчёркиваний для разделения слов в URL.",
+        "dynamic_params": "URL с несколькими GET-параметрами выглядят менее привлекательно и могут создавать дубли.",
+        "double_slashes": "Двойные слэши в пути URL создают дубли страниц и затрудняют индексацию."
+      },
+      "recommendations": {
+        "long_urls": "Сократите URL, используя только ключевые слова.",
+        "uppercase_urls": "Используйте только нижний регистр в URL и настройте 301-редирект.",
+        "special_chars": "Используйте только латиницу, цифры и дефисы в URL.",
+        "underscores": "Замените подчёркивания на дефисы и настройте 301-редирект.",
+        "dynamic_params": "Используйте ЧПУ (человекопонятные URL) вместо динамических параметров.",
+        "double_slashes": "Исправьте двойные слэши и настройте 301-редирект на корректный URL."
+      }
+    },
+    "hreflang": {
+      "display_name": "Hreflang",
+      "description": "Анализ настроек мультиязычных и региональных версий страниц.",
+      "theory": "<strong>Hreflang</strong> — атрибут, указывающий поисковым системам на языковые и региональные версии страницы.\n\n<strong>Формат:</strong> <code>&lt;link rel=\"alternate\" hreflang=\"uk\" href=\"...\"&gt;</code>\n\n<strong>Правила:</strong>\n• Каждая страница должна ссылаться на саму себя (self-referencing)\n• Двустороннее подтверждение: страница A → B, B → A\n• x-default для основной/дефолтной версии\n• Коды языков по стандарту ISO 639-1",
+      "summary": {
+        "missing": "Hreflang теги отсутствуют (одноязычный сайт)",
+        "found": "Найдено {langs} языковых версий на {pages} страницах"
+      },
+      "issues": {
+        "no_hreflang": "Hreflang теги отсутствуют (одноязычный сайт)",
+        "hreflang_found": "Найдено языковых версий на страницах",
+        "missing_self_reference": "Отсутствует самоссылка: {count} страниц",
+        "missing_return_tags": "Отсутствуют обратные ссылки: {count}",
+        "invalid_lang_codes": "Некорректные языковые коды",
+        "missing_x_default": "Отсутствует x-default hreflang"
+      },
+      "details": {
+        "no_hreflang": "На страницах сайта не найдено hreflang тегов. Для одноязычного сайта это нормально.",
+        "hreflang_found": "Hreflang теги корректно настроены.",
+        "missing_self_reference": "Каждая страница с hreflang должна иметь тег, ссылающийся на саму себя.",
+        "missing_return_tags": "Hreflang теги должны быть двусторонними: если страница A ссылается на B, то B должна ссылаться на A.",
+        "invalid_lang_codes": "Обнаружены языковые коды, не соответствующие стандарту ISO 639-1.",
+        "missing_x_default": "x-default указывает версию страницы для пользователей, язык которых не соответствует ни одному из указанных."
+      },
+      "recommendations": {
+        "no_hreflang": "Если сайт имеет языковые версии, добавьте hreflang теги для каждой версии.",
+        "missing_self_reference": "Добавьте hreflang тег со ссылкой на текущую страницу для её языковой версии.",
+        "missing_return_tags": "Добавьте соответствующие hreflang теги на целевых страницах, указывающие обратно.",
+        "invalid_lang_codes": "Используйте корректные коды языков по стандарту ISO 639-1 (например: uk, en, de, fr).",
+        "missing_x_default": "Добавьте hreflang=\"x-default\" со ссылкой на основную версию страницы."
+      }
+    },
+    "duplicates": {
+      "display_name": "Дубликаты контента",
+      "description": "Обнаружение страниц с похожим или идентичным контентом.",
+      "theory": "<strong>Дубликаты контента</strong> — страницы с идентичным или очень похожим текстом.\n\n<strong>Проблемы:</strong>\n• Google выбирает только одну версию для индексации (каноническую)\n• Остальные версии теряют трафик и ссылочный вес\n• Большое количество дублей — сигнал низкого качества\n\n<strong>Решения:</strong>\n• rel=\"canonical\" — указать основную версию\n• 301 редирект — перенаправить на основную\n• Уникализировать контент каждой страницы",
+      "summary": {
+        "found": "Найдено {count} групп дубликатов",
+        "ok": "Дубликатов не обнаружено"
+      },
+      "issues": {
+        "no_duplicates": "Дубликатов не обнаружено",
+        "exact_duplicates": "Точные дубликаты: {count} групп",
+        "near_duplicates": "Близкие дубликаты: {count} групп"
+      },
+      "details": {
+        "no_duplicates": "Проверено страниц — дубликатов контента не найдено.",
+        "exact_duplicates": "Страницы с практически идентичным контентом. Google выберет только одну версию для индексации.",
+        "near_duplicates": "Страницы с похожим контентом (более 80% совпадения). Могут конкурировать между собой в поисковой выдаче."
+      },
+      "recommendations": {
+        "no_duplicates": "Продолжайте создавать уникальный контент для каждой страницы.",
+        "exact_duplicates": "Установите канонический тег (rel=\"canonical\") или настройте 301 редирект на основную версию страницы.",
+        "near_duplicates": "Объедините похожие страницы или добавьте уникальный контент для каждой из них."
+      }
+    },
+    "redirects": {
+      "display_name": "Редиректы",
+      "description": "Анализ перенаправлений и цепочек редиректов на сайте.",
+      "theory": "<strong>Редиректы</strong> — перенаправление с одного URL на другой.\n\n<strong>Типы:</strong>\n• <strong>301</strong> — постоянный (передаёт ~90% ссылочного веса)\n• <strong>302</strong> — временный (не передаёт ссылочный вес)\n\n<strong>Проблемы:</strong>\n• Цепочки из 2+ хопов замедляют загрузку и тратят краулинговый бюджет\n• Google может прекратить следовать после 3-5 хопов\n• Внутренние ссылки должны вести на конечный URL",
+      "summary": {
+        "found": "Найдено {count} цепочек редиректов",
+        "ok": "Проблем с редиректами не обнаружено"
+      },
+      "issues": {
+        "no_redirect_issues": "Проблем с редиректами не обнаружено",
+        "redirect_chains": "Цепочки редиректов (2 хопа): {count}",
+        "long_redirect_chains": "Длинные цепочки (3+ хопов): {count}",
+        "internal_links_to_redirects": "Внутренние ссылки на редиректы: {count}"
+      },
+      "details": {
+        "no_redirect_issues": "На сайте не обнаружено проблемных цепочек редиректов.",
+        "redirect_chains": "Цепочки с двумя хопами добавляют задержку и тратят краулинговый бюджет.",
+        "long_redirect_chains": "Длинные цепочки редиректов тратят краулинговый бюджет. Google может прекратить следовать после 3+ хопов.",
+        "internal_links_to_redirects": "Внутренние ссылки ведут на URL, которые перенаправляются. Это добавляет лишнюю задержку."
+      },
+      "recommendations": {
+        "no_redirect_issues": "Продолжайте следить за тем, чтобы внутренние ссылки вели на конечные URL-адреса.",
+        "redirect_chains": "Сократите цепочки до одного редиректа, настроив прямой 301 на конечный URL.",
+        "long_redirect_chains": "Замените длинные цепочки на прямой 301 редирект на конечный URL-адрес.",
+        "internal_links_to_redirects": "Обновите внутренние ссылки, заменив URL с редиректами на конечные адреса."
+      }
+    }
   }
 }
