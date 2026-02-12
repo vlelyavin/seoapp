@@ -12,11 +12,11 @@ class Settings(BaseSettings):
     PAGESPEED_API_KEY: Optional[str] = None
 
     # Crawling Limits
-    MAX_PAGES: int = 2000
-    PAGE_TIMEOUT: int = 8  # seconds per page (reduced from 10 for speed)
+    MAX_PAGES: int = 100
+    PAGE_TIMEOUT: int = 10  # seconds per page
     TOTAL_TIMEOUT: int = 600  # 10 minutes total
     MAX_EXTERNAL_LINKS: int = 500
-    PARALLEL_REQUESTS: int = 10  # concurrent requests (increased from 5 for speed)
+    PARALLEL_REQUESTS: int = 5
 
     # Paths
     REPORTS_DIR: str = "./reports"

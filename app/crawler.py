@@ -190,9 +190,6 @@ class WebCrawler:
                     ))
                     seen_external.add(normalized)
 
-        # Debug log: Track link discovery per page
-        print(f"[Crawler] Extracted {len(internal_links)} internal links, {len(external_links)} external links from {base_url}")
-
         return internal_links, external_links
 
     async def _fetch_page(self, context: BrowserContext, url: str, depth: int) -> Optional[PageData]:
@@ -209,13 +206,6 @@ class WebCrawler:
 
                 if response is None:
                     return PageData(url=url, status_code=0, depth=depth)
-
-                # Wait for lazy-loaded scripts to execute (RocketLazyLoadScripts, etc.)
-                # This allows JavaScript-generated navigation links to appear in the DOM
-                try:
-                    await page.wait_for_timeout(1000)  # 1 second delay for lazy scripts
-                except Exception:
-                    pass  # Non-fatal if timeout fails
 
                 load_time = time.time() - start_time
 
@@ -237,7 +227,6 @@ class WebCrawler:
                 # Check content type
                 content_type = response.headers.get('content-type', '')
                 if 'text/html' not in content_type.lower():
-                    print(f"[Crawler] Skipping non-HTML page {url} (content-type: {content_type})")
                     return None
 
                 # Get rendered HTML after JavaScript execution
@@ -270,7 +259,7 @@ class WebCrawler:
                 h6_tags = [h.get_text(strip=True) for h in soup.find_all('h6') if h.get_text(strip=True)]
 
                 # Extract text content and count words
-                text_content = self._extract_text_content(soup)  # Reuse parsed soup
+                text_content = self._extract_text_content(BeautifulSoup(html, 'lxml'))
                 word_count = self._count_words(text_content)
 
                 # Extract images
@@ -298,21 +287,15 @@ class WebCrawler:
                     external_links=external_links,
                     depth=depth,
                     load_time=load_time,
-                    html_content=html,  # Re-added to fix analyzer crashes
+                    html_content=html,
                     has_noindex=has_noindex,
                     response_headers=response_headers,
                     redirect_chain=redirect_chain,
                     final_url=final_url,
                 )
 
-            except asyncio.TimeoutError:
-                print(f"[Crawler] Timeout fetching {url}")
-                return PageData(url=url, status_code=0, depth=depth, error="Timeout")
             except Exception as e:
-                print(f"[Crawler] Error fetching {url}: {type(e).__name__}: {str(e)}")
-                import traceback
-                traceback.print_exc()
-                return PageData(url=url, status_code=0, depth=depth, error=str(e))
+                return PageData(url=url, status_code=0, depth=depth)
 
             finally:
                 if page:
@@ -320,10 +303,11 @@ class WebCrawler:
 
     async def crawl(self) -> AsyncGenerator[PageData, None]:
         """
-        BFS crawl starting from start_url with timeout.
+        BFS crawl starting from start_url.
         Yields PageData for each crawled page.
         Uses Playwright for JavaScript rendering.
         """
+        # Note: Timeout is handled by run_audit() wrapper for Python 3.7+ compatibility
         self.queue.append((self.start_url, 0))  # (url, depth)
         self.visited.add(self.start_url)
 
@@ -335,69 +319,37 @@ class WebCrawler:
             )
 
             try:
-                # Add timeout wrapper (540 seconds for crawling)
-                try:
-                    async with asyncio.timeout(settings.TOTAL_TIMEOUT - 60):
-                        while self.queue and len(self.pages) < self.max_pages:
-                            # Debug log: Track queue progression
-                            print(f"[Crawler] Loop iteration: Queue={len(self.queue)} URLs, Crawled={len(self.pages)}/{self.max_pages} pages, Visited={len(self.visited)} URLs")
-                            # Process batch of URLs
-                            batch_size = min(self.parallel_requests, len(self.queue))
-                            batch = [self.queue.popleft() for _ in range(batch_size)]
+                while self.queue and len(self.pages) < self.max_pages:
+                    # Process batch of URLs
+                    batch_size = min(self.parallel_requests, len(self.queue))
+                    batch = [self.queue.popleft() for _ in range(batch_size)]
 
-                            # Fetch pages concurrently
-                            tasks = [self._fetch_page(context, url, depth) for url, depth in batch]
-                            results = await asyncio.gather(*tasks)
+                    # Fetch pages concurrently
+                    tasks = [self._fetch_page(context, url, depth) for url, depth in batch]
+                    results = await asyncio.gather(*tasks)
 
-                            for page in results:
-                                if page is None:
-                                    print(f"[Crawler] Skipped URL (returned None)")
-                                    continue
-                                if page.status_code == 0:
-                                    print(f"[Crawler] Skipped failed page {page.url}")
-                                    continue
+                    for page in results:
+                        if page is None:
+                            continue
 
-                                # Store page data
-                                self.pages[page.url] = page
+                        # Store page data
+                        self.pages[page.url] = page
 
-                                # Notify progress
-                                if self.progress_callback:
-                                    await self.progress_callback(page)
+                        # Notify progress
+                        if self.progress_callback:
+                            await self.progress_callback(page)
 
-                                yield page
+                        yield page
 
-                                # Add new internal links to queue
-                                if page.status_code == 200:
-                                    links_discovered = 0
-                                    links_added = 0
-                                    links_rejected_visited = 0
-                                    links_rejected_invalid = 0
-
-                                    for link in page.internal_links:
-                                        links_discovered += 1
-                                        normalized_link = self._normalize_url(link)
-
-                                        if normalized_link in self.visited:
-                                            links_rejected_visited += 1
-                                            continue
-
-                                        if not self._is_valid_url(normalized_link):
-                                            links_rejected_invalid += 1
-                                            continue
-
-                                        if len(self.pages) < self.max_pages:
-                                            self.visited.add(normalized_link)
-                                            self.queue.append((normalized_link, page.depth + 1))
-                                            links_added += 1
-
-                                    # Debug log: Track link validation results
-                                    print(f"[Crawler] Page {page.url}: Discovered {links_discovered}, Added {links_added}, Rejected (visited: {links_rejected_visited}, invalid: {links_rejected_invalid}), Queue size: {len(self.queue)}")
-                except asyncio.TimeoutError:
-                    print(f"[Crawler] Timeout after {settings.TOTAL_TIMEOUT - 60}s. Crawled {len(self.pages)} pages.")
-                    # Gracefully exit - caller will receive pages crawled so far
-
-                # Log completion stats
-                print(f"[Crawler] Finished. Total pages: {len(self.pages)}, Total discovered: {len(self.visited)}, Queue remaining: {len(self.queue)}")
+                        # Add new internal links to queue
+                        if page.status_code == 200:
+                            for link in page.internal_links:
+                                normalized_link = self._normalize_url(link)
+                                if (normalized_link not in self.visited and
+                                    self._is_valid_url(normalized_link) and
+                                    len(self.visited) < self.max_pages):
+                                    self.visited.add(normalized_link)
+                                    self.queue.append((normalized_link, page.depth + 1))
 
             finally:
                 await browser.close()
