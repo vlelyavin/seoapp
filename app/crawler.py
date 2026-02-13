@@ -362,6 +362,7 @@ class WebCrawler:
                 return page_data
 
             except Exception as e:
+                logger.warning(f"Failed to fetch {url}: {type(e).__name__}: {str(e)}")
                 return PageData(url=url, status_code=0, depth=depth)
 
             finally:
@@ -486,6 +487,7 @@ class WebCrawler:
                 return page_data
 
             except Exception as e:
+                logger.warning(f"Failed to fetch {url}: {type(e).__name__}: {str(e)}")
                 return PageData(url=url, status_code=0, depth=depth)
 
             finally:
