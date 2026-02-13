@@ -7,7 +7,6 @@ from urllib.parse import urljoin
 
 import aiohttp
 
-from ..config import settings
 from ..models import AnalyzerResult, AuditIssue, PageData, SeverityLevel
 from .base import BaseAnalyzer
 
@@ -60,12 +59,7 @@ class Page404Analyzer(BaseAnalyzer):
                 'Accept': 'text/html,application/xhtml+xml',
             }
 
-            connector = aiohttp.TCPConnector(
-                ssl=False,
-                limit=settings.AIOHTTP_CONNECTION_LIMIT,
-                limit_per_host=settings.AIOHTTP_LIMIT_PER_HOST,
-                ttl_dns_cache=300,  # Cache DNS for 5 minutes
-            )
+            connector = aiohttp.TCPConnector(ssl=False)
             async with aiohttp.ClientSession(connector=connector) as session:
                 async with session.get(test_url, timeout=timeout, headers=headers, allow_redirects=True) as response:
                     status_code = response.status

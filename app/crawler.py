@@ -1,11 +1,10 @@
 """Web crawler for SEO audit using Playwright for JavaScript rendering."""
 
 import asyncio
-import logging
 import re
 import time
 from collections import deque
-from typing import AsyncGenerator, Callable, Dict, List, Optional, Set
+from typing import AsyncGenerator, Callable, Dict, Optional, Set
 from urllib.parse import urljoin, urlparse, urlunparse
 
 import aiohttp
@@ -14,67 +13,6 @@ from playwright.async_api import async_playwright, Browser, BrowserContext
 
 from .config import settings
 from .models import ImageData, LinkData, PageData
-
-logger = logging.getLogger(__name__)
-
-
-class BrowserContextPool:
-    """Simple context pool with rotation to prevent memory leaks."""
-
-    def __init__(self, browser: Browser, pool_size: int, pages_per_rotation: int):
-        self.browser = browser
-        self.pool_size = pool_size
-        self.pages_per_rotation = pages_per_rotation
-        self.contexts: List[BrowserContext] = []
-        self.context_usage: List[int] = []  # Pages served per context
-        self.current_index = 0
-        self._lock = asyncio.Lock()
-
-    async def initialize(self):
-        """Create initial pool of contexts."""
-        for i in range(self.pool_size):
-            context = await self._create_context()
-            self.contexts.append(context)
-            self.context_usage.append(0)
-
-    async def acquire(self) -> BrowserContext:
-        """Get next context (round-robin with automatic rotation)."""
-        async with self._lock:
-            idx = self.current_index
-
-            # Check if context needs rotation
-            if self.context_usage[idx] >= self.pages_per_rotation:
-                await self._rotate_context(idx)
-
-            self.context_usage[idx] += 1
-            self.current_index = (self.current_index + 1) % self.pool_size
-            return self.contexts[idx]
-
-    async def _rotate_context(self, index: int):
-        """Replace old context with fresh one."""
-        logger.info(f"Rotating context {index}: served {self.context_usage[index]} pages")
-        old_context = self.contexts[index]
-        await old_context.close()
-
-        new_context = await self._create_context()
-        self.contexts[index] = new_context
-        self.context_usage[index] = 0
-
-    async def _create_context(self) -> BrowserContext:
-        """Create browser context with standard settings."""
-        return await self.browser.new_context(
-            viewport={"width": 1920, "height": 1080},
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                      "AppleWebKit/537.36 (KHTML, like Gecko) "
-                      "Chrome/120.0.0.0 Safari/537.36",
-        )
-
-    async def close_all(self):
-        """Close all contexts in pool."""
-        for context in self.contexts:
-            await context.close()
-        self.contexts.clear()
-        self.context_usage.clear()
 
 
 class WebCrawler:
@@ -362,138 +300,11 @@ class WebCrawler:
                 return page_data
 
             except Exception as e:
-                logger.warning(f"Failed to fetch {url}: {type(e).__name__}: {str(e)}")
                 return PageData(url=url, status_code=0, depth=depth)
 
             finally:
                 if page:
                     await page.close()
-
-    async def _fetch_page_pooled(
-        self,
-        context_pool: BrowserContextPool,
-        url: str,
-        depth: int
-    ) -> Optional[PageData]:
-        """Fetch page using context from pool.
-
-        Same logic as _fetch_page but acquires context from pool.
-        """
-        async with self.semaphore:
-            start_time = time.time()
-            page = None
-
-            try:
-                # Acquire context from pool (thread-safe, with rotation)
-                context = await context_pool.acquire()
-                page = await context.new_page()
-
-                # Navigate to URL
-                response = await page.goto(url, wait_until="domcontentloaded", timeout=self.timeout)
-
-                if response is None:
-                    return PageData(url=url, status_code=0, depth=depth)
-
-                load_time = time.time() - start_time
-
-                # Save response headers
-                response_headers = dict(response.headers) if response else {}
-
-                # Track redirect chain
-                redirect_chain = []
-                final_url = str(page.url)
-                req = response.request
-                chain_urls = []
-                while req.redirected_from:
-                    chain_urls.append(req.redirected_from.url)
-                    req = req.redirected_from
-                chain_urls.reverse()
-                if chain_urls:
-                    redirect_chain = chain_urls + [response.url]
-
-                # Check content type
-                content_type = response.headers.get('content-type', '')
-                if 'text/html' not in content_type.lower():
-                    return None
-
-                # Get rendered HTML after JavaScript execution
-                html = await page.content()
-                soup = BeautifulSoup(html, 'lxml')
-
-                # Extract title
-                title_tag = soup.find('title')
-                title = title_tag.get_text(strip=True) if title_tag else None
-
-                # Extract meta description
-                meta_desc = soup.find('meta', attrs={'name': re.compile(r'^description$', re.I)})
-                meta_description = meta_desc.get('content', '').strip() if meta_desc else None
-
-                # Extract meta robots
-                meta_robots_tag = soup.find('meta', attrs={'name': re.compile(r'^robots$', re.I)})
-                meta_robots = meta_robots_tag.get('content', '').strip() if meta_robots_tag else None
-                has_noindex = meta_robots and 'noindex' in meta_robots.lower() if meta_robots else False
-
-                # Extract canonical
-                canonical_tag = soup.find('link', attrs={'rel': 'canonical'})
-                canonical = canonical_tag.get('href') if canonical_tag else None
-
-                # Extract headings
-                h1_tags = [h.get_text(strip=True) for h in soup.find_all('h1') if h.get_text(strip=True)]
-                h2_tags = [h.get_text(strip=True) for h in soup.find_all('h2') if h.get_text(strip=True)]
-                h3_tags = [h.get_text(strip=True) for h in soup.find_all('h3') if h.get_text(strip=True)]
-                h4_tags = [h.get_text(strip=True) for h in soup.find_all('h4') if h.get_text(strip=True)]
-                h5_tags = [h.get_text(strip=True) for h in soup.find_all('h5') if h.get_text(strip=True)]
-                h6_tags = [h.get_text(strip=True) for h in soup.find_all('h6') if h.get_text(strip=True)]
-
-                # Extract text content and count words (reuse parsed soup)
-                text_content = self._extract_text_content(soup)
-                word_count = self._count_words(text_content)
-
-                # Extract images
-                images = self._extract_images(soup, url)
-
-                # Extract links
-                internal_links, external_links = self._extract_links(soup, url)
-
-                page_data = PageData(
-                    url=url,
-                    status_code=response.status,
-                    title=title,
-                    meta_description=meta_description,
-                    meta_robots=meta_robots,
-                    canonical=canonical,
-                    h1_tags=h1_tags,
-                    h2_tags=h2_tags,
-                    h3_tags=h3_tags,
-                    h4_tags=h4_tags,
-                    h5_tags=h5_tags,
-                    h6_tags=h6_tags,
-                    word_count=word_count,
-                    images=images,
-                    internal_links=internal_links,
-                    external_links=external_links,
-                    depth=depth,
-                    load_time=load_time,
-                    html_content=html,
-                    has_noindex=has_noindex,
-                    response_headers=response_headers,
-                    redirect_chain=redirect_chain,
-                    final_url=final_url,
-                )
-
-                # Cache the parsed soup for analyzers to reuse
-                page_data.set_soup(soup)
-
-                return page_data
-
-            except Exception as e:
-                logger.warning(f"Failed to fetch {url}: {type(e).__name__}: {str(e)}")
-                return PageData(url=url, status_code=0, depth=depth)
-
-            finally:
-                if page:
-                    await page.close()
-                # Context returns to pool automatically (not closed)
 
     async def crawl(self) -> AsyncGenerator[PageData, None]:
         """
@@ -502,33 +313,15 @@ class WebCrawler:
         Uses Playwright for JavaScript rendering.
         """
         # Note: Timeout is handled by run_audit() wrapper for Python 3.7+ compatibility
-        import time
-        crawl_start_time = time.time()
-
         self.queue.append((self.start_url, 0))  # (url, depth)
         self.visited.add(self.start_url)
 
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
-
-            # Initialize context pool if enabled
-            context_pool = None
-            context = None
-
-            if settings.ENABLE_CONTEXT_ROTATION:
-                context_pool = BrowserContextPool(
-                    browser=browser,
-                    pool_size=settings.CONTEXT_POOL_SIZE,
-                    pages_per_rotation=settings.PAGES_PER_CONTEXT_ROTATION,
-                )
-                await context_pool.initialize()
-                logger.info(f"Context pool initialized: pool_size={settings.CONTEXT_POOL_SIZE}")
-            else:
-                # Legacy single context mode
-                context = await browser.new_context(
-                    viewport={"width": 1920, "height": 1080},
-                    user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                )
+            context = await browser.new_context(
+                viewport={"width": 1920, "height": 1080},
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            )
 
             try:
                 while self.queue and len(self.pages) < self.max_pages:
@@ -537,10 +330,7 @@ class WebCrawler:
                     batch = [self.queue.popleft() for _ in range(batch_size)]
 
                     # Fetch pages concurrently
-                    if context_pool:
-                        tasks = [self._fetch_page_pooled(context_pool, url, depth) for url, depth in batch]
-                    else:
-                        tasks = [self._fetch_page(context, url, depth) for url, depth in batch]
+                    tasks = [self._fetch_page(context, url, depth) for url, depth in batch]
                     results = await asyncio.gather(*tasks)
 
                     for page in results:
@@ -566,30 +356,7 @@ class WebCrawler:
                                     self.visited.add(normalized_link)
                                     self.queue.append((normalized_link, page.depth + 1))
 
-                    # Log batch progress
-                    if settings.LOG_RESOURCE_METRICS:
-                        logger.info(
-                            f"Batch complete: crawled={len(self.pages)}/{self.max_pages} pages, "
-                            f"queue_remaining={len(self.queue)}, "
-                            f"batch_size={len(results)}"
-                        )
-
             finally:
-                # Log final stats
-                if settings.LOG_RESOURCE_METRICS:
-                    crawl_duration = time.time() - crawl_start_time
-                    page_count = len(self.pages)
-                    if page_count > 0:
-                        logger.info(
-                            f"Crawl complete: total_pages={page_count}, "
-                            f"duration={crawl_duration:.1f}s, "
-                            f"avg_per_page={crawl_duration/page_count:.2f}s"
-                        )
-                # Clean up contexts
-                if context_pool:
-                    await context_pool.close_all()
-                elif context:
-                    await context.close()
                 await browser.close()
 
     async def crawl_all(self) -> Dict[str, PageData]:
@@ -602,12 +369,7 @@ class WebCrawler:
 async def check_url_status(url: str, timeout: int = 5) -> int:
     """Check HTTP status of a URL without downloading content."""
     try:
-        connector = aiohttp.TCPConnector(
-            ssl=False,
-            limit=settings.AIOHTTP_CONNECTION_LIMIT,
-            limit_per_host=settings.AIOHTTP_LIMIT_PER_HOST,
-            ttl_dns_cache=300,  # Cache DNS for 5 minutes
-        )
+        connector = aiohttp.TCPConnector(ssl=False)
         timeout_config = aiohttp.ClientTimeout(total=timeout)
         headers = {
             'User-Agent': 'Mozilla/5.0 (compatible; SEOAuditBot/1.0)',
@@ -625,12 +387,7 @@ async def check_url_status(url: str, timeout: int = 5) -> int:
 async def fetch_url_content(url: str, timeout: int = 10) -> tuple[int, Optional[str]]:
     """Fetch URL content and return status code and content."""
     try:
-        connector = aiohttp.TCPConnector(
-            ssl=False,
-            limit=settings.AIOHTTP_CONNECTION_LIMIT,
-            limit_per_host=settings.AIOHTTP_LIMIT_PER_HOST,
-            ttl_dns_cache=300,  # Cache DNS for 5 minutes
-        )
+        connector = aiohttp.TCPConnector(ssl=False)
         timeout_config = aiohttp.ClientTimeout(total=timeout)
         headers = {
             'User-Agent': 'Mozilla/5.0 (compatible; SEOAuditBot/1.0)',
@@ -650,12 +407,7 @@ async def fetch_url_content(url: str, timeout: int = 10) -> tuple[int, Optional[
 async def get_image_size(url: str, timeout: int = 10) -> Optional[int]:
     """Get size of an image in bytes."""
     try:
-        connector = aiohttp.TCPConnector(
-            ssl=False,
-            limit=settings.AIOHTTP_CONNECTION_LIMIT,
-            limit_per_host=settings.AIOHTTP_LIMIT_PER_HOST,
-            ttl_dns_cache=300,  # Cache DNS for 5 minutes
-        )
+        connector = aiohttp.TCPConnector(ssl=False)
         timeout_config = aiohttp.ClientTimeout(total=timeout)
         headers = {
             'User-Agent': 'Mozilla/5.0 (compatible; SEOAuditBot/1.0)',

@@ -22,24 +22,6 @@ class Settings(BaseSettings):
     # Performance Optimizations
     ENABLE_PARALLEL_ANALYZERS: bool = True
 
-    # Context Rotation (Phase 3)
-    # DISABLED: Race condition causes contexts to close while pages are using them
-    # Symptoms: Pages fail silently (status_code=0), BFS queue empties prematurely
-    # Root cause: context.close() in _rotate_context() kills in-flight pages
-    # TODO: Implement reference counting before re-enabling
-    ENABLE_CONTEXT_ROTATION: bool = False
-    CONTEXT_POOL_SIZE: int = 3  # Number of browser contexts in pool
-    PAGES_PER_CONTEXT_ROTATION: int = 25  # Recycle context after N pages
-
-    # Connection Pool Limits (Phase 3)
-    AIOHTTP_CONNECTION_LIMIT: int = 50
-    AIOHTTP_LIMIT_PER_HOST: int = 10
-
-    # Resource Monitoring (Phase 3)
-    ENABLE_RESOURCE_MONITORING: bool = False  # Optional, requires psutil
-    MEMORY_WARNING_THRESHOLD_MB: int = 1500
-    LOG_RESOURCE_METRICS: bool = True
-
     # Paths
     REPORTS_DIR: str = "./reports"
     SCREENSHOTS_DIR: str = "./screenshots"
