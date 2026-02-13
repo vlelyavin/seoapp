@@ -577,8 +577,12 @@ async def run_audit(audit_id: str, request: AuditRequest):
             progress_callback=progress_callback,
         )
 
-        async for page in crawler.crawl():
-            pages[page.url] = page
+        try:
+            async with asyncio.timeout(settings.TOTAL_TIMEOUT):
+                async for page in crawler.crawl():
+                    pages[page.url] = page
+        except TimeoutError:
+            logger.warning(f"[Audit {audit.id}] Crawl timed out after {settings.TOTAL_TIMEOUT}s with {len(pages)} pages")
 
         audit.pages_crawled = len(pages)
         audit.pages = pages

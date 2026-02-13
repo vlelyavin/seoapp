@@ -314,13 +314,26 @@ class WebCrawler:
                 if page:
                     await page.close()
 
+    async def _fetch_page_with_timeout(
+        self, context: BrowserContext, url: str, depth: int
+    ) -> Optional[PageData]:
+        """Wrap _fetch_page with a hard timeout to prevent hanging."""
+        per_page_timeout = self.timeout / 1000 + 10  # page timeout + 10s buffer
+        try:
+            return await asyncio.wait_for(
+                self._fetch_page(context, url, depth),
+                timeout=per_page_timeout,
+            )
+        except asyncio.TimeoutError:
+            logger.warning(f"Hard timeout ({per_page_timeout}s) for {url}")
+            return PageData(url=url, status_code=0, depth=depth)
+
     async def crawl(self) -> AsyncGenerator[PageData, None]:
         """
         BFS crawl starting from start_url.
         Yields PageData for each crawled page.
         Uses Playwright for JavaScript rendering.
         """
-        # Note: Timeout is handled by run_audit() wrapper for Python 3.7+ compatibility
         self.queue.append((self.start_url, 0))  # (url, depth)
         self.visited.add(self.start_url)
 
@@ -333,17 +346,24 @@ class WebCrawler:
 
             try:
                 while self.queue and len(self.pages) < self.max_pages:
-                    # Process batch of URLs
-                    batch_size = min(self.parallel_requests, len(self.queue))
+                    # Process batch of URLs (cap to remaining page budget)
+                    remaining = self.max_pages - len(self.pages)
+                    batch_size = min(self.parallel_requests, len(self.queue), remaining)
                     batch = [self.queue.popleft() for _ in range(batch_size)]
 
-                    # Fetch pages concurrently
-                    tasks = [self._fetch_page(context, url, depth) for url, depth in batch]
-                    results = await asyncio.gather(*tasks)
+                    # Fetch pages concurrently with per-page timeout safety net
+                    tasks = [self._fetch_page_with_timeout(context, url, depth) for url, depth in batch]
+                    results = await asyncio.gather(*tasks, return_exceptions=True)
 
-                    for page in results:
-                        if page is None:
+                    for result in results:
+                        # Skip exceptions and None results
+                        if isinstance(result, BaseException):
+                            logger.warning(f"Batch task failed: {result}")
                             continue
+                        if result is None:
+                            continue
+
+                        page = result
 
                         # Store page data
                         self.pages[page.url] = page
@@ -355,16 +375,17 @@ class WebCrawler:
                         yield page
 
                         # Add new internal links to queue
+                        # Note: len(self.pages) < self.max_pages is enforced by the while loop
                         if page.status_code == 200:
                             for link in page.internal_links:
                                 normalized_link = self._normalize_url(link)
                                 if (normalized_link not in self.visited and
-                                    self._is_valid_url(normalized_link) and
-                                    len(self.visited) < self.max_pages):
+                                    self._is_valid_url(normalized_link)):
                                     self.visited.add(normalized_link)
                                     self.queue.append((normalized_link, page.depth + 1))
 
             finally:
+                await context.close()
                 await browser.close()
 
     async def crawl_all(self) -> Dict[str, PageData]:
