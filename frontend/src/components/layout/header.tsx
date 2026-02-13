@@ -17,7 +17,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
   const { data: session } = useSession();
 
   return (
-    <header className="sticky top-0 z-40 flex h-14 items-center gap-4 bg-black/80 px-4 backdrop-blur-sm lg:px-6">
+    <header className="sticky top-0 z-40 flex h-14 items-center gap-4 border-b border-gray-800 bg-black/80 px-4 backdrop-blur-sm lg:px-6">
       <button
         onClick={onMenuToggle}
         className="lg:hidden rounded-md p-2 text-gray-500 hover:bg-gray-950"

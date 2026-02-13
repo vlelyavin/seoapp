@@ -231,13 +231,22 @@ class WebCrawler:
                 if chain_urls:
                     redirect_chain = chain_urls + [response.url]
 
-                # Check content type
+                # Get rendered HTML (needed for both content-type sniffing and parsing)
                 content_type = response.headers.get('content-type', '')
-                if 'text/html' not in content_type.lower():
+                ct_lower = content_type.lower()
+                is_html = 'text/html' in ct_lower or 'application/xhtml+xml' in ct_lower
+
+                html = await page.content()
+
+                if not is_html:
+                    # Some servers misconfigure Content-Type (e.g. application/octet-stream for HTML)
+                    # Playwright already rendered the page, so check if it actually looks like HTML
+                    html_lower = html[:500].lower()
+                    is_html = '<html' in html_lower or '<!doctype' in html_lower
+
+                if not is_html:
                     return None
 
-                # Get rendered HTML after JavaScript execution
-                html = await page.content()
                 soup = BeautifulSoup(html, 'lxml')
 
                 # Extract title
