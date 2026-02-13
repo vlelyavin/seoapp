@@ -64,9 +64,9 @@ class ContentAnalyzer(BaseAnalyzer):
                 category="empty_pages",
                 severity=SeverityLevel.ERROR,
                 message=self.t("analyzer_content.content.issues.empty_pages", count=len(empty_pages)),
-                details=self.t("analyzer_content.content.issues.empty_pages_details"),
+                details=self.t("analyzer_content.content.details.empty_pages"),
                 affected_urls=empty_pages[:20],
-                recommendation=self.t("analyzer_content.content.issues.empty_pages_recommendation"),
+                recommendation=self.t("analyzer_content.content.recommendations.empty_pages"),
                 count=len(empty_pages),
             ))
 
@@ -75,9 +75,9 @@ class ContentAnalyzer(BaseAnalyzer):
                 category="thin_content",
                 severity=SeverityLevel.WARNING,
                 message=self.t("analyzer_content.content.issues.thin_content", count=len(thin_content)),
-                details=self.t("analyzer_content.content.issues.thin_content_details", min_words=settings.MIN_CONTENT_WORDS),
+                details=self.t("analyzer_content.content.details.thin_content", min_words=settings.MIN_CONTENT_WORDS),
                 affected_urls=[url for url, _ in thin_content[:20]],
-                recommendation=self.t("analyzer_content.content.issues.thin_content_recommendation"),
+                recommendation=self.t("analyzer_content.content.recommendations.thin_content"),
                 count=len(thin_content),
             ))
 

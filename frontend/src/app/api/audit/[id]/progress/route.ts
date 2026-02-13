@@ -27,11 +27,21 @@ export async function GET(
     return NextResponse.json({ error: "Audit not started" }, { status: 400 });
   }
 
-  // Fetch from FastAPI
+  // Fetch from FastAPI with timeout
   const fastapiUrl = process.env.FASTAPI_URL || "http://127.0.0.1:8000";
 
   try {
-    const res = await fetch(`${fastapiUrl}/api/audit/${audit.fastApiId}/current-status`);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15_000);
+
+    let res: Response;
+    try {
+      res = await fetch(`${fastapiUrl}/api/audit/${audit.fastApiId}/current-status`, {
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
 
     if (!res.ok) {
       console.error('[Progress API] FastAPI returned:', res.status);
@@ -40,42 +50,29 @@ export async function GET(
 
     const data = await res.json();
 
-    // Update database when terminal state is reached
+    // Atomically update database when terminal state is reached
     if (data.status === "completed" || data.status === "failed") {
-      const dbAudit = await prisma.audit.findUnique({
-        where: { id },
-        select: { status: true }
+      const updateData = data.status === "failed"
+        ? { status: "failed" as const, errorMessage: data.message || "Audit failed", completedAt: new Date() }
+        : { status: "completed" as const, completedAt: new Date() };
+
+      const updated = await prisma.audit.updateMany({
+        where: {
+          id,
+          status: { not: data.status },
+        },
+        data: updateData,
       });
 
-      // Only update if status changed (avoid redundant writes)
-      if (dbAudit && dbAudit.status !== data.status) {
-        if (data.status === "failed") {
-          await prisma.audit.update({
-            where: { id },
-            data: {
-              status: "failed",
-              errorMessage: data.message || "Audit failed",
-              completedAt: new Date(),
-            },
-          });
-          console.log(`[Progress API] Updated audit ${id} to failed status`);
-        } else if (data.status === "completed") {
-          // Only update status/timestamp - results endpoint will add full results
-          await prisma.audit.update({
-            where: { id },
-            data: {
-              status: "completed",
-              completedAt: new Date(),
-            },
-          });
-          console.log(`[Progress API] Updated audit ${id} to completed status`);
-        }
+      if (updated.count > 0) {
+        console.log(`[Progress API] Updated audit ${id} to ${data.status} status`);
       }
     }
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('[Progress API] Error fetching from FastAPI:', error);
+    const msg = error instanceof Error ? error.message : "Unknown error";
+    console.error('[Progress API] Error:', msg);
     return NextResponse.json({ error: "Failed to fetch status" }, { status: 500 });
   }
 }

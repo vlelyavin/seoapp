@@ -13,9 +13,9 @@ export async function POST(req: Request) {
       );
     }
 
-    if (password.length < 6) {
+    if (password.length < 8) {
       return NextResponse.json(
-        { error: "Password must be at least 6 characters" },
+        { error: "Password must be at least 8 characters" },
         { status: 400 }
       );
     }
@@ -43,7 +43,8 @@ export async function POST(req: Request) {
       { id: user.id, email: user.email },
       { status: 201 }
     );
-  } catch {
+  } catch (error) {
+    console.error("[Register] Error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

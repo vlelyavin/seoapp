@@ -39,7 +39,7 @@
     "registerError": "Помилка реєстрації",
     "emailRequired": "Email обов'язковий",
     "passwordRequired": "Пароль обов'язковий",
-    "passwordMinLength": "Пароль повинен бути не менше 6 символів",
+    "passwordMinLength": "Пароль повинен бути не менше 8 символів",
     "passwordMismatch": "Паролі не збігаються",
     "emailTaken": "Цей email вже зареєстровано"
   },
@@ -57,7 +57,9 @@
     "deleteAudit": "Видалити аудит",
     "confirmDelete": "Ви впевнені, що хочете видалити цей аудит?",
     "confirmDeleteMessage": "Цю дію не можна скасувати. Усі дані аудиту та результати будуть безповоротно видалені.",
-    "deleting": "Видалення..."
+    "deleting": "Видалення...",
+    "criticalLabel": "критичних",
+    "warningsLabel": "попереджень"
   },
   "audit": {
     "title": "SEO Аудит",
@@ -99,7 +101,17 @@
     "connectionLost": "З'єднання втрачено. Аудит може ще виконуватися у фоновому режимі.",
     "refreshToReconnect": "Оновити для перепідключення",
     "error": "Помилка",
-    "noResults": "Результати відсутні."
+    "noResults": "Результати відсутні.",
+    "recommendation": "Рекомендація:",
+    "affectedUrls": "Зачеплені URL ({count}):",
+    "pages": "{count} сторінок",
+    "sections": "Розділи",
+    "searchIssues": "Пошук проблем...",
+    "noMatchingResults": "Жодних результатів за вашим фільтром.",
+    "noData": "Немає даних",
+    "yes": "Так",
+    "no": "Ні",
+    "generating": "Генерація {format}..."
   },
   "settings": {
     "title": "Налаштування",
@@ -112,18 +124,42 @@
     "light": "Світла",
     "dark": "Темна",
     "system": "Системна",
-    "language": "Мова"
+    "language": "Мова",
+    "name": "Ім'я",
+    "passwordMinLength": "Пароль повинен бути не менше 8 символів",
+    "profileUpdated": "Профіль оновлено",
+    "passwordChanged": "Пароль змінено",
+    "failedToUpdate": "Не вдалося оновити",
+    "failedToChangePassword": "Не вдалося змінити пароль",
+    "errorSaving": "Помилка збереження"
   },
   "branding": {
     "title": "Брендинг",
     "description": "Налаштуйте зовнішній вигляд експортованих звітів",
     "companyName": "Назва компанії",
+    "companyNamePlaceholder": "Ваша компанія",
     "logo": "Логотип",
     "uploadLogo": "Завантажити логотип",
     "primaryColor": "Основний колір",
     "accentColor": "Акцентний колір",
     "preview": "Попередній перегляд",
-    "proRequired": "Потрібен план Pro або Agency"
+    "proRequired": "Потрібен план Pro або Agency",
+    "brandingSaved": "Налаштування брендингу збережено",
+    "errorSaving": "Помилка збереження",
+    "logoUploaded": "Логотип успішно завантажено",
+    "networkError": "Помилка мережі. Спробуйте ще раз.",
+    "failedToLoad": "Не вдалося завантажити",
+    "uploading": "Завантаження..."
+  },
+  "admin": {
+    "title": "Користувачі",
+    "accessRequired": "Потрібен доступ адміністратора",
+    "email": "Email",
+    "name": "Ім'я",
+    "role": "Роль",
+    "plan": "План",
+    "audits": "Аудити",
+    "joined": "Приєднався"
   },
   "plans": {
     "free": "Безкоштовний",

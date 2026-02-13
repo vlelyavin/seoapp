@@ -68,8 +68,8 @@ class ImagesAnalyzer(BaseAnalyzer):
         large_images = []
         critical_images = []
 
-        # Check image sizes (limit to first 50 for performance)
-        images_to_check = list(all_images.keys())[:50]
+        # Check image sizes (limit for performance)
+        images_to_check = list(all_images.keys())[:settings.MAX_IMAGE_CHECKS]
 
         async def check_image_size(src: str) -> tuple[str, int | None]:
             size = await get_image_size(src)
@@ -143,9 +143,9 @@ class ImagesAnalyzer(BaseAnalyzer):
                 category="missing_alt",
                 severity=SeverityLevel.ERROR,
                 message=self.t("analyzer_content.images.issues.missing_alt", count=len(missing_alt)),
-                details=self.t("analyzer_content.images.issues.missing_alt_details"),
+                details=self.t("analyzer_content.images.details.missing_alt"),
                 affected_urls=[img['src'] for img in missing_alt[:10]],
-                recommendation=self.t("analyzer_content.images.issues.missing_alt_recommendation"),
+                recommendation=self.t("analyzer_content.images.recommendations.missing_alt"),
                 count=len(missing_alt),
             ))
 
@@ -154,9 +154,9 @@ class ImagesAnalyzer(BaseAnalyzer):
                 category="empty_alt",
                 severity=SeverityLevel.WARNING,
                 message=self.t("analyzer_content.images.issues.empty_alt", count=len(empty_alt)),
-                details=self.t("analyzer_content.images.issues.empty_alt_details"),
+                details=self.t("analyzer_content.images.details.empty_alt"),
                 affected_urls=[img['src'] for img in empty_alt[:10]],
-                recommendation=self.t("analyzer_content.images.issues.empty_alt_recommendation"),
+                recommendation=self.t("analyzer_content.images.recommendations.empty_alt"),
                 count=len(empty_alt),
             ))
 
@@ -165,9 +165,9 @@ class ImagesAnalyzer(BaseAnalyzer):
                 category="legacy_format",
                 severity=SeverityLevel.WARNING,
                 message=self.t("analyzer_content.images.issues.legacy_format", count=len(legacy_format)),
-                details=self.t("analyzer_content.images.issues.legacy_format_details"),
+                details=self.t("analyzer_content.images.details.legacy_format"),
                 affected_urls=[img['src'] for img in legacy_format[:10]],
-                recommendation=self.t("analyzer_content.images.issues.legacy_format_recommendation"),
+                recommendation=self.t("analyzer_content.images.recommendations.legacy_format"),
                 count=len(legacy_format),
             ))
 
@@ -176,9 +176,9 @@ class ImagesAnalyzer(BaseAnalyzer):
                 category="critical_size",
                 severity=SeverityLevel.ERROR,
                 message=self.t("analyzer_content.images.issues.critical_size", count=len(critical_images)),
-                details=self.t("analyzer_content.images.issues.critical_size_details"),
+                details=self.t("analyzer_content.images.details.critical_size"),
                 affected_urls=[img['src'] for img in critical_images[:10]],
-                recommendation=self.t("analyzer_content.images.issues.critical_size_recommendation"),
+                recommendation=self.t("analyzer_content.images.recommendations.critical_size"),
                 count=len(critical_images),
             ))
 
@@ -187,9 +187,9 @@ class ImagesAnalyzer(BaseAnalyzer):
                 category="large_size",
                 severity=SeverityLevel.WARNING,
                 message=self.t("analyzer_content.images.issues.large_size", count=len(large_images)),
-                details=self.t("analyzer_content.images.issues.large_size_details"),
+                details=self.t("analyzer_content.images.details.large_size"),
                 affected_urls=[img['src'] for img in large_images[:10]],
-                recommendation=self.t("analyzer_content.images.issues.large_size_recommendation"),
+                recommendation=self.t("analyzer_content.images.recommendations.large_size"),
                 count=len(large_images),
             ))
 

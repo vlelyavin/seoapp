@@ -36,6 +36,18 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: "userId required" }, { status: 400 });
   }
 
+  const allowedRoles = ["user", "admin"];
+  if (role && !allowedRoles.includes(role)) {
+    return NextResponse.json({ error: "Invalid role" }, { status: 400 });
+  }
+
+  if (planId) {
+    const plan = await prisma.plan.findUnique({ where: { id: planId } });
+    if (!plan) {
+      return NextResponse.json({ error: "Plan not found" }, { status: 400 });
+    }
+  }
+
   const updateData: Record<string, string> = {};
   if (role) updateData.role = role;
   if (planId) updateData.planId = planId;

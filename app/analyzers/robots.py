@@ -78,8 +78,8 @@ class RobotsAnalyzer(BaseAnalyzer):
                 category="no_robots_txt",
                 severity=SeverityLevel.WARNING,
                 message=self.t("analyzer_content.robots.issues.no_robots_txt"),
-                details=self.t("analyzer_content.robots.issues.no_robots_txt_details"),
-                recommendation=self.t("analyzer_content.robots.issues.no_robots_txt_recommendation"),
+                details=self.t("analyzer_content.robots.details.no_robots_txt"),
+                recommendation=self.t("analyzer_content.robots.recommendations.no_robots_txt"),
             ))
         else:
             if robots_data.errors:
@@ -88,7 +88,7 @@ class RobotsAnalyzer(BaseAnalyzer):
                     severity=SeverityLevel.WARNING,
                     message=self.t("analyzer_content.robots.issues.robots_errors", count=len(robots_data.errors)),
                     details="; ".join(robots_data.errors[:5]),
-                    recommendation=self.t("analyzer_content.robots.issues.robots_errors_recommendation"),
+                    recommendation=self.t("analyzer_content.robots.recommendations.robots_errors"),
                     count=len(robots_data.errors),
                 ))
 
@@ -97,8 +97,8 @@ class RobotsAnalyzer(BaseAnalyzer):
                     category="no_sitemap_in_robots",
                     severity=SeverityLevel.INFO,
                     message=self.t("analyzer_content.robots.issues.no_sitemap_in_robots"),
-                    details=self.t("analyzer_content.robots.issues.no_sitemap_in_robots_details"),
-                    recommendation=self.t("analyzer_content.robots.issues.no_sitemap_in_robots_recommendation"),
+                    details=self.t("analyzer_content.robots.details.no_sitemap_in_robots"),
+                    recommendation=self.t("analyzer_content.robots.recommendations.no_sitemap_in_robots"),
                 ))
 
         # Create issues for sitemap
@@ -107,8 +107,8 @@ class RobotsAnalyzer(BaseAnalyzer):
                 category="no_sitemap",
                 severity=SeverityLevel.ERROR,
                 message=self.t("analyzer_content.robots.issues.no_sitemap"),
-                details=self.t("analyzer_content.robots.issues.no_sitemap_details"),
-                recommendation=self.t("analyzer_content.robots.issues.no_sitemap_recommendation"),
+                details=self.t("analyzer_content.robots.details.no_sitemap"),
+                recommendation=self.t("analyzer_content.robots.recommendations.no_sitemap"),
             ))
         else:
             if sitemap_data.errors:
@@ -117,7 +117,7 @@ class RobotsAnalyzer(BaseAnalyzer):
                     severity=SeverityLevel.WARNING,
                     message=self.t("analyzer_content.robots.issues.sitemap_errors", count=len(sitemap_data.errors)),
                     details="; ".join(sitemap_data.errors[:5]),
-                    recommendation=self.t("analyzer_content.robots.issues.sitemap_errors_recommendation"),
+                    recommendation=self.t("analyzer_content.robots.recommendations.sitemap_errors"),
                     count=len(sitemap_data.errors),
                 ))
 
@@ -126,8 +126,8 @@ class RobotsAnalyzer(BaseAnalyzer):
                     category="empty_sitemap",
                     severity=SeverityLevel.WARNING,
                     message=self.t("analyzer_content.robots.issues.empty_sitemap"),
-                    details=self.t("analyzer_content.robots.issues.empty_sitemap_details"),
-                    recommendation=self.t("analyzer_content.robots.issues.empty_sitemap_recommendation"),
+                    details=self.t("analyzer_content.robots.details.empty_sitemap"),
+                    recommendation=self.t("analyzer_content.robots.recommendations.empty_sitemap"),
                 ))
 
             # Compare sitemap URLs with crawled pages
@@ -150,9 +150,9 @@ class RobotsAnalyzer(BaseAnalyzer):
                         category="sitemap_urls_not_found",
                         severity=SeverityLevel.WARNING,
                         message=self.t("analyzer_content.robots.issues.sitemap_urls_not_found", count=len(sitemap_not_crawled)),
-                        details=self.t("analyzer_content.robots.issues.sitemap_urls_not_found_details"),
+                        details=self.t("analyzer_content.robots.details.sitemap_urls_not_found"),
                         affected_urls=list(sitemap_not_crawled)[:20],
-                        recommendation=self.t("analyzer_content.robots.issues.sitemap_urls_not_found_recommendation"),
+                        recommendation=self.t("analyzer_content.robots.recommendations.sitemap_urls_not_found"),
                         count=len(sitemap_not_crawled),
                     ))
 
@@ -161,9 +161,9 @@ class RobotsAnalyzer(BaseAnalyzer):
                         category="pages_not_in_sitemap",
                         severity=SeverityLevel.INFO,
                         message=self.t("analyzer_content.robots.issues.pages_not_in_sitemap", count=len(crawled_not_in_sitemap)),
-                        details=self.t("analyzer_content.robots.issues.pages_not_in_sitemap_details"),
+                        details=self.t("analyzer_content.robots.details.pages_not_in_sitemap"),
                         affected_urls=list(crawled_not_in_sitemap)[:20],
-                        recommendation=self.t("analyzer_content.robots.issues.pages_not_in_sitemap_recommendation"),
+                        recommendation=self.t("analyzer_content.robots.recommendations.pages_not_in_sitemap"),
                         count=len(crawled_not_in_sitemap),
                     ))
 
@@ -193,9 +193,9 @@ class RobotsAnalyzer(BaseAnalyzer):
                         category="sitemap_old_lastmod",
                         severity=SeverityLevel.INFO,
                         message=self.t("analyzer_content.robots.issues.sitemap_old_lastmod", count=len(old_lastmod)),
-                        details=self.t("analyzer_content.robots.issues.sitemap_old_lastmod_details"),
+                        details=self.t("analyzer_content.robots.details.sitemap_old_lastmod"),
                         affected_urls=[url for url, _ in old_lastmod[:10]],
-                        recommendation=self.t("analyzer_content.robots.issues.sitemap_old_lastmod_recommendation"),
+                        recommendation=self.t("analyzer_content.robots.recommendations.sitemap_old_lastmod"),
                     ))
 
         # Create issues for noindex pages
@@ -204,9 +204,9 @@ class RobotsAnalyzer(BaseAnalyzer):
                 category="noindex_pages",
                 severity=SeverityLevel.INFO,
                 message=self.t("analyzer_content.robots.issues.noindex_pages", count=len(noindex_pages)),
-                details=self.t("analyzer_content.robots.issues.noindex_pages_details"),
+                details=self.t("analyzer_content.robots.details.noindex_pages"),
                 affected_urls=noindex_pages[:20],
-                recommendation=self.t("analyzer_content.robots.issues.noindex_pages_recommendation"),
+                recommendation=self.t("analyzer_content.robots.recommendations.noindex_pages"),
                 count=len(noindex_pages),
             ))
 
@@ -216,9 +216,9 @@ class RobotsAnalyzer(BaseAnalyzer):
                 category="canonical_issues",
                 severity=SeverityLevel.WARNING,
                 message=self.t("analyzer_content.robots.issues.canonical_issues", count=len(canonical_issues)),
-                details=self.t("analyzer_content.robots.issues.canonical_issues_details"),
+                details=self.t("analyzer_content.robots.details.canonical_issues"),
                 affected_urls=[c['url'] for c in canonical_issues[:20]],
-                recommendation=self.t("analyzer_content.robots.issues.canonical_issues_recommendation"),
+                recommendation=self.t("analyzer_content.robots.recommendations.canonical_issues"),
                 count=len(canonical_issues),
             ))
 

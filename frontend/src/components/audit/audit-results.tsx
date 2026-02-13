@@ -14,7 +14,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { AnalyzerSection } from "./analyzer-section";
 import { cn } from "@/lib/utils";
 import type { AuditResults, SeverityLevel, AnalyzerResult } from "@/types/audit";
@@ -31,6 +31,7 @@ type FilterMode = "all" | "error" | "warning" | "success";
 export function AuditResultsView({ results, meta, auditId }: AuditResultsViewProps) {
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations("audit");
   const [filter, setFilter] = useState<FilterMode>("all");
   const [search, setSearch] = useState("");
   const [exportOpen, setExportOpen] = useState(false);
@@ -106,10 +107,10 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
   }
 
   const filterButtons: { key: FilterMode; label: string; icon: React.ReactNode }[] = [
-    { key: "all", label: "All", icon: <Filter className="h-3.5 w-3.5" /> },
-    { key: "error", label: "Errors", icon: <XCircle className="h-3.5 w-3.5" /> },
-    { key: "warning", label: "Warnings", icon: <AlertTriangle className="h-3.5 w-3.5" /> },
-    { key: "success", label: "Passed", icon: <CheckCircle className="h-3.5 w-3.5" /> },
+    { key: "all", label: t("filterAll"), icon: <Filter className="h-3.5 w-3.5" /> },
+    { key: "error", label: t("filterErrors"), icon: <XCircle className="h-3.5 w-3.5" /> },
+    { key: "warning", label: t("filterWarnings"), icon: <AlertTriangle className="h-3.5 w-3.5" /> },
+    { key: "success", label: t("filterPassed"), icon: <CheckCircle className="h-3.5 w-3.5" /> },
   ];
 
   return (
@@ -120,7 +121,7 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
         className="mb-4 flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
       >
         <ArrowLeft className="h-4 w-4" />
-        Back to Dashboard
+        {t("backToDashboard")}
       </button>
 
       <div className="flex gap-6">
@@ -128,7 +129,7 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
         <aside className="hidden w-56 shrink-0 xl:block">
         <div className="sticky top-20 space-y-1">
           <p className="mb-2 px-2 text-xs font-medium uppercase text-gray-600 dark:text-gray-500">
-            Sections
+            {t("sections")}
           </p>
           {Object.entries(results).map(([name, result]) => (
             <button
@@ -155,10 +156,10 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
       <div className="min-w-0 flex-1 space-y-6">
         {/* Summary stat cards */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard icon={BarChart3} label="Pages Crawled" value={pagesCrawled} color="gray" />
-          <StatCard icon={CheckCircle} label="Passed" value={passedChecks} color="green" />
-          <StatCard icon={AlertTriangle} label="Warnings" value={warnings} color="yellow" />
-          <StatCard icon={XCircle} label="Critical" value={criticalIssues} color="red" />
+          <StatCard icon={BarChart3} label={t("pagesCrawled")} value={pagesCrawled} color="gray" />
+          <StatCard icon={CheckCircle} label={t("passedChecks")} value={passedChecks} color="green" />
+          <StatCard icon={AlertTriangle} label={t("warnings")} value={warnings} color="yellow" />
+          <StatCard icon={XCircle} label={t("criticalIssues")} value={criticalIssues} color="red" />
         </div>
 
         {/* Filter bar */}
@@ -187,7 +188,7 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search issues..."
+              placeholder={t("searchIssues")}
               className="w-full rounded-lg border py-1.5 pl-8 pr-3 text-sm outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-400/30 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-white dark:focus:ring-white/20"
             />
           </div>
@@ -208,12 +209,12 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
               {exportingFormat ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Generating {exportingFormat.toUpperCase()}...
+                  {t("generating", { format: exportingFormat.toUpperCase() })}
                 </>
               ) : (
                 <>
                   <Download className="h-4 w-4" />
-                  Export
+                  {t("export")}
                   <ChevronDown className="h-3.5 w-3.5" />
                 </>
               )}
@@ -226,7 +227,7 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
                     onClick={() => handleExport(fmt)}
                     className="block w-full px-3 py-1.5 text-left text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
                   >
-                    {fmt.toUpperCase()} Report
+                    {fmt.toUpperCase()}
                   </button>
                 ))}
               </div>
@@ -237,7 +238,7 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
         {/* Analyzer sections */}
         {analyzerEntries.length === 0 ? (
           <div className="py-12 text-center text-sm text-gray-500 dark:text-gray-400">
-            No results match your filter.
+            {t("noMatchingResults")}
           </div>
         ) : (
           analyzerEntries.map(([name, result]) => (

@@ -12,6 +12,8 @@ from pathlib import Path
 from typing import Dict, Tuple, List, Set
 from urllib.parse import urlparse
 
+from .utils import extract_domain
+
 # Setup logger
 logger = logging.getLogger(__name__)
 
@@ -119,17 +121,13 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS — allow frontend origins (dev + production)
+# CORS — origins from CORS_ORIGINS env var (comma-separated)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "https://seo-audit.online",
-    ],
+    allow_origins=[o.strip() for o in settings.CORS_ORIGINS.split(",") if o.strip()],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 # Mount static files
@@ -201,7 +199,7 @@ class BroadcastChannel:
 audits: Dict[str, Tuple[AuditResult, float]] = {}  # (audit, timestamp)
 broadcast_channels: Dict[str, BroadcastChannel] = {}
 audit_progress_history: Dict[str, deque] = {}  # Store last 20 events per audit
-AUDIT_TTL = 3600  # 1 hour in seconds
+AUDIT_TTL = settings.AUDIT_TTL
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -262,7 +260,7 @@ async def audit_status(audit_id: str):
 
             # Stream new events
             start_time = time.time()
-            MAX_SSE_DURATION = 900  # 15 minutes max SSE connection
+            MAX_SSE_DURATION = settings.MAX_SSE_DURATION
 
             while True:
                 # Check if connection is too old
@@ -398,7 +396,7 @@ async def download_report(audit_id: str, format: str = "html"):
         raise HTTPException(status_code=400, detail="Audit not completed yet")
 
     # Extract domain for filename
-    domain = urlparse(audit.url).netloc.replace("www.", "")
+    domain = extract_domain(audit.url)
     date_str = datetime.now().strftime("%Y-%m-%d")
 
     format = format.lower()
@@ -566,15 +564,13 @@ async def run_audit(audit_id: str, request: AuditRequest):
                 ))
 
                 try:
-                    # Wrap analyzer call with 60-second timeout to prevent hanging audits
                     result = await asyncio.wait_for(
                         analyzer.analyze(pages, url),
-                        timeout=60
+                        timeout=settings.ANALYZER_TIMEOUT
                     )
                     return analyzer.name, result
                 except asyncio.TimeoutError:
-                    # Analyzer exceeded timeout
-                    logger.error(f"Analyzer {analyzer.name} timed out after 60 seconds")
+                    logger.error(f"Analyzer {analyzer.name} timed out after {settings.ANALYZER_TIMEOUT} seconds")
                     return analyzer.name, None
                 except Exception as e:
                     # Log error but don't break other analyzers
@@ -681,7 +677,7 @@ async def run_audit(audit_id: str, request: AuditRequest):
     except Exception as e:
         logger.error(f"Audit {audit_id} failed: {e}", exc_info=True)
         audit.status = AuditStatus.FAILED
-        audit.error_message = str(e)
+        audit.error_message = "An internal error occurred during the audit. Please try again."
 
         # Cleanup: free memory from pages and cached data
         if hasattr(audit, 'pages') and audit.pages:
@@ -702,7 +698,7 @@ async def run_audit(audit_id: str, request: AuditRequest):
         await emit_progress(ProgressEvent(
             status=AuditStatus.FAILED,
             progress=0,
-            message=t("progress.failed", lang, error=str(e)),
+            message=t("progress.failed", lang, error="internal error"),
             stage="error",
         ))
 

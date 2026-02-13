@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ArrowUpDown } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { TableData } from "@/types/audit";
 
@@ -12,6 +13,7 @@ interface AnalyzerTableProps {
 export function AnalyzerTable({ table }: AnalyzerTableProps) {
   const [sortCol, setSortCol] = useState<number | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const t = useTranslations("audit");
 
   const headers = table.headers || [];
   // Convert dict rows to arrays (backend compatibility)
@@ -87,7 +89,7 @@ export function AnalyzerTable({ table }: AnalyzerTableProps) {
                     key={ci}
                     className="whitespace-nowrap px-3 py-1.5 text-xs text-gray-900 dark:text-gray-200"
                   >
-                    {renderCell(cell)}
+                    {renderCell(cell, t)}
                   </td>
                 ))}
               </tr>
@@ -96,7 +98,7 @@ export function AnalyzerTable({ table }: AnalyzerTableProps) {
         </table>
         {sortedRows.length === 0 && (
           <div className="px-3 py-4 text-center text-xs text-gray-400">
-            No data
+            {t("noData")}
           </div>
         )}
       </div>
@@ -104,13 +106,13 @@ export function AnalyzerTable({ table }: AnalyzerTableProps) {
   );
 }
 
-function renderCell(val: string | number | boolean | null) {
+function renderCell(val: string | number | boolean | null, t: (key: string) => string) {
   if (val === null || val === undefined) return "—";
   if (typeof val === "boolean") {
     return val ? (
-      <span className="text-green-600 dark:text-green-400">Yes</span>
+      <span className="text-green-600 dark:text-green-400">{t("yes")}</span>
     ) : (
-      <span className="text-red-600 dark:text-red-400">No</span>
+      <span className="text-red-600 dark:text-red-400">{t("no")}</span>
     );
   }
   const str = String(val);

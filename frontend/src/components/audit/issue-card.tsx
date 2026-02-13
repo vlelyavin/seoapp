@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown, ChevronRight, ExternalLink } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { AuditIssue } from "@/types/audit";
 import { SEVERITY_COLORS } from "@/types/audit";
@@ -12,6 +13,7 @@ interface IssueCardProps {
 
 export function IssueCard({ issue }: IssueCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const t = useTranslations("audit");
   const colors = SEVERITY_COLORS[issue.severity];
   const hasDetails = issue.details || issue.affected_urls.length > 0 || issue.recommendation;
 
@@ -57,7 +59,7 @@ export function IssueCard({ issue }: IssueCardProps) {
 
           {issue.recommendation && (
             <div className="mb-2 rounded border border-gray-200 bg-gray-50 px-2 py-1.5 text-xs text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
-              <span className="font-medium">Recommendation: </span>
+              <span className="font-medium">{t("recommendation")} </span>
               {issue.recommendation}
             </div>
           )}
@@ -65,7 +67,7 @@ export function IssueCard({ issue }: IssueCardProps) {
           {issue.affected_urls.length > 0 && (
             <div>
               <p className="mb-1 text-xs font-medium text-gray-700 dark:text-gray-400">
-                Affected URLs ({issue.affected_urls.length}):
+                {t("affectedUrls", { count: issue.affected_urls.length })}
               </p>
               <ul className="max-h-40 space-y-0.5 overflow-y-auto">
                 {issue.affected_urls.map((url, i) => (

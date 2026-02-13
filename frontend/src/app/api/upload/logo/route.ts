@@ -3,6 +3,8 @@ import { auth } from "@/lib/auth";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 
+const ALLOWED_EXTENSIONS = new Set(["jpg", "jpeg", "png", "gif", "webp", "svg"]);
+
 export async function POST(req: Request) {
   const session = await auth();
   if (!session?.user) {
@@ -26,10 +28,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "File too large (max 2MB)" }, { status: 400 });
   }
 
+  // Validate file extension
+  const ext = file.name.split(".").pop()?.toLowerCase() || "";
+  if (!ALLOWED_EXTENSIONS.has(ext)) {
+    return NextResponse.json(
+      { error: `File extension not allowed. Allowed: ${[...ALLOWED_EXTENSIONS].join(", ")}` },
+      { status: 400 }
+    );
+  }
+
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
 
-  const ext = file.name.split(".").pop() || "png";
   const filename = `logo_${session.user.id}.${ext}`;
   const uploadDir = join(process.cwd(), "public", "uploads");
   await mkdir(uploadDir, { recursive: true });

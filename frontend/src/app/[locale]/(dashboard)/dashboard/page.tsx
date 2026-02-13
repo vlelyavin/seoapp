@@ -153,12 +153,12 @@ export default function DashboardPage() {
                           <span>{audit.pagesCrawled} {t("page", { count: audit.pagesCrawled })}</span>
                           {audit.criticalIssues > 0 && (
                             <span className="text-red-500">
-                              {audit.criticalIssues} critical
+                              {audit.criticalIssues} {t("criticalLabel")}
                             </span>
                           )}
                           {audit.warnings > 0 && (
                             <span className="text-yellow-500">
-                              {audit.warnings} warnings
+                              {audit.warnings} {t("warningsLabel")}
                             </span>
                           )}
                         </>

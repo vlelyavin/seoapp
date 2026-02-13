@@ -45,8 +45,8 @@ class SecurityAnalyzer(BaseAnalyzer):
                 category="no_https",
                 severity=SeverityLevel.ERROR,
                 message=self.t("analyzer_content.security.issues.no_https"),
-                details=self.t("analyzer_content.security.issues.no_https_details"),
-                recommendation=self.t("analyzer_content.security.issues.no_https_recommendation"),
+                details=self.t("analyzer_content.security.details.no_https"),
+                recommendation=self.t("analyzer_content.security.recommendations.no_https"),
             ))
 
         # 2. Check security headers on homepage
@@ -64,16 +64,16 @@ class SecurityAnalyzer(BaseAnalyzer):
                 "category": "missing_hsts",
                 "severity": SeverityLevel.WARNING,
                 "message": self.t("analyzer_content.security.issues.missing_hsts"),
-                "details": self.t("analyzer_content.security.issues.missing_hsts_details"),
-                "recommendation": self.t("analyzer_content.security.issues.missing_hsts_recommendation"),
+                "details": self.t("analyzer_content.security.details.missing_hsts"),
+                "recommendation": self.t("analyzer_content.security.recommendations.missing_hsts"),
             },
             "x-content-type-options": {
                 "name": "X-Content-Type-Options",
                 "category": "missing_x_content_type",
                 "severity": SeverityLevel.INFO,
                 "message": self.t("analyzer_content.security.issues.missing_x_content_type"),
-                "details": self.t("analyzer_content.security.issues.missing_x_content_type_details"),
-                "recommendation": self.t("analyzer_content.security.issues.missing_x_content_type_recommendation"),
+                "details": self.t("analyzer_content.security.details.missing_x_content_type"),
+                "recommendation": self.t("analyzer_content.security.recommendations.missing_x_content_type"),
                 "expected_value": "nosniff",
             },
             "x-frame-options": {
@@ -81,8 +81,8 @@ class SecurityAnalyzer(BaseAnalyzer):
                 "category": "missing_x_frame",
                 "severity": SeverityLevel.INFO,
                 "message": self.t("analyzer_content.security.issues.missing_x_frame"),
-                "details": self.t("analyzer_content.security.issues.missing_x_frame_details"),
-                "recommendation": self.t("analyzer_content.security.issues.missing_x_frame_recommendation"),
+                "details": self.t("analyzer_content.security.details.missing_x_frame"),
+                "recommendation": self.t("analyzer_content.security.recommendations.missing_x_frame"),
                 "expected_values": ["deny", "sameorigin"],
             },
             "content-security-policy": {
@@ -90,8 +90,8 @@ class SecurityAnalyzer(BaseAnalyzer):
                 "category": "missing_csp",
                 "severity": SeverityLevel.INFO,
                 "message": self.t("analyzer_content.security.issues.missing_csp"),
-                "details": self.t("analyzer_content.security.issues.missing_csp_details"),
-                "recommendation": self.t("analyzer_content.security.issues.missing_csp_recommendation"),
+                "details": self.t("analyzer_content.security.details.missing_csp"),
+                "recommendation": self.t("analyzer_content.security.recommendations.missing_csp"),
             },
         }
 
@@ -188,9 +188,9 @@ class SecurityAnalyzer(BaseAnalyzer):
                 category="mixed_content",
                 severity=SeverityLevel.ERROR,
                 message=self.t("analyzer_content.security.issues.mixed_content", count=len(pages_with_mixed_content)),
-                details=self.t("analyzer_content.security.issues.mixed_content_details"),
+                details=self.t("analyzer_content.security.details.mixed_content"),
                 affected_urls=pages_with_mixed_content[:20],
-                recommendation=self.t("analyzer_content.security.issues.mixed_content_recommendation"),
+                recommendation=self.t("analyzer_content.security.recommendations.mixed_content"),
                 count=len(pages_with_mixed_content),
             ))
 
@@ -200,7 +200,7 @@ class SecurityAnalyzer(BaseAnalyzer):
                 category="security_ok",
                 severity=SeverityLevel.SUCCESS,
                 message=self.t("analyzer_content.security.issues.security_ok"),
-                details=self.t("analyzer_content.security.issues.security_ok_details"),
+                details=self.t("analyzer_content.security.details.security_ok"),
             ))
 
         # 5. Build security headers table

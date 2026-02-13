@@ -30,18 +30,21 @@ class DuplicatesAnalyzer(BaseAnalyzer):
     def theory(self) -> str:
         return self.t("analyzer_content.duplicates.theory")
 
+    _EXCLUDED_TAGS = frozenset({"script", "style", "noscript"})
+
     def _extract_text(self, soup: 'BeautifulSoup') -> str:
-        """Extract and normalize text from parsed HTML soup.
+        """Extract and normalize text from parsed HTML soup (non-destructive).
 
         Args:
             soup: BeautifulSoup object (cached from PageData)
         """
-        # Remove script and style elements
-        for element in soup(["script", "style", "noscript"]):
-            element.decompose()
-        text = soup.get_text(separator=" ")
-        # Normalize whitespace
-        text = re.sub(r"\s+", " ", text).strip().lower()
+        texts = []
+        for element in soup.find_all(string=True):
+            if element.parent.name not in self._EXCLUDED_TAGS:
+                stripped = element.strip()
+                if stripped:
+                    texts.append(stripped)
+        text = re.sub(r"\s+", " ", " ".join(texts)).strip().lower()
         return text
 
     def _create_shingles(self, text: str, shingle_size: int = 3) -> set:
@@ -102,7 +105,7 @@ class DuplicatesAnalyzer(BaseAnalyzer):
             if not shingles:
                 continue
 
-            signature = self._create_minhash_signature(shingles, num_hashes=100)
+            signature = self._create_minhash_signature(shingles)
             signatures[url] = signature
             word_counts[url] = page.word_count
 

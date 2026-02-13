@@ -23,7 +23,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setError("");
 
-    if (password.length < 6) {
+    if (password.length < 8) {
       setError(t("passwordMinLength"));
       return;
     }

@@ -14,7 +14,9 @@ export async function GET(
 
   const { id } = await params;
   const { searchParams } = new URL(req.url);
-  const lang = searchParams.get("lang") || "en";
+  const rawLang = searchParams.get("lang") || "en";
+  const allowedLanguages = ["en", "uk", "ru"];
+  const lang = allowedLanguages.includes(rawLang) ? rawLang : "en";
 
   const audit = await prisma.audit.findUnique({ where: { id } });
 

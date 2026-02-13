@@ -1,15 +1,19 @@
 """HTML report generator."""
 
 import copy
+import logging
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlparse
+
+logger = logging.getLogger(__name__)
 
 from jinja2 import Environment, FileSystemLoader
 
 from .config import settings
 from .i18n import get_translator, _
 from .models import AnalyzerResult, AuditResult, SeverityLevel
+from .utils import extract_domain
 
 # Singleton instance for ReportGenerator
 _report_generator_instance = None
@@ -699,7 +703,7 @@ class ReportGenerator:
                 })
 
         # Extract domain
-        domain = urlparse(audit.url).netloc.replace("www.", "")
+        domain = extract_domain(audit.url)
 
         # Prepare translations for template
         translations = {
@@ -1068,7 +1072,7 @@ class ReportGenerator:
         }
 
         # Extract domain
-        domain = urlparse(audit.url).netloc.replace("www.", "")
+        domain = extract_domain(audit.url)
 
         # Create document
         doc = Document()
@@ -1165,8 +1169,8 @@ class ReportGenerator:
                 img_bytes = b64.b64decode(audit.homepage_screenshot)
                 img_stream = BytesIO(img_bytes)
                 doc.add_picture(img_stream, width=Inches(6.0))
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning(f"Failed to add homepage screenshot to DOCX: {e}")
             doc.add_paragraph()
 
         # --- Results Sections ---
@@ -1312,8 +1316,8 @@ class ReportGenerator:
                                 img_bytes = b64.b64decode(ss_data)
                                 img_stream = BytesIO(img_bytes)
                                 doc.add_picture(img_stream, width=Inches(6.0))
-                            except Exception:
-                                pass
+                            except Exception as e:
+                                logger.warning(f"Failed to add PageSpeed screenshot to DOCX: {e}")
 
             doc.add_paragraph()  # spacing between sections
 

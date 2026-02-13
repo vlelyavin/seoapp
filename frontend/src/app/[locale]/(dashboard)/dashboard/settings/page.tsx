@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { Save, User } from "lucide-react";
@@ -9,6 +9,9 @@ export default function SettingsPage() {
   const t = useTranslations("settings");
   const { data: session, update } = useSession();
   const [name, setName] = useState(session?.user?.name || "");
+  useEffect(() => {
+    if (session?.user?.name) setName(session.user.name);
+  }, [session?.user?.name]);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [saving, setSaving] = useState(false);
@@ -27,22 +30,22 @@ export default function SettingsPage() {
       });
 
       if (res.ok) {
-        setMessage("Profile updated");
+        setMessage(t("profileUpdated"));
         await update();
       } else {
         const data = await res.json();
-        setMessage(data.error || "Failed to update");
+        setMessage(data.error || t("failedToUpdate"));
       }
     } catch {
-      setMessage("Error saving");
+      setMessage(t("errorSaving"));
     }
     setSaving(false);
   }
 
   async function handleChangePassword(e: React.FormEvent) {
     e.preventDefault();
-    if (newPassword.length < 6) {
-      setMessage("Password must be at least 6 characters");
+    if (newPassword.length < 8) {
+      setMessage(t("passwordMinLength"));
       return;
     }
     setSaving(true);
@@ -56,15 +59,15 @@ export default function SettingsPage() {
       });
 
       if (res.ok) {
-        setMessage("Password changed");
+        setMessage(t("passwordChanged"));
         setCurrentPassword("");
         setNewPassword("");
       } else {
         const data = await res.json();
-        setMessage(data.error || "Failed to change password");
+        setMessage(data.error || t("failedToChangePassword"));
       }
     } catch {
-      setMessage("Error saving");
+      setMessage(t("errorSaving"));
     }
     setSaving(false);
   }
@@ -101,7 +104,7 @@ export default function SettingsPage() {
 
         <div className="mb-4">
           <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            {t("profile")} Name
+            {t("name")}
           </label>
           <input
             type="text"
@@ -147,7 +150,7 @@ export default function SettingsPage() {
             type="password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
-            minLength={6}
+            minLength={8}
             className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-gray-500 focus:ring-2 focus:ring-gray-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-white dark:focus:ring-white/20"
           />
         </div>

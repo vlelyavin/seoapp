@@ -16,6 +16,42 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "URL is required" }, { status: 400 });
   }
 
+  // Validate URL: protocol + block private/reserved IPs (SSRF protection)
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(url);
+  } catch {
+    return NextResponse.json({ error: "Invalid URL format" }, { status: 400 });
+  }
+
+  if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+    return NextResponse.json({ error: "Only HTTP and HTTPS URLs are allowed" }, { status: 400 });
+  }
+
+  const hostname = parsedUrl.hostname.toLowerCase();
+  const isPrivate =
+    hostname === "localhost" ||
+    hostname === "[::1]" ||
+    /^127\./.test(hostname) ||
+    /^10\./.test(hostname) ||
+    /^192\.168\./.test(hostname) ||
+    /^172\.(1[6-9]|2\d|3[01])\./.test(hostname) ||
+    /^169\.254\./.test(hostname) ||
+    /^0\./.test(hostname) ||
+    hostname.startsWith("fc") ||
+    hostname.startsWith("fd") ||
+    hostname.startsWith("fe80");
+
+  if (isPrivate) {
+    return NextResponse.json({ error: "URLs pointing to private/internal networks are not allowed" }, { status: 400 });
+  }
+
+  // Validate language
+  const allowedLanguages = ["en", "uk", "ru"];
+  if (!allowedLanguages.includes(language)) {
+    return NextResponse.json({ error: "Unsupported language" }, { status: 400 });
+  }
+
   // Check plan limits
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },

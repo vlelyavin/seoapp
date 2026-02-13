@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class ScreenshotCapture:
     """Captures screenshots using Playwright."""
 
-    DESKTOP_VIEWPORT = {"width": 1920, "height": 1080}
+    DESKTOP_VIEWPORT = {"width": settings.VIEWPORT_WIDTH, "height": settings.VIEWPORT_HEIGHT}
     MOBILE_VIEWPORT = {"width": 375, "height": 812}
 
     def __init__(self):
@@ -65,6 +65,8 @@ class ScreenshotCapture:
                     return self.to_base64(screenshot_bytes)
 
                 finally:
+                    await page.close()
+                    await context.close()
                     await browser.close()
 
         except Exception as e:
@@ -259,9 +261,8 @@ class ScreenshotCapture:
     @staticmethod
     def _url_to_filename(url: str) -> str:
         """Convert URL to safe filename."""
-        from urllib.parse import urlparse
-        parsed = urlparse(url)
-        domain = parsed.netloc.replace("www.", "").replace(".", "_")
+        from .utils import extract_domain
+        domain = extract_domain(url).replace(".", "_")
         return domain[:50]
 
 

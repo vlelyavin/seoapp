@@ -7,6 +7,7 @@ import { Save, Upload, Lock } from "lucide-react";
 
 export default function BrandingPage() {
   const t = useTranslations("branding");
+  const tCommon = useTranslations("common");
   const { data: session } = useSession();
   const [companyName, setCompanyName] = useState("");
   const [primaryColor, setPrimaryColor] = useState("#2563eb");
@@ -52,13 +53,13 @@ export default function BrandingPage() {
       });
 
       if (res.ok) {
-        setMessage("Branding settings saved");
+        setMessage(t("brandingSaved"));
       } else {
         const data = await res.json();
-        setMessage(data.error || "Failed to save");
+        setMessage(data.error || t("errorSaving"));
       }
     } catch {
-      setMessage("Error saving");
+      setMessage(t("errorSaving"));
     }
     setSaving(false);
   }
@@ -91,14 +92,14 @@ export default function BrandingPage() {
       if (res.ok) {
         const data = await res.json();
         setLogoUrl(data.url);
-        setMessage("Logo uploaded successfully");
+        setMessage(t("logoUploaded"));
       } else {
         const data = await res.json();
         setUploadError(data.error || "Upload failed");
         setPreviewUrl(null); // Clear preview on error
       }
     } catch (error) {
-      setUploadError("Network error. Please try again.");
+      setUploadError(t("networkError"));
       setPreviewUrl(null);
     } finally {
       setUploading(false);
@@ -143,7 +144,7 @@ export default function BrandingPage() {
             type="text"
             value={companyName}
             onChange={(e) => setCompanyName(e.target.value)}
-            placeholder="Your Company"
+            placeholder={t("companyNamePlaceholder")}
             className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-gray-500 focus:ring-2 focus:ring-gray-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-white dark:focus:ring-white/20"
           />
         </div>
@@ -173,7 +174,7 @@ export default function BrandingPage() {
             )}
             {imageError && (logoUrl || previewUrl) && (
               <div className="flex h-16 w-16 items-center justify-center rounded border border-dashed border-gray-300 bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
-                <span className="text-xs text-gray-400">Failed to load</span>
+                <span className="text-xs text-gray-400">{t("failedToLoad")}</span>
               </div>
             )}
             <label className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm ${
@@ -182,7 +183,7 @@ export default function BrandingPage() {
                 : 'hover:bg-gray-50 dark:hover:bg-gray-800'
             } text-gray-700 dark:border-gray-700 dark:text-gray-300`}>
               <Upload className="h-4 w-4" />
-              {uploading ? "Uploading..." : t("uploadLogo")}
+              {uploading ? t("uploading") : t("uploadLogo")}
               <input
                 type="file"
                 accept="image/*"
@@ -245,7 +246,7 @@ export default function BrandingPage() {
           className="flex items-center gap-2 rounded-lg bg-gray-900 text-white hover:bg-gray-800 px-4 py-2 text-sm font-medium dark:bg-white dark:text-black dark:hover:bg-gray-200 disabled:opacity-50"
         >
           <Save className="h-4 w-4" />
-          {saving ? "..." : "Save"}
+          {saving ? "..." : tCommon("save")}
         </button>
       </form>
     </div>

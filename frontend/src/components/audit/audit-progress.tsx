@@ -50,7 +50,7 @@ export function AuditProgressView({ progress }: AuditProgressViewProps) {
         <div className="mb-6">
           <div className="mb-1.5 flex items-center justify-between text-xs text-gray-400">
             <span>{Math.round(pct)}%</span>
-            {pagesCrawled > 0 && <span>{pagesCrawled} pages</span>}
+            {pagesCrawled > 0 && <span>{t("pages", { count: pagesCrawled })}</span>}
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-gray-700">
             <div

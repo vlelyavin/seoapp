@@ -39,7 +39,7 @@
     "registerError": "Ошибка регистрации",
     "emailRequired": "Email обязателен",
     "passwordRequired": "Пароль обязателен",
-    "passwordMinLength": "Пароль должен быть не менее 6 символов",
+    "passwordMinLength": "Пароль должен быть не менее 8 символов",
     "passwordMismatch": "Пароли не совпадают",
     "emailTaken": "Этот email уже зарегистрирован"
   },
@@ -57,7 +57,9 @@
     "deleteAudit": "Удалить аудит",
     "confirmDelete": "Вы уверены, что хотите удалить этот аудит?",
     "confirmDeleteMessage": "Это действие нельзя отменить. Все данные аудита и результаты будут безвозвратно удалены.",
-    "deleting": "Удаление..."
+    "deleting": "Удаление...",
+    "criticalLabel": "критических",
+    "warningsLabel": "предупреждений"
   },
   "audit": {
     "title": "SEO Аудит",
@@ -99,7 +101,17 @@
     "connectionLost": "Соединение потеряно. Аудит может ещё выполняться в фоновом режиме.",
     "refreshToReconnect": "Обновить для переподключения",
     "error": "Ошибка",
-    "noResults": "Результаты отсутствуют."
+    "noResults": "Результаты отсутствуют.",
+    "recommendation": "Рекомендация:",
+    "affectedUrls": "Затронутые URL ({count}):",
+    "pages": "{count} страниц",
+    "sections": "Разделы",
+    "searchIssues": "Поиск проблем...",
+    "noMatchingResults": "Нет результатов, соответствующих фильтру.",
+    "noData": "Нет данных",
+    "yes": "Да",
+    "no": "Нет",
+    "generating": "Генерация {format}..."
   },
   "settings": {
     "title": "Настройки",
@@ -112,18 +124,42 @@
     "light": "Светлая",
     "dark": "Тёмная",
     "system": "Системная",
-    "language": "Язык"
+    "language": "Язык",
+    "name": "Имя",
+    "passwordMinLength": "Пароль должен быть не менее 8 символов",
+    "profileUpdated": "Профиль обновлён",
+    "passwordChanged": "Пароль изменён",
+    "failedToUpdate": "Не удалось обновить",
+    "failedToChangePassword": "Не удалось изменить пароль",
+    "errorSaving": "Ошибка сохранения"
   },
   "branding": {
     "title": "Брендинг",
     "description": "Настройте внешний вид экспортируемых отчётов",
     "companyName": "Название компании",
+    "companyNamePlaceholder": "Ваша компания",
     "logo": "Логотип",
     "uploadLogo": "Загрузить логотип",
     "primaryColor": "Основной цвет",
     "accentColor": "Акцентный цвет",
     "preview": "Предпросмотр",
-    "proRequired": "Требуется план Pro или Agency"
+    "proRequired": "Требуется план Pro или Agency",
+    "brandingSaved": "Настройки брендинга сохранены",
+    "errorSaving": "Ошибка сохранения",
+    "logoUploaded": "Логотип успешно загружен",
+    "networkError": "Ошибка сети. Попробуйте ещё раз.",
+    "failedToLoad": "Не удалось загрузить",
+    "uploading": "Загрузка..."
+  },
+  "admin": {
+    "title": "Пользователи",
+    "accessRequired": "Требуется доступ администратора",
+    "email": "Email",
+    "name": "Имя",
+    "role": "Роль",
+    "plan": "План",
+    "audits": "Аудиты",
+    "joined": "Присоединился"
   },
   "plans": {
     "free": "Бесплатный",

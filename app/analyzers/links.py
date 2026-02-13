@@ -112,9 +112,9 @@ class LinksAnalyzer(BaseAnalyzer):
                 category="broken_internal",
                 severity=SeverityLevel.ERROR,
                 message=self.t("analyzer_content.links.issues.broken_internal", count=len(broken_internal)),
-                details=self.t("analyzer_content.links.issues.broken_internal_details"),
+                details=self.t("analyzer_content.links.details.broken_internal"),
                 affected_urls=[link['url'] for link in broken_internal[:20]],
-                recommendation=self.t("analyzer_content.links.issues.broken_internal_recommendation"),
+                recommendation=self.t("analyzer_content.links.recommendations.broken_internal"),
                 count=len(broken_internal),
             ))
 
@@ -124,9 +124,9 @@ class LinksAnalyzer(BaseAnalyzer):
                 category="broken_external",
                 severity=SeverityLevel.WARNING,
                 message=self.t("analyzer_content.links.issues.broken_external", count=len(broken_external)),
-                details=self.t("analyzer_content.links.issues.broken_external_details"),
+                details=self.t("analyzer_content.links.details.broken_external"),
                 affected_urls=[link['url'] for link in broken_external[:20]],
-                recommendation=self.t("analyzer_content.links.issues.broken_external_recommendation"),
+                recommendation=self.t("analyzer_content.links.recommendations.broken_external"),
                 count=len(broken_external),
             ))
 

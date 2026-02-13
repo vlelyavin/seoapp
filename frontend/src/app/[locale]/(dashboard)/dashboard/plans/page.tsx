@@ -13,7 +13,7 @@ export default function PlansPage() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [switching, setSwitching] = useState<string | null>(null);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   useEffect(() => {
     async function loadPlans() {
@@ -32,7 +32,7 @@ export default function PlansPage() {
 
   async function handleSelectPlan(planId: string) {
     setSwitching(planId);
-    setMessage("");
+    setMessage(null);
 
     try {
       const res = await fetch("/api/user/plan", {
@@ -42,15 +42,15 @@ export default function PlansPage() {
       });
 
       if (res.ok) {
-        setMessage(t("planUpdated"));
+        setMessage({ type: "success", text: t("planUpdated") });
         // Refresh session to update planId in JWT
         await update();
       } else {
         const data = await res.json();
-        setMessage(data.error || t("updateFailed"));
+        setMessage({ type: "error", text: data.error || t("updateFailed") });
       }
     } catch {
-      setMessage(t("updateFailed"));
+      setMessage({ type: "error", text: t("updateFailed") });
     }
     setSwitching(null);
   }
@@ -78,12 +78,12 @@ export default function PlansPage() {
         <div
           className={cn(
             "rounded-lg px-4 py-2 text-sm",
-            message.includes("error") || message.includes("failed") || message.includes("Failed")
+            message.type === "error"
               ? "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300"
               : "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300"
           )}
         >
-          {message}
+          {message.text}
         </div>
       )}
 

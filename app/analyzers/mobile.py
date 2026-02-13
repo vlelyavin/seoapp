@@ -99,7 +99,7 @@ class MobileAnalyzer(BaseAnalyzer):
                 category="viewport_ok",
                 severity=SeverityLevel.SUCCESS,
                 message=self.t("analyzer_content.mobile.issues.viewport_ok", count=total_ok),
-                details=self.t("analyzer_content.mobile.issues.viewport_ok_details"),
+                details=self.t("analyzer_content.mobile.details.viewport_ok"),
                 count=total_ok,
             ))
 
@@ -108,9 +108,9 @@ class MobileAnalyzer(BaseAnalyzer):
                 category="missing_viewport",
                 severity=SeverityLevel.ERROR,
                 message=self.t("analyzer_content.mobile.issues.missing_viewport", count=len(pages_no_viewport)),
-                details=self.t("analyzer_content.mobile.issues.missing_viewport_details"),
+                details=self.t("analyzer_content.mobile.details.missing_viewport"),
                 affected_urls=pages_no_viewport[:20],
-                recommendation=self.t("analyzer_content.mobile.issues.missing_viewport_recommendation"),
+                recommendation=self.t("analyzer_content.mobile.recommendations.missing_viewport"),
                 count=len(pages_no_viewport),
             ))
 
@@ -119,9 +119,9 @@ class MobileAnalyzer(BaseAnalyzer):
                 category="bad_viewport",
                 severity=SeverityLevel.WARNING,
                 message=self.t("analyzer_content.mobile.issues.bad_viewport", count=len(pages_bad_viewport)),
-                details=self.t("analyzer_content.mobile.issues.bad_viewport_details"),
+                details=self.t("analyzer_content.mobile.details.bad_viewport"),
                 affected_urls=pages_bad_viewport[:20],
-                recommendation=self.t("analyzer_content.mobile.issues.bad_viewport_recommendation"),
+                recommendation=self.t("analyzer_content.mobile.recommendations.bad_viewport"),
                 count=len(pages_bad_viewport),
             ))
 
@@ -130,9 +130,9 @@ class MobileAnalyzer(BaseAnalyzer):
                 category="flash_content",
                 severity=SeverityLevel.ERROR,
                 message=self.t("analyzer_content.mobile.issues.flash_content", count=len(pages_with_flash)),
-                details=self.t("analyzer_content.mobile.issues.flash_content_details"),
+                details=self.t("analyzer_content.mobile.details.flash_content"),
                 affected_urls=pages_with_flash[:20],
-                recommendation=self.t("analyzer_content.mobile.issues.flash_content_recommendation"),
+                recommendation=self.t("analyzer_content.mobile.recommendations.flash_content"),
                 count=len(pages_with_flash),
             ))
 

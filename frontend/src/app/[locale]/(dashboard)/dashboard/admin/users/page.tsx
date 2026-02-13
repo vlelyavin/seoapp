@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Shield, ChevronDown } from "lucide-react";
 import { cn, formatDate } from "@/lib/utils";
 
@@ -18,6 +18,7 @@ interface UserRow {
 
 export default function AdminUsersPage() {
   const { data: session } = useSession();
+  const t = useTranslations("admin");
   const locale = useLocale();
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,7 +60,7 @@ export default function AdminUsersPage() {
     return (
       <div className="py-12 text-center">
         <Shield className="mx-auto mb-4 h-12 w-12 text-gray-300 dark:text-gray-600" />
-        <p className="text-gray-500">Admin access required</p>
+        <p className="text-gray-500">{t("accessRequired")}</p>
       </div>
     );
   }
@@ -75,19 +76,19 @@ export default function AdminUsersPage() {
   return (
     <div className="mx-auto max-w-5xl">
       <h1 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
-        Users ({users.length})
+        {t("title")} ({users.length})
       </h1>
 
       <div className="overflow-x-auto rounded-xl border dark:border-gray-800">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">Email</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">Name</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">Role</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">Plan</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">Audits</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">Joined</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">{t("email")}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">{t("name")}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">{t("role")}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">{t("plan")}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">{t("audits")}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">{t("joined")}</th>
             </tr>
           </thead>
           <tbody>

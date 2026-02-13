@@ -1,6 +1,6 @@
 """Application configuration settings."""
 
-from typing import Optional
+from typing import List, Optional
 from pydantic_settings import BaseSettings
 from pathlib import Path
 
@@ -8,6 +8,8 @@ from pathlib import Path
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
+    # CORS
+    CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000"
 
     # API Keys
     PAGESPEED_API_KEY: Optional[str] = None
@@ -41,6 +43,16 @@ class Settings(BaseSettings):
 
     # Structure limits
     MAX_CLICK_DEPTH: int = 3
+
+    # Audit lifecycle
+    AUDIT_TTL: int = 3600  # seconds before audit data is cleaned up
+    MAX_SSE_DURATION: int = 900  # max SSE stream duration in seconds
+    ANALYZER_TIMEOUT: int = 60  # per-analyzer timeout in seconds
+    MAX_IMAGE_CHECKS: int = 50  # max images to check size for
+
+    # Browser viewport
+    VIEWPORT_WIDTH: int = 1920
+    VIEWPORT_HEIGHT: int = 1080
 
     # Localization
     LANGUAGE: str = "en"  # Supported: uk, ru, en
