@@ -119,7 +119,12 @@
     "exportDownload": "Download",
     "cancel": "Cancel",
     "loadingAudit": "Loading audit...",
-    "exportGeneratingHint": "File generation started. You can close this window."
+    "exportGeneratingHint": "File generation started. You can close this window.",
+    "progressConnecting": "Connecting...",
+    "progressCrawlingStart": "Starting site crawl...",
+    "progressCrawling": "Crawled {count} pages",
+    "progressAnalyzing": "Analyzing crawled pages...",
+    "progressGeneratingReport": "Generating report..."
   },
   "settings": {
     "title": "Settings",

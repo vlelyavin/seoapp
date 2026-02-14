@@ -119,7 +119,12 @@
     "exportDownload": "Завантажити",
     "cancel": "Скасувати",
     "loadingAudit": "Завантаження аудиту...",
-    "exportGeneratingHint": "Генерація файлу запущена. Ви можете закрити це вікно."
+    "exportGeneratingHint": "Генерація файлу запущена. Ви можете закрити це вікно.",
+    "progressConnecting": "Підключення...",
+    "progressCrawlingStart": "Починаємо сканування сайту...",
+    "progressCrawling": "Проскановано {count} сторінок",
+    "progressAnalyzing": "Аналіз просканованих сторінок...",
+    "progressGeneratingReport": "Генерація звіту..."
   },
   "settings": {
     "title": "Налаштування",

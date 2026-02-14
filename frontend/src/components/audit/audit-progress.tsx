@@ -14,9 +14,24 @@ export function AuditProgressView({ progress }: AuditProgressViewProps) {
   const locale = useLocale();
   const t = useTranslations("audit");
   const pct = progress?.progress || 0;
-  const message = progress?.message || "Connecting...";
   const stage = progress?.stage || "crawling";
   const pagesCrawled = progress?.pages_crawled || 0;
+
+  function getProgressMessage(): string {
+    if (!progress) return t("progressConnecting");
+    switch (progress.stage) {
+      case "crawling":
+        return progress.pages_crawled
+          ? t("progressCrawling", { count: progress.pages_crawled })
+          : t("progressCrawlingStart");
+      case "analyzing":
+        return t("progressAnalyzing");
+      case "generating_report":
+        return t("progressGeneratingReport");
+      default:
+        return t("progressConnecting");
+    }
+  }
 
   const stages = [
     { key: "crawling", label: t("stageCrawling") },
@@ -43,7 +58,7 @@ export function AuditProgressView({ progress }: AuditProgressViewProps) {
         </h2>
 
         <p className="mb-6 text-center text-sm text-gray-400">
-          {message}
+          {getProgressMessage()}
         </p>
 
         {/* Progress bar */}
