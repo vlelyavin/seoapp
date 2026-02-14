@@ -9,7 +9,8 @@ from urllib.parse import urlparse
 logger = logging.getLogger(__name__)
 
 import re
-from jinja2 import Environment, FileSystemLoader, Markup
+from jinja2 import Environment, FileSystemLoader
+from markupsafe import Markup, escape
 
 from .config import settings
 from .i18n import get_translator, _
@@ -671,7 +672,6 @@ class ReportGenerator:
         text = str(value) if value is not None else ""
 
         # HTML-escape the text first to prevent XSS
-        from markupsafe import escape
         text = str(escape(text))
 
         # SVG icons (14×14) matching the report's existing icon style
