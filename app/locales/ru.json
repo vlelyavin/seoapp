@@ -1,20 +1,7 @@
 {
   "common": {
-    "yes": "Да",
-    "no": "Нет",
-    "error": "Ошибка",
-    "warning": "Предупреждение",
-    "info": "Информация",
-    "success": "Успешно",
-    "ok": "OK",
-    "found": "Найдено",
-    "not_found": "Не найдено",
-    "pages": "страниц",
-    "issues": "проблем",
-    "recommendations": "Рекомендация",
     "expand_more": "Развернуть ещё",
-    "collapse": "Свернуть",
-    "examples": "Примеры:"
+    "collapse": "Свернуть"
   },
   "progress": {
     "crawling_start": "Начинаем сканирование сайта...",
@@ -150,112 +137,56 @@
   "analyzers": {
     "cms": {
       "name": "CMS / Платформа",
-      "description": "Определение системы управления контентом или платформы сайта.",
-      "confidence": "Впевненість: {percent}%",
-      "detected": "Визначено: {cms}",
-      "multiple_detected": "Також виявлені ознаки: {cms_list}",
-      "not_detected": "CMS не визначено",
-      "possibly": "Возможно: {cms}",
-      "probably": "Ймовірно: {cms}"
+      "description": "Определение системы управления контентом или платформы сайта."
     },
     "meta_tags": {
       "name": "Мета-теги",
-      "description": "Мета-теги важны для SEO и отображения в поисковой выдаче.",
-      "description_too_long": "Description занадто довгий",
-      "description_too_short": "Description занадто короткий",
-      "duplicate_descriptions": "Дубликаты description",
-      "duplicate_titles": "Дубликаты title",
-      "missing_description": "Отсутствуютй meta description",
-      "missing_title": "Отсутствуютй title",
-      "title_too_long": "Title слишком длинный",
-      "title_too_short": "Title слишком короткий"
+      "description": "Мета-теги важны для SEO и отображения в поисковой выдаче."
     },
     "headings": {
       "name": "Заголовки H1-H6",
-      "description": "Анализ заголовков H1-H6: наличие, уникальность и правильная иерархия.",
-      "duplicate_h1": "Дублікати H1",
-      "h1_too_long": "H1 занадто довгий",
-      "hierarchy_violation": "Нарушение иерархии заголовків",
-      "missing_h1": "Отсутствует H1",
-      "multiple_h1": "Несколько H1"
+      "description": "Анализ заголовков H1-H6: наличие, уникальность и правильная иерархия."
     },
     "page_404": {
       "name": "Страница 404",
-      "description": "Кастомная страница 404 улучшает пользовательский опыт.",
-      "missing": "Відсутня кастомна сторінка 404",
-      "no_home_link": "Страница 404 без посилання на головну",
-      "no_navigation": "Страница 404 без навігації",
-      "no_search": "Страница 404 без пошуку",
-      "wrong_status": "Неправильний HTTP статус"
+      "description": "Кастомная страница 404 улучшает пользовательский опыт."
     },
     "speed": {
       "name": "Скорость загрузки",
-      "description": "Скорость загрузки влияет на ранжирование и пользовательский опыт.",
-      "cls_high": "{device} CLS високий",
-      "desktop_score_critical": "Критично низький Desktop Score",
-      "desktop_score_low": "Низький Desktop Score",
-      "fcp_slow": "{device} FCP повільний",
-      "lcp_slow": "{device} LCP повільний",
-      "mobile_score_critical": "Критично низький Mobile Score",
-      "mobile_score_low": "Низький Mobile Score"
+      "description": "Скорость загрузки влияет на ранжирование и пользовательский опыт."
     },
     "images": {
       "name": "Изображения",
-      "description": "Оптимизация изображений важна для скорости и SEO.",
-      "empty_alt": "Зображення з порожнім alt",
-      "large_images": "Великі зображення",
-      "missing_alt": "Зображення без alt",
-      "no_webp": "Отсутствуют WebP зображення"
+      "description": "Оптимизация изображений важна для скорости и SEO."
     },
     "content": {
       "name": "Контент",
-      "description": "Качественный контент — основа успешного SEO.",
-      "no_structured_data": "Відсутня структурована розмітка",
-      "thin_content": "Тонкий контент"
+      "description": "Качественный контент — основа успешного SEO."
     },
     "links": {
       "name": "Битые ссылки",
-      "description": "Битые ссылки вредят SEO и пользовательскому опыту.",
-      "broken_external": "Биті зовнішні посилання",
-      "broken_internal": "Биті внутрішні посилання"
+      "description": "Битые ссылки вредят SEO и пользовательскому опыту."
     },
     "favicon": {
       "name": "Фавикон",
-      "description": "Фавикон помогает узнавать сайт в браузере.",
-      "missing": "Фавікон відсутній",
-      "no_apple_touch": "Отсутствует Apple Touch Icon",
-      "no_ico": "Отсутствуютй /favicon.ico"
+      "description": "Фавикон помогает узнавать сайт в браузере."
     },
     "external_links": {
       "name": "Внешние ссылки",
-      "description": "Анализ исходящих ссылок на другие сайты.",
-      "commercial_no_nofollow": "Комерційні посилання без nofollow",
-      "many_dofollow": "Багато dofollow посилань"
+      "description": "Анализ исходящих ссылок на другие сайты."
     },
     "robots": {
       "name": "Индексация",
       "description": "Настройка robots.txt и sitemap.xml.",
-      "canonical_issues": "Проблеми з canonical",
-      "files": "Файлы",
-      "no_robots": "Файл robots.txt відсутній",
-      "no_sitemap": "Файл sitemap.xml відсутній",
-      "noindex_pages": "Страницы с noindex",
-      "sitemap_errors": "Проблеми з sitemap"
+      "files": "Файлы"
     },
     "structure": {
       "name": "Структура сайта",
-      "description": "Структура сайта влияет на индексацию.",
-      "deep_pages": "Глибоко вкладені сторінки",
-      "orphan_pages": "Сирітські сторінки"
+      "description": "Структура сайта влияет на индексацию."
     },
     "content_sections": {
       "name": "Информационные разделы",
-      "description": "Обнаружение блога, новостей, FAQ и справки.",
-      "blog_detected": "Виявлено блог/новини",
-      "faq_detected": "Виявлено FAQ/довідку",
-      "faq_no_schema": "FAQ без Schema.org розмітки",
-      "no_blog": "Блог/новини не виявлено",
-      "no_faq": "FAQ не виявлено"
+      "description": "Обнаружение блога, новостей, FAQ и справки."
     },
     "schema": {
       "name": "Структурированные данные",
@@ -331,27 +262,11 @@
         "long_description": "Слишком длинный Description: {count} страниц",
         "duplicate_title": "Дубли Title: {count} групп дубликатов",
         "duplicate_description": "Дубли Description: {count} групп дубликатов",
-        "duplicate_description_details": "Дубли Description: {count} групп дубликатов",
-        "duplicate_description_recommendation": "Дубли Description: {count} групп дубликатов",
-        "duplicate_title_details": "Дубли Title: {count} групп дубликатов",
-        "duplicate_title_recommendation": "Дубли Title: {count} групп дубликатов",
-        "long_description_details": "Слишком длинный Description: {count} страниц",
-        "long_description_recommendation": "Слишком длинный Description: {count} страниц",
-        "long_title_details": "Слишком длинный Title: {count} страниц",
-        "long_title_recommendation": "Слишком длинный Title: {count} страниц",
-        "missing_description_details": "Отсутствует Description: {count} страниц",
-        "missing_description_recommendation": "Отсутствует Description: {count} страниц",
-        "missing_title_details": "Отсутствует Title: {count} страниц",
-        "missing_title_recommendation": "Отсутствует Title: {count} страниц",
         "problem_duplicate_title": "Дубликат Title",
         "problem_long_title": "Title слишком длинный",
         "problem_missing_description": "Отсутствует Description",
         "problem_missing_title": "Отсутствует Title",
         "problem_short_title": "Title слишком короткий",
-        "short_description_details": "Слишком короткий Description: {count} страниц",
-        "short_description_recommendation": "Слишком короткий Description: {count} страниц",
-        "short_title_details": "Слишком короткий Title: {count} страниц",
-        "short_title_recommendation": "Слишком короткий Title: {count} страниц",
         "table_title": "Проблемные страницы"
       },
       "details": {
@@ -390,19 +305,7 @@
         "duplicate_h1": "Дубли H1: {count} групп",
         "empty_h1": "Пустой H1: {count} страниц",
         "hierarchy_violation": "Нарушение иерархии заголовков: {count} страниц",
-        "duplicate_h1_details": "Дубли H1: {count} групп",
-        "duplicate_h1_recommendation": "Дубли H1: {count} групп",
-        "empty_h1_details": "Пустой H1: {count} страниц",
-        "empty_h1_recommendation": "Пустой H1: {count} страниц",
         "empty_value": "Пустое значение",
-        "h1_too_long_details": "Слишком длинный H1: {count} страниц",
-        "h1_too_long_recommendation": "Слишком длинный H1: {count} страниц",
-        "hierarchy_violation_details": "Нарушение иерархии заголовков: {count} страниц",
-        "hierarchy_violation_recommendation": "Нарушение иерархии заголовков: {count} страниц",
-        "missing_h1_details": "Отсутствует H1: {count} страниц",
-        "missing_h1_recommendation": "Отсутствует H1: {count} страниц",
-        "multiple_h1_details": "Несколько H1: {count} страниц",
-        "multiple_h1_recommendation": "Несколько H1: {count} страниц",
         "problem_empty_h1": "Пустой H1",
         "problem_hierarchy_skip": "Нарушение иерархии",
         "problem_missing_h1": "Отсутствует H1",
@@ -522,16 +425,6 @@
         "critical_size": "Очень большие изображения (>1 MB): {count} шт.",
         "legacy_format": "Устаревший формат изображений: {count} шт.",
         "images_ok": "Все изображения оптимизированы",
-        "critical_size_details": "Очень большие изображения (>1 MB): {count} шт.",
-        "critical_size_recommendation": "Очень большие изображения (>1 MB): {count} шт.",
-        "empty_alt_details": "Изображения с пустым alt: {count} шт.",
-        "empty_alt_recommendation": "Изображения с пустым alt: {count} шт.",
-        "large_size_details": "Большие изображения (>400 KB): {count} шт.",
-        "large_size_recommendation": "Большие изображения (>400 KB): {count} шт.",
-        "legacy_format_details": "Устаревший формат изображений: {count} шт.",
-        "legacy_format_recommendation": "Устаревший формат изображений: {count} шт.",
-        "missing_alt_details": "Изображения без alt: {count} шт.",
-        "missing_alt_recommendation": "Изображения без alt: {count} шт.",
         "problem_critical_size": "Критический размер",
         "problem_large_size": "Большой размер",
         "table_title": "Проблемные изображения"
@@ -565,16 +458,9 @@
         "no_structured_data": "Отсутствует структурированная разметка Schema.org",
         "has_structured_data": "Обнаружена структурированная разметка Schema.org",
         "content_ok": "Контент в норме",
-        "empty_pages_details": "Пустые страницы: {count} шт.",
-        "empty_pages_recommendation": "Пустые страницы: {count} шт.",
-        "has_structured_data_details": "Обнаружена структурированная разметка Schema.org",
-        "no_structured_data_details": "Отсутствует структурированная разметка Schema.org",
-        "no_structured_data_recommendation": "Отсутствует структурированная разметка Schema.org",
         "status_empty": "Пусто",
         "status_thin": "Мало контента",
-        "table_title": "Страницы с недостаточным контентом",
-        "thin_content_details": "Страницы с тонким контентом: {count} шт.",
-        "thin_content_recommendation": "Страницы с тонким контентом: {count} шт."
+        "table_title": "Страницы с недостаточным контентом"
       },
       "details": {
         "thin_content": "Страницы с малым количеством текста могут быть понижены в ранжировании.",
@@ -600,10 +486,6 @@
         "broken_internal": "Битые внутренние ссылки: {count} шт.",
         "broken_external": "Битые внешние ссылки: {count} шт.",
         "no_broken_links": "Битых ссылок не обнаружено",
-        "broken_external_details": "Битые внешние ссылки: {count} шт.",
-        "broken_external_recommendation": "Битые внешние ссылки: {count} шт.",
-        "broken_internal_details": "Битые внутренние ссылки: {count} шт.",
-        "broken_internal_recommendation": "Битые внутренние ссылки: {count} шт.",
         "table_title": "Битые ссылки",
         "type_external": "Внешняя",
         "type_internal": "Внутренняя"
@@ -632,25 +514,10 @@
         "no_favicon_ico": "Отсутствует /favicon.ico",
         "no_apple_touch_icon": "Отсутствует Apple Touch Icon",
         "old_favicon_format": "Рекомендуется SVG или PNG формат",
-        "favicon_ok_details": "Фавикон настроен корректно",
         "missing": "Favicon отсутствует",
-        "missing_favicon_details": "Фавикон отсутствует",
-        "missing_favicon_recommendation": "Фавикон отсутствует",
         "no_apple": "Отсутствует Apple Touch Icon",
-        "no_apple_details": "Отсутствует Apple Touch Icon",
-        "no_apple_recommendation": "Отсутствует Apple Touch Icon",
-        "no_apple_touch_icon_details": "Отсутствует Apple Touch Icon",
-        "no_apple_touch_icon_recommendation": "Отсутствует Apple Touch Icon",
-        "no_favicon_ico_details": "Отсутствует /favicon.ico",
-        "no_favicon_ico_recommendation": "Отсутствует /favicon.ico",
         "no_ico": "Отсутствует .ico файл",
-        "no_ico_details": "Отсутствует .ico файл",
-        "no_ico_recommendation": "Отсутствует .ico файл",
-        "old_favicon_format_details": "Рекомендуется SVG или PNG формат",
-        "old_favicon_format_recommendation": "Рекомендуется SVG или PNG формат",
-        "old_format": "Устаревший формат",
-        "old_format_details": "Устаревший формат",
-        "old_format_recommendation": "Устаревший формат"
+        "old_format": "Устаревший формат"
       },
       "details": {
         "favicon_ok": "Фавикон помогает пользователям узнавать ваш сайт.",
@@ -716,33 +583,10 @@
         "sitemap_old_lastmod": "Устаревшие даты lastmod в sitemap: {count} URL",
         "noindex_pages": "Страницы с noindex: {count} шт.",
         "canonical_issues": "Проблемы с canonical: {count} шт.",
-        "canonical_issues_details": "Проблемы с canonical: {count} шт.",
-        "canonical_issues_recommendation": "Проблемы с canonical: {count} шт.",
         "count_items": "Количество элементов",
-        "empty_sitemap_details": "Sitemap пустой",
-        "empty_sitemap_recommendation": "Sitemap пустой",
-        "no_robots_txt_details": "Файл robots.txt отсутствует",
-        "no_robots_txt_recommendation": "Файл robots.txt отсутствует",
-        "no_sitemap_details": "Файл sitemap.xml отсутствует",
-        "no_sitemap_in_robots_details": "Sitemap не указан в robots.txt",
-        "no_sitemap_in_robots_recommendation": "Sitemap не указан в robots.txt",
-        "no_sitemap_recommendation": "Файл sitemap.xml отсутствует",
-        "noindex_pages_details": "Страницы с noindex: {count} шт.",
         "noindex_pages_label": "Страницы с noindex",
-        "noindex_pages_recommendation": "Страницы с noindex: {count} шт.",
         "none": "Нет",
-        "pages_not_in_sitemap_details": "Страницы не включены в sitemap: {count} шт.",
-        "pages_not_in_sitemap_recommendation": "Страницы не включены в sitemap: {count} шт.",
         "robots_errors": "Ошибки в robots.txt: {count}",
-        "robots_errors_recommendation": "Ошибки в robots.txt: {count}",
-        "robots_txt_errors_details": "Ошибки в robots.txt: {count} шт.",
-        "robots_txt_errors_recommendation": "Ошибки в robots.txt: {count} шт.",
-        "sitemap_errors_details": "Проблемы с sitemap: {count} шт.",
-        "sitemap_errors_recommendation": "Проблемы с sitemap: {count} шт.",
-        "sitemap_old_lastmod_details": "Устаревшие даты lastmod в sitemap: {count} URL",
-        "sitemap_old_lastmod_recommendation": "Устаревшие даты lastmod в sitemap: {count} URL",
-        "sitemap_urls_not_found_details": "URL в sitemap не найдены на сайте: {count} шт.",
-        "sitemap_urls_not_found_recommendation": "URL в sitemap не найдены на сайте: {count} шт.",
         "status_exists": "Есть",
         "status_missing": "Отсутствует",
         "table_title": "Статус индексации",
@@ -916,19 +760,6 @@
         "missing_x_frame": "Отсутствует X-Frame-Options",
         "missing_csp": "Отсутствует Content-Security-Policy",
         "security_ok": "HTTPS и безопасность в норме",
-        "missing_csp_details": "Отсутствует Content-Security-Policy",
-        "missing_csp_recommendation": "Отсутствует Content-Security-Policy",
-        "missing_hsts_details": "Отсутствует заголовок HSTS",
-        "missing_hsts_recommendation": "Отсутствует заголовок HSTS",
-        "missing_x_content_type_details": "Отсутствует X-Content-Type-Options",
-        "missing_x_content_type_recommendation": "Отсутствует X-Content-Type-Options",
-        "missing_x_frame_details": "Отсутствует X-Frame-Options",
-        "missing_x_frame_recommendation": "Отсутствует X-Frame-Options",
-        "mixed_content_details": "Смешанный контент: {count} страниц",
-        "mixed_content_recommendation": "Смешанный контент: {count} страниц",
-        "no_https_details": "Сайт не использует HTTPS",
-        "no_https_recommendation": "Сайт не использует HTTPS",
-        "security_ok_details": "HTTPS и безопасность в норме",
         "status_check_failed": "Проверка не удалась",
         "status_invalid": "Некорректный",
         "status_missing": "Отсутствует",
@@ -966,14 +797,7 @@
         "viewport_ok": "Все страницы имеют корректный viewport",
         "missing_viewport": "{count} страниц без viewport",
         "bad_viewport": "Некорректный viewport: {count} страниц",
-        "flash_content": "Flash-контент: {count} страниц",
-        "bad_viewport_details": "Некорректный viewport: {count} страниц",
-        "bad_viewport_recommendation": "Некорректный viewport: {count} страниц",
-        "flash_content_details": "Flash-контент: {count} страниц",
-        "flash_content_recommendation": "Flash-контент: {count} страниц",
-        "missing_viewport_details": "{count} страниц без viewport",
-        "missing_viewport_recommendation": "{count} страниц без viewport",
-        "viewport_ok_details": "Все страницы имеют корректный viewport"
+        "flash_content": "Flash-контент: {count} страниц"
       },
       "details": {
         "viewport_ok": "Мета-тег viewport настроен правильно на всех страницах.",
@@ -1105,13 +929,6 @@
         "internal_links_to_redirects": "Обновите внутренние ссылки, заменив URL с редиректами на конечные адреса."
       }
     }
-  },
-  "status": {
-    "crawling": "Сканирование страниц...",
-    "analyzing": "Анализируем страницы...",
-    "generating": "Генерируем отчёт...",
-    "completed": "Аудит завершён!",
-    "failed": "Ошибка"
   },
   "tables": {
     "element": "Элемент",

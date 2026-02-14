@@ -1,17 +1,5 @@
 {
   "common": {
-    "yes": "Так",
-    "no": "Ні",
-    "error": "Помилка",
-    "warning": "Попередження",
-    "info": "Інформація",
-    "success": "Успішно",
-    "ok": "OK",
-    "found": "Знайдено",
-    "not_found": "Не знайдено",
-    "pages": "сторінок",
-    "issues": "проблем",
-    "recommendations": "Рекомендація",
     "expand_more": "Розгорнути ще",
     "collapse": "Згорнути"
   },
@@ -149,112 +137,56 @@
   "analyzers": {
     "cms": {
       "name": "CMS / Платформа",
-      "description": "Визначення системи керування контентом або платформи сайту.",
-      "detected": "Визначено: {cms}",
-      "probably": "Ймовірно: {cms}",
-      "possibly": "Можливо: {cms}",
-      "not_detected": "CMS не визначено",
-      "confidence": "Впевненість: {percent}%",
-      "multiple_detected": "Також виявлені ознаки: {cms_list}"
+      "description": "Визначення системи керування контентом або платформи сайту."
     },
     "meta_tags": {
       "name": "Мета-теги",
-      "description": "Мета-теги важливі для SEO та відображення у пошуковій видачі.",
-      "missing_title": "Відсутній title",
-      "missing_description": "Відсутній meta description",
-      "title_too_short": "Title занадто короткий",
-      "title_too_long": "Title занадто довгий",
-      "description_too_short": "Description занадто короткий",
-      "description_too_long": "Description занадто довгий",
-      "duplicate_titles": "Дублікати title",
-      "duplicate_descriptions": "Дублікати description"
+      "description": "Мета-теги важливі для SEO та відображення у пошуковій видачі."
     },
     "headings": {
       "name": "Заголовки H1-H6",
-      "description": "Аналіз заголовків H1-H6: наявність, унікальність та правильна ієрархія.",
-      "missing_h1": "Відсутній H1",
-      "multiple_h1": "Декілька H1",
-      "duplicate_h1": "Дублікати H1",
-      "h1_too_long": "H1 занадто довгий",
-      "hierarchy_violation": "Порушення ієрархії заголовків"
+      "description": "Аналіз заголовків H1-H6: наявність, унікальність та правильна ієрархія."
     },
     "page_404": {
       "name": "Сторінка 404",
-      "description": "Кастомна сторінка 404 покращує користувацький досвід.",
-      "missing": "Відсутня кастомна сторінка 404",
-      "wrong_status": "Неправильний HTTP статус",
-      "no_navigation": "Сторінка 404 без навігації",
-      "no_home_link": "Сторінка 404 без посилання на головну",
-      "no_search": "Сторінка 404 без пошуку"
+      "description": "Кастомна сторінка 404 покращує користувацький досвід."
     },
     "speed": {
       "name": "Швидкість завантаження",
-      "description": "Швидкість завантаження впливає на ранжування та користувацький досвід.",
-      "mobile_score_critical": "Критично низький Mobile Score",
-      "mobile_score_low": "Низький Mobile Score",
-      "desktop_score_critical": "Критично низький Desktop Score",
-      "desktop_score_low": "Низький Desktop Score",
-      "fcp_slow": "{device} FCP повільний",
-      "lcp_slow": "{device} LCP повільний",
-      "cls_high": "{device} CLS високий"
+      "description": "Швидкість завантаження впливає на ранжування та користувацький досвід."
     },
     "images": {
       "name": "Зображення",
-      "description": "Оптимізація зображень важлива для швидкості та SEO.",
-      "missing_alt": "Зображення без alt",
-      "empty_alt": "Зображення з порожнім alt",
-      "large_images": "Великі зображення",
-      "no_webp": "Відсутні WebP зображення"
+      "description": "Оптимізація зображень важлива для швидкості та SEO."
     },
     "content": {
       "name": "Контент",
-      "description": "Якісний контент — основа успішного SEO.",
-      "thin_content": "Тонкий контент",
-      "no_structured_data": "Відсутня структурована розмітка"
+      "description": "Якісний контент — основа успішного SEO."
     },
     "links": {
       "name": "Биті посилання",
-      "description": "Биті посилання шкодять SEO та користувацькому досвіду.",
-      "broken_internal": "Биті внутрішні посилання",
-      "broken_external": "Биті зовнішні посилання"
+      "description": "Биті посилання шкодять SEO та користувацькому досвіду."
     },
     "favicon": {
       "name": "Фавікон",
-      "description": "Фавікон допомагає впізнавати сайт у браузері.",
-      "missing": "Фавікон відсутній",
-      "no_ico": "Відсутній /favicon.ico",
-      "no_apple_touch": "Відсутній Apple Touch Icon"
+      "description": "Фавікон допомагає впізнавати сайт у браузері."
     },
     "external_links": {
       "name": "Зовнішні посилання",
-      "description": "Аналіз вихідних посилань на інші сайти.",
-      "commercial_no_nofollow": "Комерційні посилання без nofollow",
-      "many_dofollow": "Багато dofollow посилань"
+      "description": "Аналіз вихідних посилань на інші сайти."
     },
     "robots": {
       "name": "Індексація",
       "description": "Налаштування robots.txt та sitemap.xml.",
-      "no_robots": "Файл robots.txt відсутній",
-      "no_sitemap": "Файл sitemap.xml відсутній",
-      "sitemap_errors": "Проблеми з sitemap",
-      "noindex_pages": "Сторінки з noindex",
-      "canonical_issues": "Проблеми з canonical",
       "files": "Файли"
     },
     "structure": {
       "name": "Структура сайту",
-      "description": "Структура сайту впливає на індексацію.",
-      "deep_pages": "Глибоко вкладені сторінки",
-      "orphan_pages": "Сирітські сторінки"
+      "description": "Структура сайту впливає на індексацію."
     },
     "content_sections": {
       "name": "Інформаційні розділи",
-      "description": "Виявлення блогу, новин, FAQ та довідки.",
-      "blog_detected": "Виявлено блог/новини",
-      "faq_detected": "Виявлено FAQ/довідку",
-      "no_blog": "Блог/новини не виявлено",
-      "no_faq": "FAQ не виявлено",
-      "faq_no_schema": "FAQ без Schema.org розмітки"
+      "description": "Виявлення блогу, новин, FAQ та довідки."
     },
     "schema": {
       "name": "Структуровані дані",
@@ -330,22 +262,6 @@
         "long_description": "Слишком длинний Description: {count} сторінок",
         "duplicate_title": "Дубли Title: {count} групп дубликатов",
         "duplicate_description": "Дубли Description: {count} групп дубликатов",
-        "missing_title_details": "Title является важним фактором ранжирования. Каждая сторінка повинна иметь уникальний Title.",
-        "missing_description_details": "Meta Description влияет на кликабельность в пошуковой видаче.",
-        "short_title_details": "Оптимальная длина Title: 50-60 символов.",
-        "long_title_details": "Оптимальная длина Title: 50-60 символов. Длинний Title буде обрезан в видаче.",
-        "short_description_details": "Оптимальная длина Description: 150-160 символов.",
-        "long_description_details": "Оптимальная длина Description: 150-160 символов.",
-        "duplicate_title_details": "Дубли Title усложняют понимание пошуковими системами уникальности контенту.",
-        "duplicate_description_details": "Уникальний Description повишает кликабельность в видаче.",
-        "missing_title_recommendation": "Добавьте уникальний тег <title> для каждой сторіноки.",
-        "missing_description_recommendation": "Добавьте уникальний мета-тег description для каждой сторіноки.",
-        "short_title_recommendation": "Расширьте Title, включив больше ключевих слов.",
-        "long_title_recommendation": "Сократите Title до 60 символов.",
-        "short_description_recommendation": "Расширьте Description, описав содержание сторіноки подробнее.",
-        "long_description_recommendation": "Сократите Description до 160 символов.",
-        "duplicate_title_recommendation": "Создайте уникальний Title для каждой сторіноки.",
-        "duplicate_description_recommendation": "Создайте уникальний Description для каждой сторіноки.",
         "problem_duplicate_title": "Дублікат Title",
         "problem_long_title": "Title занадто довгий",
         "problem_missing_title": "Відсутній Title",
@@ -389,18 +305,6 @@
         "duplicate_h1": "Дубли H1: {count} групп",
         "empty_h1": "Пустой H1: {count} сторінок",
         "hierarchy_violation": "Нарушение иерархии заголовків: {count} сторінок",
-        "missing_h1_details": "Каждая сторінка повинна иметь один заголовок H1.",
-        "multiple_h1_details": "На сторіноке повинен бить тільки один H1. Несколько H1 могут запутать пошуковие системи.",
-        "h1_too_long_details": "Оптимальная длина H1: 20-70 символов.",
-        "duplicate_h1_details": "Дубли H1 на разних сторінках снижают уникальность контенту.",
-        "empty_h1_details": "H1 без текста не несёт SEO-ценности.",
-        "hierarchy_violation_details": "Пропуск уровней заголовків (например, H1 → H3 без H2) нарушает семантику.",
-        "missing_h1_recommendation": "Добавьте заголовок H1 на каждую сторіноку.",
-        "multiple_h1_recommendation": "Оставьте тільки один H1 на сторіноке, остальние змените на H2-H6.",
-        "h1_too_long_recommendation": "Сократите H1 до 70 символов.",
-        "duplicate_h1_recommendation": "Создайте уникальний H1 для каждой сторіноки.",
-        "empty_h1_recommendation": "Заполните H1 релевантним текстом с ключевими словами.",
-        "hierarchy_violation_recommendation": "Соблюдайте последовательную иерархию: H1 → H2 → H3 → H4.",
         "empty_value": "Порожнє значення",
         "problem_empty_h1": "Порожній H1",
         "problem_hierarchy_skip": "Порушення ієрархії",
@@ -521,16 +425,6 @@
         "critical_size": "Очень большие зображения (>1 MB): {count} шт.",
         "legacy_format": "Устаревший формат зображений: {count} шт.",
         "images_ok": "Всі зображения оптимзировани",
-        "missing_alt_details": "Атрибут alt важен для доступности и SEO. Поисковие системи используют alt для понимания содержания зображений.",
-        "empty_alt_details": "Пустой alt допустим тільки для декоративних зображений.",
-        "large_size_details": "Большие зображения замедляют загрузку, особенно на мобильних устройствах.",
-        "critical_size_details": "Изображения больше 1 MB критически замедляют загрузку сторіноки.",
-        "legacy_format_details": "Формати JPEG и PNG можна заменить на WebP или AVIF для лучшего сжатия.",
-        "missing_alt_recommendation": "Добавьте описательний атрибут alt ко всім зображениям.",
-        "empty_alt_recommendation": "Заполните alt описанием зображения или отметьте как декоративное (role='presentation').",
-        "large_size_recommendation": "Оптимзируйте зображения или використовуйте lazy loading.",
-        "critical_size_recommendation": "Уменьшите размер зображений через сжатие и/или зменение разрешения.",
-        "legacy_format_recommendation": "Конвертируйте зображения в формат WebP. Ето може уменьшить размер на 25-35%.",
         "problem_critical_size": "Критичний розмір",
         "problem_large_size": "Великий розмір",
         "table_title": "Проблемні зображення"
@@ -564,13 +458,6 @@
         "no_structured_data": "Отсутствует структурированная разметка Schema.org",
         "has_structured_data": "Обнаружена структурированная разметка Schema.org",
         "content_ok": "Контент в норме",
-        "thin_content_details": "Страници с малим количеством текста могут бить понижени в ранжировании.",
-        "empty_pages_details": "Страници без текстового контенту не несут ценности для пошукових систем.",
-        "no_structured_data_details": "Структурированная разметка помогает пошуковим системам понять контент.",
-        "has_structured_data_details": "Структурированная разметка може дать расширенние сниппети в видаче.",
-        "thin_content_recommendation": "Дополните сторіноки полезним контентом (минимум 300 слов).",
-        "empty_pages_recommendation": "Добавьте уникальний текстовий контент или налаштуйте noindex для етих сторінок.",
-        "no_structured_data_recommendation": "Добавьте разметку Schema.org для основних сторінок.",
         "status_empty": "Порожньо",
         "status_thin": "Недостатньо контенту",
         "table_title": "Сторінки з недостатнім контентом"
@@ -599,10 +486,6 @@
         "broken_internal": "Битие внутренние ссилки: {count} шт.",
         "broken_external": "Битие внешние ссилки: {count} шт.",
         "no_broken_links": "Битих ссилок не обнаружено",
-        "broken_internal_details": "Внутренние ссилки на несуществующие сторіноки вредят SEO и пользовательскому опиту.",
-        "broken_external_details": "Ссилки на несуществующие внешние ресурси могут разочаровать пользователей.",
-        "broken_internal_recommendation": "Исправьте или удалите битие ссилки. Настройте редиректи для удалённих сторінок.",
-        "broken_external_recommendation": "Обновите или удалите битие внешние ссилки.",
         "type_external": "Зовнішнє",
         "type_internal": "Внутрішнє",
         "table_title": "Биті посилання"
@@ -631,25 +514,10 @@
         "no_favicon_ico": "Отсутствует /favicon.ico",
         "no_apple_touch_icon": "Отсутствует Apple Touch Icon",
         "old_favicon_format": "Рекомендуется SVG или PNG формат",
-        "favicon_ok_details": "Фавикон помогает пользователям узнавать ваш сайт.",
-        "missing_favicon_details": "Без фавикона сайт виглядит менше профессионально.",
-        "no_favicon_ico_details": "Некоторие браузери ищут favicon.ico в корне сайту.",
-        "no_apple_touch_icon_details": "Apple Touch Icon нужен для красивого отображения на iOS устройствах.",
-        "old_favicon_format_details": "SVG фавикони масштабируются без потери качества и поддерживают тёмную тему.",
-        "missing_favicon_recommendation": "Создайте и додайте фавикон на сайт.",
-        "no_favicon_ico_recommendation": "Добавьте файл favicon.ico в корень сайту.",
-        "no_apple_touch_icon_recommendation": "Добавьте Apple Touch Icon (180x180) для iOS устройств.",
-        "old_favicon_format_recommendation": "Добавьте SVG версию фавикона.",
         "missing": "Favicon відсутній",
         "no_apple": "Відсутній Apple Touch Icon",
         "no_ico": "Відсутній .ico файл",
-        "old_format": "Застарілий формат",
-        "no_ico_details": "Некоторие браузери ищут favicon.ico в корне сайту.",
-        "no_ico_recommendation": "Добавьте файл favicon.ico в корень сайту.",
-        "no_apple_details": "Apple Touch Icon нужен для красивого отображения на iOS устройствах.",
-        "no_apple_recommendation": "Добавьте Apple Touch Icon (180x180) для iOS устройств.",
-        "old_format_details": "SVG фавикони масштабируются без потери качества и поддерживают тёмную тему.",
-        "old_format_recommendation": "Добавьте SVG версию фавикона."
+        "old_format": "Застарілий формат"
       },
       "details": {
         "favicon_ok": "Фавикон помогает пользователям узнавать ваш сайт.",
@@ -715,26 +583,6 @@
         "sitemap_old_lastmod": "Устаревшие дати lastmod в sitemap: {count} URL",
         "noindex_pages": "Страници с noindex: {count} шт.",
         "canonical_issues": "Проблеми с canonical: {count} шт.",
-        "no_robots_txt_details": "Без robots.txt пошуковие роботи индексируют всі доступние сторіноки.",
-        "robots_txt_errors_details": "Синтаксические помилки могут привести к неправильной интерпретации файла.",
-        "no_sitemap_in_robots_details": "Рекомендуется указать путь к sitemap в robots.txt.",
-        "no_sitemap_details": "Без sitemap.xml пошуковим системам сложнее найти всі сторіноки.",
-        "sitemap_errors_details": "Проблеми с файлом sitemap могут препятствовать индексации.",
-        "empty_sitemap_details": "Sitemap не содержит URL-адресов.",
-        "sitemap_urls_not_found_details": "Ети URL указани в sitemap, но не били знайденийи краулером или возвращают ошибку.",
-        "pages_not_in_sitemap_details": "Ети сторіноки знайденийи на сайті, но відсутні в sitemap.xml.",
-        "sitemap_old_lastmod_details": "Более половини URL имеют lastmod старше 6 месяцев. Обновите дати или контент.",
-        "noindex_pages_details": "Ети сторіноки не будуть индексироваться пошуковими системами.",
-        "canonical_issues_details": "Проблеми с canonical могут привести к дублированию контенту.",
-        "no_robots_txt_recommendation": "Создайте файл robots.txt и укажите в нём sitemap.",
-        "robots_txt_errors_recommendation": "Исправьте синтаксические помилки в robots.txt.",
-        "no_sitemap_in_robots_recommendation": "Добавьте строку 'Sitemap: https://yoursite.com/sitemap.xml' в robots.txt.",
-        "no_sitemap_recommendation": "Создайте sitemap.xml со всіми важними сторінками сайту.",
-        "sitemap_errors_recommendation": "Проверьте валидность sitemap.xml.",
-        "empty_sitemap_recommendation": "Добавьте URL-адреса сторінок в sitemap.xml.",
-        "sitemap_urls_not_found_recommendation": "Проверьте ети URL и удалите несуществующие з sitemap.",
-        "pages_not_in_sitemap_recommendation": "Добавьте важние сторіноки в sitemap для лучшей индексации.",
-        "sitemap_old_lastmod_recommendation": "Обновите lastmod дати в sitemap при зменении контенту сторінок.",
         "count_items": "Кількість елементів",
         "noindex_pages_label": "Сторінки з noindex",
         "none": "Немає",
@@ -746,10 +594,7 @@
         "invalid_syntax": "Рядок {line}: неправильний синтаксис",
         "fetch_failed": "Не вдалося завантажити: {url}",
         "parse_error": "Помилка парсингу {url}: {error}",
-        "robots_errors": "Помилки в robots.txt: {count}",
-        "robots_errors_recommendation": "Виправте синтаксичні помилки в robots.txt.",
-        "noindex_pages_recommendation": "Переконайтеся, що noindex встановлено навмисно. Видаліть noindex для сторінок, які потрібно індексувати.",
-        "canonical_issues_recommendation": "Виправте canonical посилання або видаліть їх, якщо вони вказують на неіснуючі сторінки."
+        "robots_errors": "Помилки в robots.txt: {count}"
       },
       "details": {
         "no_robots_txt": "Без robots.txt пошуковие роботи индексируют всі доступние сторіноки.",
@@ -915,19 +760,6 @@
         "missing_x_frame": "Отсутствует X-Frame-Options",
         "missing_csp": "Отсутствует Content-Security-Policy",
         "security_ok": "HTTPS и безопасность в норме",
-        "no_https_details": "HTTPS является фактором ранжирования Google с 2014 года. Без SSL-сертификата сайт помечается как небезопасний.",
-        "mixed_content_details": "Найдени HTTP-ресурси (зображения, скрипти, стили) на HTTPS-сторінках. Браузери могут блокировать такие ресурси.",
-        "missing_hsts_details": "HSTS принуждает браузер всігда использовать HTTPS-соединение.",
-        "missing_x_content_type_details": "Заголовок X-Content-Type-Options: nosniff предотвращает MIME-sniffing атаки.",
-        "missing_x_frame_details": "Заголовок X-Frame-Options защищает от clickjacking-атак.",
-        "missing_csp_details": "CSP контролирует, з каких источников разрешено загружать ресурси на сторіноке.",
-        "security_ok_details": "Сайт использует HTTPS, основние заголовки безопасности присутствуют, смешанний контент не обнаружен.",
-        "no_https_recommendation": "Установите SSL-сертификат и налаштуйте перенаправление с HTTP на HTTPS.",
-        "mixed_content_recommendation": "Замените всі HTTP-ссилки на ресурси на HTTPS или використовуйте протокол-относительние URL.",
-        "missing_hsts_recommendation": "Добавьте заголовок: Strict-Transport-Security: max-age=31536000; includeSubDomains",
-        "missing_x_content_type_recommendation": "Добавьте заголовок: X-Content-Type-Options: nosniff",
-        "missing_x_frame_recommendation": "Добавьте заголовок: X-Frame-Options: DENY или SAMEORIGIN",
-        "missing_csp_recommendation": "Настройте Content-Security-Policy для контроля источников ресурсов.",
         "status_check_failed": "Перевірка не вдалася",
         "status_invalid": "Некоректний",
         "status_missing": "Відсутній",
@@ -965,14 +797,7 @@
         "viewport_ok": "Всі сторіноки имеют корректний viewport",
         "missing_viewport": "{count} сторінок без viewport",
         "bad_viewport": "Некорректний viewport: {count} сторінок",
-        "flash_content": "Flash-контент: {count} сторінок",
-        "viewport_ok_details": "Мета-тег viewport настроен правильно на всіх сторінках.",
-        "missing_viewport_details": "Без мета-тега viewport мобильние браузери отображают сторіноку в масштабе десктопа.",
-        "bad_viewport_details": "Viewport не содержит width=device-width, що може взвать проблеми с масштабированием.",
-        "flash_content_details": "Flash не поддерживается мобильними браузерами и большинством современних десктопних браузеров.",
-        "missing_viewport_recommendation": "Добавьте <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> в <head>.",
-        "bad_viewport_recommendation": "Убедитесь, що viewport содержит width=device-width.",
-        "flash_content_recommendation": "Замените Flash-контент на HTML5, CSS3 или JavaScript."
+        "flash_content": "Flash-контент: {count} сторінок"
       },
       "details": {
         "viewport_ok": "Мета-тег viewport настроен правильно на всіх сторінках.",
@@ -1104,13 +929,6 @@
         "internal_links_to_redirects": "Обновите внутренние ссилки, заменив URL с редиректами на конечние адреса."
       }
     }
-  },
-  "status": {
-    "crawling": "Сканування сторінок...",
-    "analyzing": "Аналізуємо сторінки...",
-    "generating": "Генеруємо звіт...",
-    "completed": "Аудит завершено!",
-    "failed": "Помилка"
   },
   "tables": {
     "element": "Елемент",
