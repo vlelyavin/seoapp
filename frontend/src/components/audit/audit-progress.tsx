@@ -25,7 +25,7 @@ export function AuditProgressView({ progress }: AuditProgressViewProps) {
   ];
 
   return (
-    <div className="mx-auto max-w-xl py-16">
+    <div className="mx-auto max-w-xl py-6 sm:py-16">
       <button
         onClick={() => router.push(`/${locale}/dashboard`)}
         className="mb-4 flex items-center gap-2 text-sm text-gray-400 hover:text-white"
@@ -33,7 +33,7 @@ export function AuditProgressView({ progress }: AuditProgressViewProps) {
         <ArrowLeft className="h-4 w-4" />
         {t("backToDashboard")}
       </button>
-      <div className="rounded-xl border border-gray-800 bg-gray-900 p-8">
+      <div className="rounded-xl border border-gray-800 bg-gray-900 p-4 sm:p-8">
         <div className="mb-6 flex items-center justify-center">
           <Loader2 className="h-10 w-10 animate-spin text-white" />
         </div>
@@ -66,7 +66,7 @@ export function AuditProgressView({ progress }: AuditProgressViewProps) {
             const isActive = s.key === stage;
             const isPast = stages.findIndex((x) => x.key === stage) > i;
             return (
-              <div key={s.key} className="flex w-24 flex-col items-center gap-1">
+              <div key={s.key} className="flex flex-1 flex-col items-center gap-1">
                 <div
                   className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium ${
                     isPast

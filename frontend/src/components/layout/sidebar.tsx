@@ -7,9 +7,7 @@ import { useSession } from "next-auth/react";
 import {
   LayoutDashboard,
   Plus,
-  CreditCard,
   Settings,
-  Palette,
   Users,
   X,
 } from "lucide-react";
@@ -39,21 +37,21 @@ export function Sidebar({ open, onClose }: SidebarProps) {
       label: t("newAudit"),
       icon: Plus,
     },
-    {
-      href: `/${locale}/dashboard/plans`,
-      label: t("plans"),
-      icon: CreditCard,
-    },
+    // {
+    //   href: `/${locale}/dashboard/plans`,
+    //   label: t("plans"),
+    //   icon: CreditCard,
+    // },
     {
       href: `/${locale}/dashboard/settings`,
       label: t("settings"),
       icon: Settings,
     },
-    {
-      href: `/${locale}/dashboard/settings/branding`,
-      label: t("branding"),
-      icon: Palette,
-    },
+    // {
+    //   href: `/${locale}/dashboard/settings/branding`,
+    //   label: t("branding"),
+    //   icon: Palette,
+    // },
   ];
 
   const adminItems = isAdmin
@@ -162,6 +160,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           )}
         </nav>
 
+        {/* Plan badge — temporarily hidden
         {session?.user && (
           <div className="border-t border-gray-800 p-3">
             <Link
@@ -178,6 +177,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
             </Link>
           </div>
         )}
+        */}
       </aside>
     </>
   );

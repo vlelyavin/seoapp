@@ -136,7 +136,7 @@ export default function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             {t("title")}
@@ -149,7 +149,7 @@ export default function DashboardPage() {
         </div>
         <Link
           href={`/${locale}/dashboard/audit/new`}
-          className="flex items-center gap-2 rounded-lg bg-gray-900 text-white hover:bg-gray-800 px-4 py-2 text-sm font-medium dark:bg-white dark:text-black dark:hover:bg-gray-200 transition-colors"
+          className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-lg bg-gray-900 text-white hover:bg-gray-800 px-4 py-2 text-sm font-medium dark:bg-white dark:text-black dark:hover:bg-gray-200 transition-colors"
         >
           <Plus className="h-4 w-4" />
           {t("startAudit")}
@@ -249,7 +249,7 @@ export default function DashboardPage() {
                     e.stopPropagation();
                     setDeleteAuditId(audit.id);
                   }}
-                  className="shrink-0 rounded-md p-1.5 text-gray-400 opacity-0 transition-opacity hover:bg-red-50 hover:text-red-600 group-hover:opacity-100 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                  className="shrink-0 rounded-md p-1.5 text-gray-400 opacity-100 sm:opacity-0 transition-opacity hover:bg-red-50 hover:text-red-600 sm:group-hover:opacity-100 dark:hover:bg-red-900/20 dark:hover:text-red-400"
                   title={t("deleteAudit")}
                 >
                   <Trash2 className="h-4 w-4" />
