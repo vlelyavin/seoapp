@@ -839,14 +839,14 @@ class ReportGenerator:
         <div class="category-overview">
             <h1 style="font-size: 18pt; margin-bottom: 16px;">{t("report.category_overview")}</h1>
             <div class="table-wrapper">
-                <table class="data-table">
+                <table class="data-table category-table">
                     <thead>
                         <tr>
                             <th style="width: 30px;">#</th>
                             <th>{t("report.category")}</th>
                             <th>{t("report.status")}</th>
-                            <th style="width: 60px; text-align: center;">{t("report.critical_count")}</th>
-                            <th style="width: 70px; text-align: center;">{t("report.warning_count")}</th>
+                            <th style="width: 70px; text-align: center;">{t("report.critical_count")}</th>
+                            <th style="width: 90px; text-align: center;">{t("report.warning_count")}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -903,8 +903,9 @@ class ReportGenerator:
         # --- Change 1: Replace summary header with cover-style content ---
         generated_at = datetime.now().strftime("%d.%m.%Y")
         cover_header = f'''
-            <h1 class="pdf-cover-title">{t("report.cover_title")}</h1>
-            <div class="pdf-cover-meta">{domain} · {t("report.pages_analyzed", count=audit.pages_crawled)} · {generated_at} · Made by seo-audit.online</div>
+            <h1 class="pdf-cover-title">Express SEO audit by seo-audit.online</h1>
+            <div class="pdf-cover-url">Website: {domain}</div>
+            <div class="pdf-cover-meta">{t("report.pages_analyzed", count=audit.pages_crawled)} · {generated_at}</div>
         '''
         # Replace the original h1 + p header in the summary section
         html_content = re.sub(
@@ -967,6 +968,11 @@ class ReportGenerator:
                 color: #111827;
                 margin: 0 0 8px 0;
             }
+            .pdf-cover-url {
+                font-size: 10pt;
+                color: #111827;
+                margin-bottom: 2px;
+            }
             .pdf-cover-meta {
                 font-size: 10pt;
                 color: #111827;
@@ -986,13 +992,12 @@ class ReportGenerator:
             .pdf-verdict {
                 background: #f0f9ff;
                 border-left: 3px solid #3b82f6;
-                border-radius: 8px;
+                border-radius: 0 8px 8px 0;
                 padding: 10px 14px;
                 font-size: 10pt;
                 color: #374151;
                 line-height: 1.6;
-                margin-top: 12px;
-                margin-bottom: 24px;
+                margin-top: 16px;
             }
 
             /* === Category Overview === */
@@ -1096,6 +1101,15 @@ class ReportGenerator:
             /* === Truncation: single-line URLs and table cells === */
             .data-table {
                 table-layout: fixed !important;
+            }
+            .category-table {
+                table-layout: auto !important;
+            }
+            .category-table td {
+                white-space: normal !important;
+                overflow: visible !important;
+                text-overflow: clip !important;
+                max-width: none !important;
             }
             .issue-urls li {
                 white-space: nowrap !important;
