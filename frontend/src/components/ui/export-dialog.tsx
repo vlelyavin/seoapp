@@ -65,7 +65,7 @@ export function ExportDialog({
       />
 
       {/* Dialog */}
-      <div className="relative z-10 w-full max-w-md rounded-xl border bg-white p-6 shadow-xl dark:border-gray-800 dark:bg-gray-900">
+      <div className="relative z-10 mx-5 w-full max-w-md rounded-xl border bg-white p-6 shadow-xl dark:border-gray-800 dark:bg-gray-900">
         {/* Close button */}
         <button
           onClick={onClose}
@@ -132,7 +132,7 @@ export function ExportDialog({
           <button
             onClick={() => onExport(selectedFormat, lang)}
             disabled={loading}
-            className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium whitespace-nowrap text-white hover:bg-blue-700 disabled:opacity-50"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
@@ -145,7 +145,7 @@ export function ExportDialog({
           </button>
           <button
             onClick={onClose}
-            className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+            className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
           >
             {t("cancel")}
           </button>
