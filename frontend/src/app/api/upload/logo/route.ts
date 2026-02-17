@@ -57,5 +57,5 @@ export async function POST(req: Request) {
 
   await writeFile(filepath, buffer);
 
-  return NextResponse.json({ url: `/api/upload/logo/${filename}` });
+  return NextResponse.json({ url: `/uploads/${filename}` });
 }

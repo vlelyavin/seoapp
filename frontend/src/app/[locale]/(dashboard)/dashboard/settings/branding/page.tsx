@@ -3,7 +3,14 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
-import { Save, Upload, Lock } from "lucide-react";
+import { Save, Upload, Lock, ImageOff } from "lucide-react";
+
+function normalizeLogoUrl(url: string): string {
+  if (url.startsWith("/api/upload/logo/")) {
+    return url.replace("/api/upload/logo/", "/uploads/");
+  }
+  return url;
+}
 
 export default function BrandingPage() {
   const t = useTranslations("branding");
@@ -19,12 +26,16 @@ export default function BrandingPage() {
   const [uploadError, setUploadError] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [imageError, setImageError] = useState(false);
+  const [logoFallbackTried, setLogoFallbackTried] = useState(false);
+  const [logoDisplayUrl, setLogoDisplayUrl] = useState("");
 
   const isAgency = session?.user?.planId === "agency";
 
   // Reset image error state when logoUrl changes (e.g., after loading from API)
   useEffect(() => {
     setImageError(false);
+    setLogoFallbackTried(false);
+    setLogoDisplayUrl(normalizeLogoUrl(logoUrl));
   }, [logoUrl]);
 
   useEffect(() => {
@@ -37,7 +48,7 @@ export default function BrandingPage() {
             setCompanyName(data.companyName || "");
             setPrimaryColor(data.primaryColor || "#2563eb");
             setAccentColor(data.accentColor || "#7c3aed");
-            setLogoUrl(data.logoUrl || "");
+            setLogoUrl(normalizeLogoUrl(data.logoUrl || ""));
           }
         }
       } catch { /* ignore */ }
@@ -96,7 +107,7 @@ export default function BrandingPage() {
 
       if (res.ok) {
         const data = await res.json();
-        setLogoUrl(data.url);
+        setLogoUrl(normalizeLogoUrl(data.url));
         setMessage(t("logoUploaded"));
       } else {
         const data = await res.json();
@@ -162,11 +173,23 @@ export default function BrandingPage() {
             {(previewUrl || logoUrl) && !imageError && (
               <div className="relative">
                 <img
-                  src={previewUrl || logoUrl}
+                  src={previewUrl || logoDisplayUrl || logoUrl}
                   alt="Logo"
                   className="h-16 w-16 rounded border object-contain dark:border-gray-700"
                   onError={() => {
-                    console.error("Failed to load logo image:", previewUrl || logoUrl);
+                    const originalLogo = normalizeLogoUrl(logoUrl);
+                    const canFallbackToUploads =
+                      !previewUrl &&
+                      !logoFallbackTried &&
+                      logoUrl.startsWith("/api/upload/logo/");
+
+                    if (canFallbackToUploads) {
+                      setLogoDisplayUrl(originalLogo.replace("/api/upload/logo/", "/uploads/"));
+                      setLogoFallbackTried(true);
+                      return;
+                    }
+
+                    console.error("Failed to load logo image:", previewUrl || logoDisplayUrl || logoUrl);
                     setImageError(true);
                   }}
                 />
@@ -178,8 +201,11 @@ export default function BrandingPage() {
               </div>
             )}
             {imageError && (logoUrl || previewUrl) && (
-              <div className="flex h-16 w-16 items-center justify-center rounded border border-dashed border-gray-300 bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
-                <span className="text-xs text-gray-400">{t("failedToLoad")}</span>
+              <div className="flex h-16 items-center gap-2 rounded border border-dashed border-gray-300 bg-gray-50 px-3 dark:border-gray-700 dark:bg-gray-800">
+                <ImageOff className="h-4 w-4 text-gray-400" />
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  {t("failedToLoad")}
+                </span>
               </div>
             )}
             <label className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm ${

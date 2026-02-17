@@ -116,7 +116,7 @@ export default function PlansPage() {
             <div
               key={plan.id}
               className={cn(
-                "relative rounded-xl border bg-white p-6 dark:bg-gray-900",
+                "relative flex h-full flex-col rounded-xl border bg-white p-6 dark:bg-gray-900",
                 isCurrent
                   ? "border-gray-900 ring-2 ring-gray-900/20 dark:border-white dark:ring-white/20"
                   : "border-gray-200 dark:border-gray-800",
@@ -152,7 +152,7 @@ export default function PlansPage() {
                 </div>
               </div>
 
-              <ul className="mb-6 space-y-3">
+              <ul className="mb-6 flex-1 space-y-3">
                 {featureItems.map((item) => (
                   <FeatureItem
                     key={item.text}
@@ -167,7 +167,7 @@ export default function PlansPage() {
                 onClick={() => handleSelectPlan(plan.id)}
                 disabled={isCurrent || isSwitching}
                 className={cn(
-                  "w-full rounded-lg px-4 py-2.5 text-sm font-medium transition-colors",
+                  "mt-auto w-full rounded-lg px-4 py-2.5 text-sm font-medium transition-colors",
                   isCurrent
                     ? "cursor-not-allowed bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500"
                     : isAgency
