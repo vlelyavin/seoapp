@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslations, useLocale } from "next-intl";
 import Link from "next/link";
@@ -205,14 +205,34 @@ export default function DashboardPage() {
                     <p className="truncate text-sm font-medium text-gray-900 dark:text-white">
                       {audit.url}
                     </p>
-                    <div className="mt-0.5 flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {formatDate(audit.startedAt, locale)}
-                      </span>
+                    <div className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {formatDate(audit.startedAt, locale)}
+                        </span>
+                        {audit.status === "completed" && (
+                          <span>
+                            {audit.pagesCrawled} {t("page", { count: audit.pagesCrawled })}
+                          </span>
+                        )}
+                        {audit.status === "completed" && (
+                          <div className="hidden items-center gap-3 sm:flex">
+                            {audit.criticalIssues > 0 && (
+                              <span className="text-red-500">
+                                {audit.criticalIssues} {t("criticalLabel")}
+                              </span>
+                            )}
+                            {audit.warnings > 0 && (
+                              <span className="text-yellow-500">
+                                {audit.warnings} {t("warningsLabel")}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
                       {audit.status === "completed" && (
-                        <>
-                          <span>{audit.pagesCrawled} {t("page", { count: audit.pagesCrawled })}</span>
+                        <div className="mt-1 flex flex-wrap items-center gap-3 sm:hidden">
                           {audit.criticalIssues > 0 && (
                             <span className="text-red-500">
                               {audit.criticalIssues} {t("criticalLabel")}
@@ -223,7 +243,7 @@ export default function DashboardPage() {
                               {audit.warnings} {t("warningsLabel")}
                             </span>
                           )}
-                        </>
+                        </div>
                       )}
                     </div>
                     {audit.status === "failed" && audit.errorMessage && (

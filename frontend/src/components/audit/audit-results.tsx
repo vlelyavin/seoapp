@@ -172,61 +172,65 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
         </div>
 
         {/* Filter bar */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-1 rounded-lg border border-gray-200 bg-gray-100 p-1 dark:border-gray-800 dark:bg-gray-900">
-            {filterButtons.map((fb) => (
+        <div className="space-y-2">
+          <div className="w-full sm:w-auto">
+            <div className="flex w-full items-center gap-1 rounded-lg border border-gray-200 bg-gray-100 p-1 dark:border-gray-800 dark:bg-gray-900">
+              {filterButtons.map((fb) => (
+                <button
+                  key={fb.key}
+                  onClick={() => setFilter(fb.key)}
+                  className={cn(
+                    "flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors sm:flex-none sm:px-2.5",
+                    filter === fb.key
+                      ? "border border-gray-300 bg-white text-gray-900 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                      : "border border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                  )}
+                >
+                  {fb.icon}
+                  <span className="truncate">{fb.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="relative min-w-0 flex-1 sm:max-w-xs">
+              <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={t("searchIssues")}
+                className="h-[34px] w-full rounded-lg border py-1.5 pl-8 pr-3 text-sm outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-400/30 dark:border-gray-800 dark:bg-gray-900 dark:text-white dark:focus:border-white dark:focus:ring-white/20"
+              />
+            </div>
+
+            {/* Export button */}
+            <div className="shrink-0">
               <button
-                key={fb.key}
-                onClick={() => setFilter(fb.key)}
+                type="button"
+                disabled={exportingFormat !== null}
+                onClick={() => setExportDialogOpen(true)}
                 className={cn(
-                  "flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
-                  filter === fb.key
-                    ? "border border-gray-300 bg-white text-gray-900 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                    : "border border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                  "flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium",
+                  exportingFormat
+                    ? "cursor-not-allowed opacity-50 border-gray-300 text-gray-500 dark:border-gray-600 dark:text-gray-500"
+                    : "text-gray-700 hover:bg-gray-100 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
                 )}
               >
-                {fb.icon}
-                {fb.label}
+                {exportingFormat ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {t("generating", { format: exportingFormat.toUpperCase() })}
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-4 w-4" />
+                    {t("export")}
+                  </>
+                )}
               </button>
-            ))}
-          </div>
-
-          <div className="relative flex-1 min-w-0 sm:min-w-[200px] max-w-xs">
-            <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={t("searchIssues")}
-              className="h-[34px] w-full rounded-lg border py-1.5 pl-8 pr-3 text-sm outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-400/30 dark:border-gray-800 dark:bg-gray-900 dark:text-white dark:focus:border-white dark:focus:ring-white/20"
-            />
-          </div>
-
-          {/* Export button */}
-          <div className="ml-auto">
-            <button
-              type="button"
-              disabled={exportingFormat !== null}
-              onClick={() => setExportDialogOpen(true)}
-              className={cn(
-                "flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium",
-                exportingFormat
-                  ? "cursor-not-allowed opacity-50 border-gray-300 text-gray-500 dark:border-gray-600 dark:text-gray-500"
-                  : "text-gray-700 hover:bg-gray-100 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
-              )}
-            >
-              {exportingFormat ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  {t("generating", { format: exportingFormat.toUpperCase() })}
-                </>
-              ) : (
-                <>
-                  <Download className="h-4 w-4" />
-                  {t("export")}
-                </>
-              )}
-            </button>
+            </div>
           </div>
 
           {/* Export dialog */}

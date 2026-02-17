@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { toApiLogoPath } from "@/lib/logo-storage";
+import { toPublicLogoPath } from "@/lib/logo-storage";
 
 export async function GET() {
   const session = await auth();
@@ -25,7 +25,14 @@ export async function GET() {
     where: { userId: session.user.id },
   });
 
-  return NextResponse.json(branding);
+  if (!branding) {
+    return NextResponse.json(null);
+  }
+
+  return NextResponse.json({
+    ...branding,
+    logoUrl: toPublicLogoPath(branding.logoUrl),
+  });
 }
 
 export async function PUT(req: Request) {
@@ -60,12 +67,14 @@ export async function PUT(req: Request) {
     }
   }
 
-  let normalizedLogoUrl: string | undefined | null = logoUrl;
+  let normalizedLogoUrl: string | null | undefined = undefined;
 
-  // Validate + normalize logoUrl
-  if (logoUrl !== undefined && logoUrl !== null && logoUrl !== "") {
+  // Validate + normalize logoUrl.
+  if (logoUrl === null || logoUrl === "") {
+    normalizedLogoUrl = null;
+  } else if (logoUrl !== undefined) {
     try {
-      normalizedLogoUrl = toApiLogoPath(logoUrl);
+      normalizedLogoUrl = toPublicLogoPath(logoUrl);
       if (!normalizedLogoUrl) {
         return NextResponse.json(
           { error: "Invalid logo URL" },
@@ -80,13 +89,21 @@ export async function PUT(req: Request) {
     }
   }
 
+  const updatePayload: { companyName?: string; logoUrl?: string | null } = {};
+  if (companyName !== undefined) {
+    updatePayload.companyName = companyName;
+  }
+  if (normalizedLogoUrl !== undefined) {
+    updatePayload.logoUrl = normalizedLogoUrl;
+  }
+
   const branding = await prisma.brandSettings.upsert({
     where: { userId: session.user.id },
-    update: { companyName, logoUrl: normalizedLogoUrl },
+    update: updatePayload,
     create: {
       userId: session.user.id,
       companyName,
-      logoUrl: normalizedLogoUrl,
+      logoUrl: normalizedLogoUrl ?? null,
     },
   });
 

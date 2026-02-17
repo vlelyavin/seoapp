@@ -75,7 +75,7 @@ fi
 
 # 4. Setup app directory
 echo "[4/11] Syncing files to app directory..."
-sudo mkdir -p "$APP_DIR" "$APP_DIR/reports" "$APP_DIR/screenshots"
+sudo mkdir -p "$APP_DIR" "$APP_DIR/reports" "$APP_DIR/screenshots" "$APP_DIR/frontend/public/uploads"
 # Use rsync for reliable copy (preserves structure, handles all files)
 sudo rsync -a --exclude='node_modules' --exclude='.next' --exclude='venv' \
     --exclude='.git' --exclude='*.pyc' --exclude='__pycache__' \

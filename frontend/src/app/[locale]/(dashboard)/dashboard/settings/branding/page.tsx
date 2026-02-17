@@ -10,10 +10,10 @@ function normalizeLogoUrl(url: string): string {
   try {
     const pathname = new URL(url, "https://placeholder.local").pathname;
     if (pathname.startsWith("/uploads/")) {
-      return `/api/upload/logo/${pathname.slice("/uploads/".length)}`;
+      return pathname;
     }
     if (pathname.startsWith("/api/upload/logo/")) {
-      return pathname;
+      return `/uploads/${pathname.slice("/api/upload/logo/".length)}`;
     }
   } catch {
     return "";
@@ -33,13 +33,23 @@ export default function BrandingPage() {
   const [uploadError, setUploadError] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [imageError, setImageError] = useState(false);
+  const [logoVersion, setLogoVersion] = useState<number>(0);
 
   const isAgency = session?.user?.planId === "agency";
 
   // Reset image error state when logoUrl changes (e.g., after loading from API)
   useEffect(() => {
     setImageError(false);
+    setLogoVersion(Date.now());
   }, [logoUrl]);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl?.startsWith("blob:")) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   useEffect(() => {
     async function load() {
@@ -82,15 +92,18 @@ export default function BrandingPage() {
   }
 
   async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
+    const fileInput = e.currentTarget;
+    const file = fileInput.files?.[0];
+    fileInput.value = "";
     if (!file) return;
 
-    // Show preview immediately using FileReader
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPreviewUrl(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+    // Show preview immediately with a blob URL.
+    setPreviewUrl((prev) => {
+      if (prev?.startsWith("blob:")) {
+        URL.revokeObjectURL(prev);
+      }
+      return URL.createObjectURL(file);
+    });
 
     // Clear previous errors and start upload
     setUploadError("");
@@ -109,20 +122,38 @@ export default function BrandingPage() {
       if (res.ok) {
         const data = await res.json();
         setLogoUrl(normalizeLogoUrl(data.url));
-        setPreviewUrl(null);
+        setPreviewUrl((prev) => {
+          if (prev?.startsWith("blob:")) {
+            URL.revokeObjectURL(prev);
+          }
+          return null;
+        });
+        setLogoVersion(Date.now());
         setMessage(t("logoUploaded"));
       } else {
         const data = await res.json();
         setUploadError(data.error || "Upload failed");
-        setPreviewUrl(null); // Clear preview on error
+        setPreviewUrl((prev) => {
+          if (prev?.startsWith("blob:")) {
+            URL.revokeObjectURL(prev);
+          }
+          return null;
+        });
       }
     } catch {
       setUploadError(t("networkError"));
-      setPreviewUrl(null);
+      setPreviewUrl((prev) => {
+        if (prev?.startsWith("blob:")) {
+          URL.revokeObjectURL(prev);
+        }
+        return null;
+      });
     } finally {
       setUploading(false);
     }
   }
+
+  const logoSrc = previewUrl || (logoUrl ? `${logoUrl}?v=${logoVersion}` : "");
 
   if (!isAgency) {
     return (
@@ -172,14 +203,14 @@ export default function BrandingPage() {
             {t("logo")}
           </label>
           <div className="flex items-center gap-3">
-            {(previewUrl || logoUrl) && !imageError && (
+            {logoSrc && !imageError && (
               <div className="relative">
                 <img
-                  src={previewUrl || logoUrl}
+                  src={logoSrc}
                   alt="Logo"
                   className="h-16 w-16 rounded border object-contain dark:border-gray-700"
                   onError={() => {
-                    console.error("Failed to load logo image:", previewUrl || logoUrl);
+                    console.error("Failed to load logo image:", logoSrc);
                     setImageError(true);
                   }}
                 />
@@ -190,7 +221,7 @@ export default function BrandingPage() {
                 )}
               </div>
             )}
-            {imageError && (logoUrl || previewUrl) && (
+            {imageError && logoSrc && (
               <div className="flex h-16 items-center gap-2 rounded border border-dashed border-gray-300 bg-gray-50 px-3 dark:border-gray-700 dark:bg-gray-800">
                 <ImageOff className="h-4 w-4 text-gray-400" />
                 <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -207,8 +238,11 @@ export default function BrandingPage() {
               {uploading ? t("uploading") : t("uploadLogo")}
               <input
                 type="file"
-                accept="image/*"
+                accept=".png,.jpg,.jpeg,.gif,.webp,.svg,image/*"
                 onChange={handleLogoUpload}
+                onClick={(event) => {
+                  event.currentTarget.value = "";
+                }}
                 disabled={uploading}
                 className="hidden"
               />

@@ -1,16 +1,6 @@
 import { NextResponse } from "next/server";
-import { readFile } from "fs/promises";
-import { join } from "path";
-import { getUploadsDir } from "@/lib/logo-storage";
 
-const MIME_TYPES: Record<string, string> = {
-  jpg: "image/jpeg",
-  jpeg: "image/jpeg",
-  png: "image/png",
-  gif: "image/gif",
-  webp: "image/webp",
-  svg: "image/svg+xml",
-};
+const ALLOWED_EXTENSIONS = new Set(["jpg", "jpeg", "png", "gif", "webp", "svg"]);
 
 export async function GET(
   req: Request,
@@ -24,22 +14,9 @@ export async function GET(
   }
 
   const ext = filename.split(".").pop()?.toLowerCase() || "";
-  const mime = MIME_TYPES[ext];
-  if (!mime) {
+  if (!ALLOWED_EXTENSIONS.has(ext)) {
     return NextResponse.json({ error: "Unsupported format" }, { status: 400 });
   }
 
-  const filepath = join(getUploadsDir(), filename);
-
-  try {
-    const buffer = await readFile(filepath);
-    return new NextResponse(buffer, {
-      headers: {
-        "Content-Type": mime,
-        "Cache-Control": "public, max-age=86400",
-      },
-    });
-  } catch {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
+  return NextResponse.redirect(new URL(`/uploads/${filename}`, req.url), 307);
 }

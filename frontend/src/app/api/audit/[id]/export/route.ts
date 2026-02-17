@@ -12,7 +12,7 @@ import {
 import {
   extractLogoFilenameFromUrl,
   getUploadsDir,
-  toApiLogoPath,
+  toPublicLogoPath,
 } from "@/lib/logo-storage";
 
 const SUPPORTED_FORMATS: ExportFormat[] = ["pdf", "html", "docx"];
@@ -71,12 +71,12 @@ export async function GET(
       const origin = new URL(req.url).origin;
 
       let logoUrl: string | undefined;
-      const apiLogoPath = toApiLogoPath(branding.logoUrl);
-      const filename = extractLogoFilenameFromUrl(apiLogoPath);
-      if (apiLogoPath && filename) {
+      const publicLogoPath = toPublicLogoPath(branding.logoUrl);
+      const filename = extractLogoFilenameFromUrl(publicLogoPath);
+      if (publicLogoPath && filename) {
         try {
           await access(join(getUploadsDir(), filename), fsConstants.R_OK);
-          logoUrl = `${origin}${apiLogoPath}`;
+          logoUrl = `${origin}${publicLogoPath}`;
         } catch {
           logoUrl = undefined;
         }
