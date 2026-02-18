@@ -1,17 +1,1 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(python -m venv:*)",
-      "Bash(venvScriptsactivate)",
-      "Bash(pip install:*)",
-      "Bash(venv/Scripts/pip install:*)",
-      "Bash(venv/Scripts/playwright install:*)",
-      "Bash(curl:*)",
-      "Bash(python:*)",
-      "Bash(npx next build:*)",
-      "Bash(git rm:*)",
-      "Bash(git add:*)",
-      "Bash(npm run build:*)"
-    ]
-  }
-}
+

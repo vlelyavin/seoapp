@@ -63,6 +63,10 @@ def translate_analyzer_content(result: AnalyzerResult, lang: str, translator) ->
     if translated_desc:
         translated.description = translated_desc
 
+    # For some analyzers we rebuild problem summaries from translated issues
+    # later in this function to avoid mixed-language fragments.
+    rebuild_problem_summary_from_issues = False
+
     # Translate summary - handle special cases for different analyzers
     if result.summary:
         if name == "cms":
@@ -216,12 +220,7 @@ def translate_analyzer_content(result: AnalyzerResult, lang: str, translator) ->
                     if translated_summary:
                         translated.summary = translated_summary.format(internal=match.group(1), external=match.group(2))
             elif "Broken links found:" in result.summary:
-                match = re.search(r'Broken links found: (.+)$', result.summary)
-                if match:
-                    summary_key = f"analyzer_content.{name}.summary.broken_found"
-                    translated_summary = translator.get(summary_key, "")
-                    if translated_summary:
-                        translated.summary = translated_summary.format(broken=match.group(1))
+                rebuild_problem_summary_from_issues = True
 
         elif name == "favicon":
             summary_map = {
@@ -259,12 +258,7 @@ def translate_analyzer_content(result: AnalyzerResult, lang: str, translator) ->
                 if translated_summary:
                     translated.summary = translated_summary
             elif "Indexation issues:" in result.summary:
-                match = re.search(r'Indexation issues: (.+)$', result.summary)
-                if match:
-                    summary_key = f"analyzer_content.{name}.summary.problems"
-                    translated_summary = translator.get(summary_key, "")
-                    if translated_summary:
-                        translated.summary = translated_summary.format(problems=match.group(1))
+                rebuild_problem_summary_from_issues = True
 
         elif name == "structure":
             if "is optimal" in result.summary:
@@ -333,12 +327,7 @@ def translate_analyzer_content(result: AnalyzerResult, lang: str, translator) ->
                 if translated_summary:
                     translated.summary = translated_summary
             elif "Issues found:" in result.summary:
-                match = re.search(r'Issues found: (.+)$', result.summary)
-                if match:
-                    summary_key = f"analyzer_content.{name}.summary.problems"
-                    translated_summary = translator.get(summary_key, "")
-                    if translated_summary:
-                        translated.summary = translated_summary.format(problems=match.group(1))
+                rebuild_problem_summary_from_issues = True
 
         elif name == "mobile":
             if "have a viewport" in result.summary:
@@ -534,6 +523,30 @@ def translate_analyzer_content(result: AnalyzerResult, lang: str, translator) ->
                     if eng in issue.message and lang in translations:
                         issue.message = issue.message.replace(eng, translations[lang])
 
+    # Rebuild selected problem summaries from already translated issue messages
+    # to avoid mixed-language output (e.g., "Найдено ... broken links").
+    if rebuild_problem_summary_from_issues:
+        translated_problem_messages = [
+            issue.message for issue in translated.issues
+            if issue.message and issue.severity != SeverityLevel.SUCCESS
+        ][:3]
+
+        if translated_problem_messages:
+            if name == "links":
+                summary_key = "analyzer_content.links.summary.broken_found"
+                translated_summary = translator.get(summary_key, "")
+                if translated_summary:
+                    translated.summary = translated_summary.format(
+                        broken=", ".join(translated_problem_messages)
+                    )
+            elif name in {"robots", "security"}:
+                summary_key = f"analyzer_content.{name}.summary.problems"
+                translated_summary = translator.get(summary_key, "")
+                if translated_summary:
+                    translated.summary = translated_summary.format(
+                        problems=", ".join(translated_problem_messages)
+                    )
+
     # Translate tables
     # Build reverse maps: English value → target translation (keyed by snake_case keys)
     en_translations = load_translations("en")
@@ -552,10 +565,28 @@ def translate_analyzer_content(result: AnalyzerResult, lang: str, translator) ->
     table_values = build_reverse_map(en_tt.get("values", {}), target_tt.get("values", {}))
     table_patterns = build_reverse_map(en_tt.get("patterns", {}), target_tt.get("patterns", {}))
 
+    analyzer_en_table_title = (
+        en_translations.get("analyzer_content", {})
+        .get(name, {})
+        .get("issues", {})
+        .get("table_title")
+    )
+    analyzer_localized_table_title = translator.get(
+        f"analyzer_content.{name}.issues.table_title",
+        "",
+    )
+
     for table in translated.tables:
         # Translate table title
-        if table.get("title") and table["title"] in table_titles:
-            table["title"] = table_titles[table["title"]]
+        if table.get("title"):
+            if table["title"] in table_titles:
+                table["title"] = table_titles[table["title"]]
+            elif (
+                analyzer_en_table_title
+                and analyzer_localized_table_title
+                and table["title"] == analyzer_en_table_title
+            ):
+                table["title"] = analyzer_localized_table_title
 
         # Translate table headers
         if table.get("headers"):
