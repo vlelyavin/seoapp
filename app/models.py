@@ -37,6 +37,7 @@ class AuditRequest(BaseModel):
     progress_language: Optional[str] = None  # UI locale for progress messages (defaults to language)
     analyzers: Optional[List[str]] = None  # None = all analyzers
     max_pages: Optional[int] = None  # Override MAX_PAGES (plan-enforced limit)
+    show_pages_crawled: bool = False  # Show pages crawled count in report summary
 
 
 class ImageData(BaseModel):
@@ -158,6 +159,7 @@ class AuditResult(BaseModel):
     error_message: Optional[str] = None
     language: str = "en"  # Report language: en, uk, ru
     homepage_screenshot: Optional[str] = None  # base64 homepage screenshot
+    show_pages_crawled: bool = False  # Show pages crawled count in report summary
 
     @property
     def overall_score(self) -> int:

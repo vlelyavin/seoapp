@@ -76,6 +76,7 @@
     "maxPages": "Maximum Pages",
     "maxPagesHint": "Set how many pages to crawl (your plan allows up to {limit} pages)",
     "startAudit": "Start Audit",
+    "showPagesCrawled": "Show scanned pages count in report",
     "inProgress": "Audit in progress...",
     "completed": "Audit completed",
     "failed": "Audit failed",

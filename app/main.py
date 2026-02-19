@@ -222,6 +222,7 @@ async def start_audit(request: AuditRequest, background_tasks: BackgroundTasks):
         status=AuditStatus.PENDING,
         started_at=datetime.utcnow(),
         language=request.language if request.language in ["en", "uk", "ru"] else "en",
+        show_pages_crawled=request.show_pages_crawled,
     )
 
     # Store audit with timestamp
@@ -377,6 +378,7 @@ async def get_audit_results(audit_id: str, lang: str = "en"):
         "passed_checks": audit.passed_checks,
         "results": results_dict,
         "homepage_screenshot": audit.homepage_screenshot,
+        "show_pages_crawled": audit.show_pages_crawled,
     }
 
 
@@ -530,6 +532,7 @@ async def generate_report_from_data(request: Request):
         results=results,
         homepage_screenshot=audit_data.get("homepage_screenshot"),
         language=lang,
+        show_pages_crawled=audit_data.get("show_pages_crawled", False),
     )
 
     generator = get_report_generator()

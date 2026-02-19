@@ -10,7 +10,7 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json();
-  const { url, language = "en", progressLanguage, analyzers = null, maxPages, includeScreenshots = false } = body;
+  const { url, language = "en", progressLanguage, analyzers = null, maxPages, includeScreenshots = false, showPagesCrawled = false } = body;
 
   if (!url) {
     return NextResponse.json({ error: "URL is required" }, { status: 400 });
@@ -95,6 +95,7 @@ export async function POST(req: Request) {
       analyzers,
       max_pages: effectiveMaxPages,
       include_screenshots: includeScreenshots,
+      show_pages_crawled: showPagesCrawled,
     }),
   });
 

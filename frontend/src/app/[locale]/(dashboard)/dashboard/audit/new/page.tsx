@@ -21,6 +21,7 @@ export default function NewAuditPage() {
   const [showAnalyzers, setShowAnalyzers] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPagesCrawled, setShowPagesCrawled] = useState(false);
 
   // Custom page limit state
   const [maxPages, setMaxPages] = useState<number>(10); // Default to Free plan limit
@@ -72,6 +73,7 @@ export default function NewAuditPage() {
           analyzers: realSelected.length === REAL_ANALYZER_NAMES.length ? null : realSelected,
           maxPages,
           includeScreenshots,
+          showPagesCrawled,
         }),
       });
 
@@ -228,6 +230,21 @@ export default function NewAuditPage() {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Show pages crawled option */}
+          <div className="mt-4">
+            <label className="flex items-center gap-2 rounded px-2 py-1 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showPagesCrawled}
+                onChange={() => setShowPagesCrawled((prev) => !prev)}
+                className="rounded border-gray-300 text-gray-900 focus:ring-gray-500 dark:border-gray-600 dark:text-white dark:focus:ring-white"
+              />
+              <span className="text-gray-700 dark:text-gray-300">
+                {t("showPagesCrawled")}
+              </span>
+            </label>
           </div>
         </div>
 

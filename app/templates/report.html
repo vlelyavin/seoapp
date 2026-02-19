@@ -123,6 +123,9 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 16px;
+        }
+        .summary-grid-3 {
+            grid-template-columns: repeat(3, 1fr);
             margin-bottom: 36px;
         }
 
@@ -555,13 +558,15 @@
             <p style="color: var(--color-text-light); margin-bottom: 4px; font-size: 13px;">Website: {{ domain }}</p>
             <p style="color: var(--color-text-light); margin-bottom: 24px; font-size: 13px;">{{ t.pages_analyzed if t else '{} pages analyzed'.format(audit.pages_crawled) }} · {{ generated_at }}</p>
 
-            <div class="summary-grid">
+            <div class="summary-grid{% if not show_pages_crawled %} summary-grid-3{% endif %}">
+                {% if show_pages_crawled %}
                 <div class="summary-card info">
                     <div class="icon-circle">
                         <svg viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
                     </div>
                     <div><div class="number">{{ audit.pages_crawled }}</div><div class="label">{{ t.pages_crawled if t else 'Pages crawled' }}</div></div>
                 </div>
+                {% endif %}
                 <div class="summary-card success">
                     <div class="icon-circle">
                         <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>

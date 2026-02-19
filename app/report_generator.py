@@ -830,6 +830,7 @@ class ReportGenerator:
             lang=lang,
             brand=template_brand,
             report_title_display=report_title_display,
+            show_pages_crawled=audit.show_pages_crawled,
         )
 
         # Save report
@@ -990,6 +991,9 @@ class ReportGenerator:
             .summary-grid {
                 grid-template-columns: repeat(4, 1fr) !important;
                 margin-top: 24px !important;
+            }
+            .summary-grid-3 {
+                grid-template-columns: repeat(3, 1fr) !important;
             }
             .summary-card {
                 padding: 10px !important;
@@ -1588,15 +1592,16 @@ class ReportGenerator:
         self._docx_set_font(run, size_pt=10, color_rgb=(107, 114, 128))
 
         # Summary stats table
-        summary_table = doc.add_table(rows=2, cols=4)
-        summary_table.style = 'Table Grid'
-
         summary_items = [
-            (t_labels['pages_crawled'], str(audit.pages_crawled), brand_primary_hex),
             (t_labels['passed_checks'], str(audit.passed_checks), '10B981'),
             (t_labels['warnings'], str(audit.warnings), 'F59E0B'),
             (t_labels['critical_issues'], str(audit.critical_issues), 'EF4444'),
         ]
+        if audit.show_pages_crawled:
+            summary_items.insert(0, (t_labels['pages_crawled'], str(audit.pages_crawled), brand_primary_hex))
+
+        summary_table = doc.add_table(rows=2, cols=len(summary_items))
+        summary_table.style = 'Table Grid'
 
         for i, (label, value, color) in enumerate(summary_items):
             header_cell = summary_table.rows[0].cells[i]
@@ -1643,9 +1648,6 @@ class ReportGenerator:
         if audit.homepage_screenshot:
             import base64 as b64
             from io import BytesIO
-            hp_title = self._strip_docx_decorations(t_labels.get("homepage_screenshot_title", "Homepage"))
-            hp_heading = doc.add_heading(hp_title, level=1)
-            hp_heading.paragraph_format.space_after = Pt(12)
             try:
                 img_bytes = b64.b64decode(audit.homepage_screenshot)
                 img_stream = BytesIO(img_bytes)
@@ -1668,19 +1670,25 @@ class ReportGenerator:
         severity_order_map = {SeverityLevel.ERROR: 0, SeverityLevel.WARNING: 1, SeverityLevel.INFO: 2, SeverityLevel.SUCCESS: 3}
         sorted_sections = sorted(docx_sections, key=lambda s: severity_order_map.get(s["severity"], 4))
 
-        cat_table = doc.add_table(rows=1 + len(sorted_sections), cols=5)
+        cat_table = doc.add_table(rows=1 + len(sorted_sections), cols=4)
         cat_table.style = 'Table Grid'
 
+        # Set column widths: category ~50%, others share remaining space
+        cat_table.columns[0].width = Inches(3.25)
+        cat_table.columns[1].width = Inches(1.25)
+        cat_table.columns[2].width = Inches(1.0)
+        cat_table.columns[3].width = Inches(1.0)
+
         # Header row
-        headers = ["#", t("report.category"), t("report.status"), t("report.critical_count"), t("report.warning_count")]
+        headers = [t("report.category"), t("report.status"), t("report.critical_count"), t("report.warning_count")]
         for i, header_text in enumerate(headers):
             cell = cat_table.rows[0].cells[i]
             cell.text = ''
             p = cell.paragraphs[0]
-            if i in (0, 2, 3, 4):
+            if i in (1, 2, 3):
                 p.alignment = WD_ALIGN_PARAGRAPH.CENTER
             run = p.add_run(header_text)
-            self._docx_set_font(run, size_pt=9, bold=True, color_rgb=(55, 65, 81))
+            self._docx_set_font(run, size_pt=8, bold=True, color_rgb=(55, 65, 81))
             self._docx_set_cell_shading(cell, 'F1F5F9')
 
         badge_text_map = {
@@ -1707,37 +1715,31 @@ class ReportGenerator:
                 for shaded_cell in row.cells:
                     self._docx_set_cell_shading(shaded_cell, 'F8FAFC')
 
-            # #
+            # Category
             cell = row.cells[0]
             cell.text = ''
-            cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
-            run = cell.paragraphs[0].add_run(str(row_idx))
-            self._docx_set_font(run, size_pt=9, color_rgb=(156, 163, 175))
-            # Category
-            cell = row.cells[1]
-            cell.text = ''
             run = cell.paragraphs[0].add_run(section["title"])
-            self._docx_set_font(run, size_pt=9, color_rgb=(55, 65, 81))
+            self._docx_set_font(run, size_pt=8, color_rgb=(55, 65, 81))
             # Status badge
-            cell = row.cells[2]
+            cell = row.cells[1]
             cell.text = ''
             cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
             badge = badge_text_map.get(section["severity"], "—")
             badge_clr = badge_color_map.get(section["severity"], (55, 65, 81))
             run = cell.paragraphs[0].add_run(badge)
-            self._docx_set_font(run, size_pt=9, bold=True, color_rgb=badge_clr)
+            self._docx_set_font(run, size_pt=8, bold=True, color_rgb=badge_clr)
             # Critical count
-            cell = row.cells[3]
+            cell = row.cells[2]
             cell.text = ''
             cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
             run = cell.paragraphs[0].add_run(str(criticals))
-            self._docx_set_font(run, size_pt=9, bold=criticals > 0, color_rgb=(239, 68, 68) if criticals > 0 else (156, 163, 175))
+            self._docx_set_font(run, size_pt=8, bold=criticals > 0, color_rgb=(239, 68, 68) if criticals > 0 else (156, 163, 175))
             # Warning count
-            cell = row.cells[4]
+            cell = row.cells[3]
             cell.text = ''
             cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
             run = cell.paragraphs[0].add_run(str(warns))
-            self._docx_set_font(run, size_pt=9, bold=warns > 0, color_rgb=(245, 158, 11) if warns > 0 else (156, 163, 175))
+            self._docx_set_font(run, size_pt=8, bold=warns > 0, color_rgb=(245, 158, 11) if warns > 0 else (156, 163, 175))
 
         doc.add_paragraph()
 
@@ -1850,7 +1852,7 @@ class ReportGenerator:
                         cell.text = ''
                         p = cell.paragraphs[0]
                         run = p.add_run(header)
-                        self._docx_set_font(run, size_pt=9, bold=True)
+                        self._docx_set_font(run, size_pt=8, bold=True)
                         self._docx_set_cell_shading(cell, 'F3F4F6')
                         self._docx_set_cell_margins(cell, top=50, right=80, bottom=50, left=80)
 
@@ -1861,7 +1863,7 @@ class ReportGenerator:
                             cell = table.rows[row_idx + 1].cells[col_idx]
                             cell.text = ''
                             p = cell.paragraphs[0]
-                            self._docx_add_formatted_cell(p, value, font_size_pt=9)
+                            self._docx_add_formatted_cell(p, value, font_size_pt=8)
                             self._docx_set_cell_margins(cell, top=40, right=80, bottom=40, left=80)
                             # Alternating row shading
                             if row_idx % 2 == 1:
