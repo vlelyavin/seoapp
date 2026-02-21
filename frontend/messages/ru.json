@@ -16,7 +16,7 @@
     "newAudit": "Новый аудит",
     "plans": "Тарифы",
     "settings": "Настройки",
-    "branding": "Брендинг",
+    "indexing": "Индексация",
     "admin": "Админ",
     "users": "Пользователи",
     "logout": "Выйти",
@@ -140,10 +140,6 @@
     "changePassword": "Изменить пароль",
     "currentPassword": "Текущий пароль",
     "newPassword": "Новый пароль",
-    "theme": "Тема",
-    "light": "Светлая",
-    "dark": "Тёмная",
-    "system": "Системная",
     "language": "Язык",
     "name": "Имя",
     "passwordMinLength": "Пароль должен быть не менее 8 символов",
@@ -151,7 +147,9 @@
     "passwordChanged": "Пароль изменён",
     "failedToUpdate": "Не удалось обновить",
     "failedToChangePassword": "Не удалось изменить пароль",
-    "errorSaving": "Ошибка сохранения"
+    "errorSaving": "Ошибка сохранения",
+    "tabGeneral": "Основное",
+    "tabBranding": "Брендирование"
   },
   "branding": {
     "title": "Брендинг",
@@ -201,6 +199,7 @@
     "updateFailed": "Не удалось обновить план",
     "unlimitedAudits": "Неограниченное количество аудитов/месяц",
     "pdfOnly": "Экспорт только в PDF",
+    "pdfAndHtmlExports": "Экспорт PDF и HTML",
     "fullExports": "Экспорт PDF, HTML и DOCX",
     "watermarkIncluded": "Водяной знак в экспортируемых отчётах",
     "noWatermark": "Без водяного знака в отчётах"
@@ -865,6 +864,40 @@
         "long_redirect_chains": "Замените длинные цепочки на прямой 301 редирект на конечный URL-адрес.",
         "internal_links_to_redirects": "Обновите внутренние ссылки, заменив URL с редиректами на конечные адреса."
       }
+    }
+  },
+  "indexing": {
+    "title": "Индексация",
+    "comingSoon": "Эта функция скоро появится."
+  },
+  "marketing": {
+    "nav": {
+      "audit": "SEO Аудит",
+      "indexing": "Индексация",
+      "pricing": "Тарифы",
+      "dashboard": "Панель управления",
+      "signIn": "Войти",
+      "signUp": "Регистрация"
+    },
+    "landing": {
+      "title": "Профессиональный инструмент SEO аудита",
+      "subtitle": "Анализируйте ваш сайт по 20+ SEO метрикам и получайте практические рекомендации.",
+      "cta": "Начать бесплатный аудит"
+    },
+    "pricing": {
+      "title": "Тарифы",
+      "subtitle": "Выберите план, который вам подходит."
+    },
+    "indexingLanding": {
+      "title": "Инструмент индексации",
+      "subtitle": "Скоро. Мониторинг и управление индексацией вашего сайта."
+    },
+    "footer": {
+      "copyright": "© {year} SEO Audit. Все права защищены.",
+      "audit": "SEO Аудит",
+      "indexing": "Индексация",
+      "pricing": "Тарифы",
+      "login": "Войти"
     }
   }
 }

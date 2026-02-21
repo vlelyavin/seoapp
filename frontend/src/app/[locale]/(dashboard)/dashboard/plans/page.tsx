@@ -91,25 +91,30 @@ export default function PlansPage() {
         {plans.map((plan) => {
           const isCurrent = session?.user?.planId === plan.id;
           const isAgency = plan.id === "agency";
+          const isPro = plan.id === "pro";
           const isSwitching = switching === plan.id;
           const featureItems = [
             {
               text:
-                plan.id === "agency"
+                isPro || isAgency
                   ? t("unlimitedAudits")
                   : t("auditsPerMonth", { count: plan.auditsPerMonth }),
               highlight: false,
             },
             { text: t("maxPages", { count: plan.maxPages }), highlight: false },
             {
-              text: plan.id === "agency" ? t("fullExports") : t("pdfOnly"),
-              highlight: plan.id === "agency",
+              text: isAgency
+                ? t("fullExports")
+                : isPro
+                ? t("pdfAndHtmlExports")
+                : t("pdfOnly"),
+              highlight: isAgency,
             },
             {
               text: plan.id === "free" ? t("watermarkIncluded") : t("noWatermark"),
-              highlight: plan.id === "agency",
+              highlight: isAgency,
             },
-            ...(plan.id === "agency" ? [{ text: t("whiteLabel"), highlight: true }] : []),
+            ...(isAgency ? [{ text: t("whiteLabel"), highlight: true }] : []),
           ];
 
           return (

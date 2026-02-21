@@ -3,12 +3,21 @@
 import { signIn } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 
+const isDev = process.env.NODE_ENV === "development";
+
 export default function LoginPage() {
   const t = useTranslations("auth");
   const locale = useLocale();
 
   async function handleGoogleSignIn() {
     await signIn("google", { callbackUrl: `/${locale}/dashboard` });
+  }
+
+  async function handleDevSignIn() {
+    const res = await fetch("/api/auth/dev-login", { method: "POST" });
+    if (res.ok) {
+      window.location.href = `/${locale}/dashboard`;
+    }
   }
 
   return (
@@ -41,6 +50,22 @@ export default function LoginPage() {
           </svg>
           {t("google")}
         </button>
+
+        {isDev && (
+          <>
+            <div className="my-4 flex items-center gap-2">
+              <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+              <span className="text-xs text-gray-400">DEV ONLY</span>
+              <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+            </div>
+            <button
+              onClick={handleDevSignIn}
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-amber-500/50 bg-amber-500/10 px-4 py-2.5 text-sm font-medium text-amber-600 hover:bg-amber-500/20 dark:text-amber-400"
+            >
+              🔧 Dev Login (admin)
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

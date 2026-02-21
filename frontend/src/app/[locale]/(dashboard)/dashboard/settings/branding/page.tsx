@@ -157,12 +157,9 @@ export default function BrandingPage() {
 
   if (!isAgency) {
     return (
-      <div className="mx-auto max-w-2xl py-12 text-center">
-        <Lock className="mx-auto mb-4 h-12 w-12 text-gray-300 dark:text-gray-600" />
-        <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-          {t("title")}
-        </h1>
-        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+      <div className="py-12 text-center">
+        <Lock className="mx-auto mb-4 h-12 w-12 text-gray-600" />
+        <p className="text-sm text-gray-400">
           {t("proRequired")}
         </p>
       </div>
@@ -170,10 +167,7 @@ export default function BrandingPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-        {t("title")}
-      </h1>
+    <div className="space-y-6">
       <p className="text-sm text-gray-500 dark:text-gray-400">
         {t("description")}
       </p>

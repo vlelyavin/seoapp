@@ -7,16 +7,16 @@ async function main() {
     where: { id: "free" },
     update: {
       name: "Free",
-      auditsPerMonth: 5,
-      maxPages: 10,
+      auditsPerMonth: 3,
+      maxPages: 20,
       whiteLabel: false,
       price: 0,
     },
     create: {
       id: "free",
       name: "Free",
-      auditsPerMonth: 5,
-      maxPages: 10,
+      auditsPerMonth: 3,
+      maxPages: 20,
       whiteLabel: false,
       price: 0,
     },
@@ -26,18 +26,18 @@ async function main() {
     where: { id: "pro" },
     update: {
       name: "Pro",
-      auditsPerMonth: 50,
-      maxPages: 100,
+      auditsPerMonth: 999999,
+      maxPages: 200,
       whiteLabel: false,
-      price: 20,
+      price: 9,
     },
     create: {
       id: "pro",
       name: "Pro",
-      auditsPerMonth: 50,
-      maxPages: 100,
+      auditsPerMonth: 999999,
+      maxPages: 200,
       whiteLabel: false,
-      price: 20,
+      price: 9,
     },
   });
 
@@ -46,17 +46,17 @@ async function main() {
     update: {
       name: "Agency",
       auditsPerMonth: 999999,
-      maxPages: 500,
+      maxPages: 1000,
       whiteLabel: true,
-      price: 50,
+      price: 29,
     },
     create: {
       id: "agency",
       name: "Agency",
       auditsPerMonth: 999999,
-      maxPages: 500,
+      maxPages: 1000,
       whiteLabel: true,
-      price: 50,
+      price: 29,
     },
   });
 

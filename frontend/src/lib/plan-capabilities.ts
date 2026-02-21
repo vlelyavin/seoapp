@@ -9,13 +9,18 @@ export interface PlanCapabilities {
 
 export function getPlanCapabilities(planId?: string | null): PlanCapabilities {
   const isAgency = planId === "agency";
+  const isPro = planId === "pro";
   const isFree = planId === "free";
 
   return {
-    allowedExportFormats: isAgency ? ["pdf", "html", "docx"] : ["pdf"],
+    allowedExportFormats: isAgency
+      ? ["pdf", "html", "docx"]
+      : isPro
+      ? ["pdf", "html"]
+      : ["pdf"],
     canUseBranding: isAgency,
     showWatermark: isFree,
-    unlimitedAudits: isAgency,
+    unlimitedAudits: isAgency || isPro,
   };
 }
 

@@ -7,8 +7,8 @@ import { useSession } from "next-auth/react";
 import {
   CreditCard,
   LayoutDashboard,
-  Palette,
   Plus,
+  Search,
   Settings,
   Users,
 } from "lucide-react";
@@ -39,6 +39,11 @@ export function Sidebar({ open, onClose }: SidebarProps) {
       icon: Plus,
     },
     {
+      href: `/${locale}/dashboard/indexing`,
+      label: t("indexing"),
+      icon: Search,
+    },
+    {
       href: `/${locale}/dashboard/plans`,
       label: t("plans"),
       icon: CreditCard,
@@ -47,11 +52,6 @@ export function Sidebar({ open, onClose }: SidebarProps) {
       href: `/${locale}/dashboard/settings`,
       label: t("settings"),
       icon: Settings,
-    },
-    {
-      href: `/${locale}/dashboard/settings/branding`,
-      label: t("branding"),
-      icon: Palette,
     },
   ];
 
@@ -75,10 +75,10 @@ export function Sidebar({ open, onClose }: SidebarProps) {
     <aside
       id="dashboard-sidebar"
       className={cn(
-        "fixed inset-y-0 left-0 top-14 z-50 flex w-56 flex-col overflow-hidden border-r border-gray-800 bg-black transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+        "fixed inset-y-0 left-0 top-14 z-50 flex w-56 flex-col overflow-hidden border-r border-gray-800 bg-black transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
         open
-          ? "translate-x-0 opacity-100 pointer-events-auto"
-          : "-translate-x-full opacity-0 pointer-events-none"
+          ? "translate-x-0"
+          : "-translate-x-full"
       )}
     >
       <nav className="flex-1 space-y-1 p-3">

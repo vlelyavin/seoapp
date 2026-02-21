@@ -41,11 +41,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-        {t("title")}
-      </h1>
-
+    <div className="space-y-6">
       {message && (
         <div className="rounded-lg bg-gray-100 px-4 py-2 text-sm text-gray-900 dark:bg-gray-900 dark:text-white">
           {message}

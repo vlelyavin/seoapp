@@ -1,0 +1,31 @@
+"use client";
+
+import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
+
+export function Footer() {
+  const t = useTranslations("marketing.footer");
+  const locale = useLocale();
+  const year = new Date().getFullYear();
+
+  return (
+    <footer className="border-t border-gray-800 bg-black">
+      <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-4 py-8 sm:flex-row sm:justify-between lg:px-6">
+        <p className="text-sm text-gray-500">
+          {t("copyright", { year })}
+        </p>
+        <nav className="flex gap-4">
+          <Link href={`/${locale}`} className="text-sm text-gray-400 transition-colors hover:text-white">
+            {t("audit")}
+          </Link>
+          <Link href={`/${locale}/pricing`} className="text-sm text-gray-400 transition-colors hover:text-white">
+            {t("pricing")}
+          </Link>
+          <Link href={`/${locale}/login`} className="text-sm text-gray-400 transition-colors hover:text-white">
+            {t("login")}
+          </Link>
+        </nav>
+      </div>
+    </footer>
+  );
+}

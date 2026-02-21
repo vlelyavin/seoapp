@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { fastapiFetch } from "@/lib/api-client";
+import { getPlanCapabilities } from "@/lib/plan-capabilities";
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -71,7 +72,8 @@ export async function POST(req: Request) {
     },
   });
 
-  const hasMonthlyLimit = user.plan.id !== "agency";
+  const capabilities = getPlanCapabilities(user.plan.id);
+  const hasMonthlyLimit = !capabilities.unlimitedAudits;
   if (hasMonthlyLimit && auditsThisMonth >= user.plan.auditsPerMonth) {
     return NextResponse.json(
       { error: "Monthly audit limit reached. Please upgrade your plan." },

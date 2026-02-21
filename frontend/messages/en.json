@@ -16,7 +16,7 @@
     "newAudit": "New Audit",
     "plans": "Plans",
     "settings": "Settings",
-    "branding": "Branding",
+    "indexing": "Indexing",
     "admin": "Admin",
     "users": "Users",
     "logout": "Sign Out",
@@ -140,10 +140,6 @@
     "changePassword": "Change Password",
     "currentPassword": "Current Password",
     "newPassword": "New Password",
-    "theme": "Theme",
-    "light": "Light",
-    "dark": "Dark",
-    "system": "System",
     "language": "Language",
     "name": "Name",
     "passwordMinLength": "Password must be at least 8 characters",
@@ -151,7 +147,9 @@
     "passwordChanged": "Password changed",
     "failedToUpdate": "Failed to update",
     "failedToChangePassword": "Failed to change password",
-    "errorSaving": "Error saving"
+    "errorSaving": "Error saving",
+    "tabGeneral": "General",
+    "tabBranding": "Branding"
   },
   "branding": {
     "title": "Branding",
@@ -201,6 +199,7 @@
     "updateFailed": "Failed to update plan",
     "unlimitedAudits": "Unlimited audits/month",
     "pdfOnly": "PDF export only",
+    "pdfAndHtmlExports": "PDF and HTML exports",
     "fullExports": "PDF, HTML, and DOCX exports",
     "watermarkIncluded": "Watermark in exported reports",
     "noWatermark": "No watermark in exported reports"
@@ -865,6 +864,40 @@
         "long_redirect_chains": "Replace long chains with a direct 301 redirect to the final URL.",
         "internal_links_to_redirects": "Update internal links by replacing redirect URLs with final destination URLs."
       }
+    }
+  },
+  "indexing": {
+    "title": "Indexing",
+    "comingSoon": "This feature is coming soon."
+  },
+  "marketing": {
+    "nav": {
+      "audit": "SEO Audit",
+      "indexing": "Indexing",
+      "pricing": "Pricing",
+      "dashboard": "Dashboard",
+      "signIn": "Sign In",
+      "signUp": "Sign Up"
+    },
+    "landing": {
+      "title": "Professional SEO Audit Tool",
+      "subtitle": "Analyze your website with 20+ SEO metrics and get actionable insights.",
+      "cta": "Start Free Audit"
+    },
+    "pricing": {
+      "title": "Pricing",
+      "subtitle": "Choose the plan that fits your needs."
+    },
+    "indexingLanding": {
+      "title": "Indexing Tool",
+      "subtitle": "Coming soon. Monitor and manage your website indexing."
+    },
+    "footer": {
+      "copyright": "© {year} SEO Audit. All rights reserved.",
+      "audit": "SEO Audit",
+      "indexing": "Indexing",
+      "pricing": "Pricing",
+      "login": "Sign In"
     }
   }
 }

@@ -16,7 +16,7 @@
     "newAudit": "Новий аудит",
     "plans": "Тарифи",
     "settings": "Налаштування",
-    "branding": "Брендинг",
+    "indexing": "Індексація",
     "admin": "Адмін",
     "users": "Користувачі",
     "logout": "Вийти",
@@ -140,10 +140,6 @@
     "changePassword": "Змінити пароль",
     "currentPassword": "Поточний пароль",
     "newPassword": "Новий пароль",
-    "theme": "Тема",
-    "light": "Світла",
-    "dark": "Темна",
-    "system": "Системна",
     "language": "Мова",
     "name": "Ім'я",
     "passwordMinLength": "Пароль повинен бути не менше 8 символів",
@@ -151,7 +147,9 @@
     "passwordChanged": "Пароль змінено",
     "failedToUpdate": "Не вдалося оновити",
     "failedToChangePassword": "Не вдалося змінити пароль",
-    "errorSaving": "Помилка збереження"
+    "errorSaving": "Помилка збереження",
+    "tabGeneral": "Загальне",
+    "tabBranding": "Брендування"
   },
   "branding": {
     "title": "Брендинг",
@@ -201,6 +199,7 @@
     "updateFailed": "Не вдалося оновити план",
     "unlimitedAudits": "Необмежена кількість аудитів/місяць",
     "pdfOnly": "Експорт лише у PDF",
+    "pdfAndHtmlExports": "Експорт PDF та HTML",
     "fullExports": "Експорт PDF, HTML та DOCX",
     "watermarkIncluded": "Водяний знак у звітах",
     "noWatermark": "Без водяного знака у звітах"
@@ -865,6 +864,40 @@
         "long_redirect_chains": "Замініть довгі ланцюжки на прямий 301 редирект на кінцеву URL-адресу.",
         "internal_links_to_redirects": "Оновіть внутрішні посилання, замінивши URL з редиректами на кінцеві адреси."
       }
+    }
+  },
+  "indexing": {
+    "title": "Індексація",
+    "comingSoon": "Ця функція незабаром з'явиться."
+  },
+  "marketing": {
+    "nav": {
+      "audit": "SEO Аудит",
+      "indexing": "Індексація",
+      "pricing": "Тарифи",
+      "dashboard": "Панель керування",
+      "signIn": "Увійти",
+      "signUp": "Реєстрація"
+    },
+    "landing": {
+      "title": "Професійний інструмент SEO аудиту",
+      "subtitle": "Аналізуйте свій вебсайт за 20+ SEO метриками та отримуйте практичні рекомендації.",
+      "cta": "Почати безкоштовний аудит"
+    },
+    "pricing": {
+      "title": "Тарифи",
+      "subtitle": "Оберіть план, який вам підходить."
+    },
+    "indexingLanding": {
+      "title": "Інструмент індексації",
+      "subtitle": "Незабаром. Моніторинг та управління індексацією вашого сайту."
+    },
+    "footer": {
+      "copyright": "© {year} SEO Audit. Усі права захищені.",
+      "audit": "SEO Аудит",
+      "indexing": "Індексація",
+      "pricing": "Тарифи",
+      "login": "Увійти"
     }
   }
 }
