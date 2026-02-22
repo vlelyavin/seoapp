@@ -134,8 +134,9 @@ model Site {
   autoIndexGoogle    Boolean       @default(false)
   autoIndexBing      Boolean       @default(false)
   sitemapUrl         String?       @db.Text
-  indexnowKey        String?       @db.VarChar(191)
-  lastSyncedAt       DateTime?
+  indexnowKey           String?       @db.VarChar(191)
+  indexnowKeyVerified   Boolean       @default(false)
+  lastSyncedAt          DateTime?
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
   user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)

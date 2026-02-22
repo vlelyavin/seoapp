@@ -44,6 +44,7 @@ interface Site {
   autoIndexBing: boolean;
   sitemapUrl: string | null;
   indexnowKey: string | null;
+  indexnowKeyVerified: boolean;
   lastSyncedAt: string | null;
   totalUrls: number;
   indexedCount: number;
@@ -504,6 +505,14 @@ export default function IndexingPage() {
     }
   };
 
+  // ── Mark site as IndexNow-verified in local state ─────────────────────────
+
+  const handleVerifySuccess = useCallback((siteId: string) => {
+    setSites((prev) =>
+      prev.map((s) => (s.id === siteId ? { ...s, indexnowKeyVerified: true } : s))
+    );
+  }, []);
+
   // ── Copy IndexNow key ─────────────────────────────────────────────────────
 
   const copyKey = async (key: string) => {
@@ -688,6 +697,7 @@ export default function IndexingPage() {
                 onToggleAutoBing={(v) => toggleAutoIndex(site.id, "bing", v)}
                 onRunNow={() => runNow(site.id)}
                 onCopyKey={(k) => copyKey(k)}
+                onVerifySuccess={() => handleVerifySuccess(site.id)}
                 showToast={showToast}
               />
             ))
@@ -825,6 +835,7 @@ function SiteCard({
   onToggleAutoBing,
   onRunNow,
   onCopyKey,
+  onVerifySuccess,
   showToast,
 }: {
   site: Site;
@@ -848,6 +859,7 @@ function SiteCard({
   onToggleAutoBing: (v: boolean) => void;
   onRunNow: () => void;
   onCopyKey: (k: string) => void;
+  onVerifySuccess: () => void;
   showToast: (msg: string, ok?: boolean) => void;
 }) {
   const [activeTab, setActiveTab] = useState<"overview" | "urls" | "report">(
@@ -867,9 +879,8 @@ function SiteCard({
   const [report, setReport] = useState<Report | null>(null);
   const [loadingReport, setLoadingReport] = useState(false);
 
-  // Verify key state
-  const [verifying, setVerifying] = useState(false);
-  const [verifyResult, setVerifyResult] = useState<boolean | null>(null);
+  // IndexNow verification modal state: null = closed, else holds the action to run after verify
+  const [indexNowModal, setIndexNowModal] = useState<{ action: () => void } | null>(null);
 
   const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -987,19 +998,13 @@ function SiteCard({
 
   // ── Verify IndexNow key ───────────────────────────────────────────────────
 
-  const verifyKey = async () => {
-    setVerifying(true);
-    setVerifyResult(null);
-    try {
-      const res = await fetch(
-        `/api/indexing/sites/${site.id}/verify-key`
-      );
-      if (res.ok) {
-        const data = await res.json();
-        setVerifyResult(data.verified);
-      }
-    } finally {
-      setVerifying(false);
+  // ── IndexNow submit guard ─────────────────────────────────────────────────
+
+  const bingSubmit = (action: () => void) => {
+    if (!site.indexnowKeyVerified) {
+      setIndexNowModal({ action });
+    } else {
+      action();
     }
   };
 
@@ -1207,11 +1212,8 @@ function SiteCard({
                 {site.indexnowKey && (
                   <button
                     onClick={() =>
-                      onRequestSubmit(
-                        site.id,
-                        [],
-                        ["bing"],
-                        stats?.notIndexed ?? 0
+                      bingSubmit(() =>
+                        onRequestSubmit(site.id, [], ["bing"], stats?.notIndexed ?? 0)
                       )
                     }
                     disabled={!stats?.notIndexed}
@@ -1254,64 +1256,12 @@ function SiteCard({
                 />
               </div>
 
-              {/* IndexNow key */}
-              {site.indexnowKey && (
-                <div className="rounded-lg border border-gray-800 bg-gray-950 p-4 space-y-3">
-                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    {t("indexnowKey")}
-                  </p>
-                  <p className="text-xs text-gray-500">{t("indexnowKeyDesc")}</p>
-                  <div className="flex items-center gap-2 rounded-md border border-gray-800 bg-gray-900 px-3 py-2">
-                    <code className="flex-1 text-xs text-green-400 break-all">
-                      {site.indexnowKey}
-                    </code>
-                    <button
-                      onClick={() => onCopyKey(site.indexnowKey!)}
-                      className="shrink-0 text-gray-400 hover:text-white transition"
-                    >
-                      {copied === site.indexnowKey ? (
-                        <Check className="h-4 w-4 text-green-400" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                    </button>
-                  </div>
-                  <p className="text-xs text-gray-500">
-                    File URL:{" "}
-                    <code className="text-gray-300">
-                      {(site.domain.startsWith("sc-domain:")
-                        ? `https://${site.domain.replace("sc-domain:", "")}`
-                        : site.domain.replace(/\/$/, ""))}/
-                      {site.indexnowKey}.txt
-                    </code>
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={verifyKey}
-                      disabled={verifying}
-                      className="flex items-center gap-1.5 rounded-md border border-gray-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-gray-800 disabled:opacity-50"
-                    >
-                      {verifying ? (
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                      ) : (
-                        <Check className="h-3 w-3" />
-                      )}
-                      {verifying ? t("verifying") : t("verifyKey")}
-                    </button>
-                    {verifyResult === true && (
-                      <span className="text-xs text-green-400 flex items-center gap-1">
-                        <CheckCircle className="h-3.5 w-3.5" />
-                        {t("keyVerified")}
-                      </span>
-                    )}
-                    {verifyResult === false && (
-                      <span className="text-xs text-red-400 flex items-center gap-1">
-                        <XCircle className="h-3.5 w-3.5" />
-                        {t("keyNotFound")}
-                      </span>
-                    )}
-                  </div>
-                </div>
+              {/* IndexNow key status badge — shown when already verified */}
+              {site.indexnowKey && site.indexnowKeyVerified && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-green-900/20 px-3 py-1 text-xs font-medium text-green-400">
+                  <CheckCircle className="h-3.5 w-3.5" />
+                  IndexNow key verified
+                </span>
               )}
             </div>
           )}
@@ -1377,11 +1327,8 @@ function SiteCard({
                   {site.indexnowKey && (
                     <button
                       onClick={() =>
-                        onRequestSubmit(
-                          site.id,
-                          [...selectedUrls],
-                          ["bing"],
-                          selectedUrls.size
+                        bingSubmit(() =>
+                          onRequestSubmit(site.id, [...selectedUrls], ["bing"], selectedUrls.size)
                         )
                       }
                       className="rounded-md border border-gray-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-gray-700"
@@ -1576,11 +1523,8 @@ function SiteCard({
                                   {site.indexnowKey && (
                                     <button
                                       onClick={() =>
-                                        onRequestSubmit(
-                                          site.id,
-                                          [url.id],
-                                          ["bing"],
-                                          1
+                                        bingSubmit(() =>
+                                          onRequestSubmit(site.id, [url.id], ["bing"], 1)
                                         )
                                       }
                                       title={t("submitToBing")}
@@ -1745,6 +1689,20 @@ function SiteCard({
             </div>
           )}
         </div>
+      )}
+
+      {/* IndexNow key verification modal */}
+      {indexNowModal && site.indexnowKey && (
+        <IndexNowVerifyModal
+          site={site}
+          onClose={() => setIndexNowModal(null)}
+          onProceed={() => {
+            const action = indexNowModal.action;
+            setIndexNowModal(null);
+            action();
+          }}
+          onVerifySuccess={onVerifySuccess}
+        />
       )}
     </div>
   );
@@ -2003,5 +1961,165 @@ function Toggle({
         </div>
       )}
     </label>
+  );
+}
+
+// ── IndexNow Verification Modal ───────────────────────────────────────────────
+
+function IndexNowVerifyModal({
+  site,
+  onClose,
+  onProceed,
+  onVerifySuccess,
+}: {
+  site: Site;
+  onClose: () => void;
+  onProceed: () => void;
+  onVerifySuccess: () => void;
+}) {
+  const [verifying, setVerifying] = useState(false);
+  const [verified, setVerified] = useState(false);
+  const [verifyError, setVerifyError] = useState<string | null>(null);
+  const [keyCopied, setKeyCopied] = useState(false);
+
+  const baseDomain = site.domain.startsWith("sc-domain:")
+    ? `https://${site.domain.replace("sc-domain:", "")}`
+    : site.domain.replace(/\/$/, "");
+  const keyFileUrl = `${baseDomain}/${site.indexnowKey}.txt`;
+
+  const copyKey = async () => {
+    await navigator.clipboard.writeText(site.indexnowKey!);
+    setKeyCopied(true);
+    setTimeout(() => setKeyCopied(false), 2000);
+  };
+
+  const verify = async () => {
+    setVerifying(true);
+    setVerifyError(null);
+    try {
+      const res = await fetch(`/api/indexing/sites/${site.id}/verify-key`);
+      const data = await res.json();
+      if (data.verified) {
+        setVerified(true);
+        onVerifySuccess();
+      } else {
+        setVerifyError("Key file not found or content mismatch. Make sure the file is accessible at the URL below.");
+      }
+    } catch {
+      setVerifyError("Network error — could not reach the server.");
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      <div className="relative z-10 w-full max-w-md rounded-xl border border-gray-800 bg-gray-900 p-6 shadow-xl">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-base font-semibold text-white">
+            Verify IndexNow Key
+          </h3>
+          <button
+            onClick={onClose}
+            className="rounded-md p-1 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <p className="text-sm text-gray-400 mb-5">
+          To submit pages to Bing via IndexNow, place a verification file on your server once.
+        </p>
+
+        <div className="space-y-4">
+          {/* Step 1 */}
+          <div>
+            <p className="text-xs font-medium text-gray-300 mb-1.5">
+              1. Create a plain-text file with exactly this content:
+            </p>
+            <div className="flex items-center gap-2 rounded-md border border-gray-800 bg-gray-950 px-3 py-2">
+              <code className="flex-1 text-xs text-green-400 break-all">
+                {site.indexnowKey}
+              </code>
+              <button
+                onClick={copyKey}
+                className="shrink-0 text-gray-400 hover:text-white transition"
+                title="Copy key"
+              >
+                {keyCopied ? (
+                  <Check className="h-4 w-4 text-green-400" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Step 2 */}
+          <div>
+            <p className="text-xs font-medium text-gray-300 mb-1.5">
+              2. Upload it so it&apos;s accessible at this URL:
+            </p>
+            <code className="block text-xs text-gray-300 rounded-md border border-gray-800 bg-gray-950 px-3 py-2 break-all">
+              {keyFileUrl}
+            </code>
+          </div>
+
+          {/* Step 3 */}
+          <div>
+            <p className="text-xs font-medium text-gray-300 mb-2">
+              3. Verify the file is accessible:
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={verify}
+                disabled={verifying || verified}
+                className="flex items-center gap-1.5 rounded-md border border-gray-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-gray-800 disabled:opacity-50"
+              >
+                {verifying ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : verified ? (
+                  <CheckCircle className="h-3 w-3 text-green-400" />
+                ) : (
+                  <Check className="h-3 w-3" />
+                )}
+                {verifying ? "Verifying…" : verified ? "Verified!" : "Verify"}
+              </button>
+              {verified && (
+                <span className="text-xs text-green-400 flex items-center gap-1">
+                  <CheckCircle className="h-3.5 w-3.5" />
+                  Key file confirmed
+                </span>
+              )}
+              {verifyError && (
+                <span className="text-xs text-red-400">{verifyError}</span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-6 flex justify-end gap-3">
+          <button
+            onClick={onClose}
+            className="rounded-md border border-gray-700 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-gray-800"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onProceed}
+            disabled={!verified}
+            className="flex items-center gap-2 rounded-md bg-gradient-to-r from-copper to-copper-light px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+          >
+            Proceed to Submit →
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

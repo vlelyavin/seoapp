@@ -45,6 +45,14 @@ export async function GET(
 
     const text = await res.text();
     const verified = text.trim() === site.indexnowKey;
+
+    if (verified) {
+      await prisma.site.update({
+        where: { id: siteId },
+        data: { indexnowKeyVerified: true },
+      });
+    }
+
     return NextResponse.json({ verified, keyUrl, status: res.status });
   } catch (e) {
     return NextResponse.json({
