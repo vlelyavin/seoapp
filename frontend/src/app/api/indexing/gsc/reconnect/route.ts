@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { randomUUID } from "crypto";
 
 /**
  * POST /api/indexing/gsc/reconnect
  * Returns the URL the user should visit to re-authorize with full scopes.
- * Forces consent screen to ensure all required scopes are granted.
+ * Uses a dedicated /api/indexing/gsc/callback endpoint (not NextAuth's callback)
+ * so that the GSC OAuth flow doesn't conflict with NextAuth's state/PKCE validation.
  */
 export async function POST() {
   const session = await auth();
@@ -13,7 +15,8 @@ export async function POST() {
   }
 
   const clientId = process.env.AUTH_GOOGLE_ID ?? "";
-  const redirectUri = `${process.env.AUTH_URL ?? "http://localhost:3000"}/api/auth/callback/google`;
+  const redirectUri = `${process.env.AUTH_URL ?? "http://localhost:3000"}/api/indexing/gsc/callback`;
+  const state = randomUUID();
 
   const scopes = [
     "openid",
@@ -30,9 +33,18 @@ export async function POST() {
     scope: scopes,
     access_type: "offline",
     prompt: "consent",
+    state,
   });
 
   const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
 
-  return NextResponse.json({ authUrl });
+  const response = NextResponse.json({ authUrl });
+  response.cookies.set("gsc_oauth_state", state, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 600, // 10 minutes
+    path: "/",
+  });
+  return response;
 }
