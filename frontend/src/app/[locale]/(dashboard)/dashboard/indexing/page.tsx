@@ -124,6 +124,19 @@ interface ConfirmState {
   count: number;
 }
 
+interface RunStatus {
+  phase: "running" | "done" | "error";
+  newUrls?: number;
+  changedUrls?: number;
+  removedUrls?: number;
+  submittedGoogle?: number;
+  submittedBing?: number;
+  failedGoogle?: number;
+  failedBing?: number;
+  errorMsg?: string;
+  ranAt?: string; // ISO string
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function relativeTime(dateStr: string | null | undefined): string {
@@ -219,6 +232,7 @@ export default function IndexingPage() {
   const [siteQuotas, setSiteQuotas] = useState<Record<string, Quota>>({});
   const [syncing, setSyncing] = useState<Record<string, boolean>>({});
   const [running, setRunning] = useState<Record<string, boolean>>({});
+  const [runStatuses, setRunStatuses] = useState<Record<string, RunStatus>>({});
   const [copied, setCopied] = useState<string | null>(null);
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
 
@@ -487,19 +501,50 @@ export default function IndexingPage() {
 
   const runNow = async (siteId: string) => {
     setRunning((prev) => ({ ...prev, [siteId]: true }));
+    setRunStatuses((prev) => ({ ...prev, [siteId]: { phase: "running" } }));
     try {
       const res = await fetch(`/api/indexing/sites/${siteId}/run-auto-index`, {
         method: "POST",
       });
       if (res.ok) {
         const data = await res.json();
-        showToast(
-          `Done. New: ${data.newUrls}, Changed: ${data.changedUrls}, Google: ${data.submittedGoogle}, Bing: ${data.submittedBing}`
-        );
+        setRunStatuses((prev) => ({
+          ...prev,
+          [siteId]: {
+            phase: "done",
+            newUrls: data.newUrls,
+            changedUrls: data.changedUrls,
+            removedUrls: data.removedUrls,
+            submittedGoogle: data.submittedGoogle,
+            submittedBing: data.submittedBing,
+            failedGoogle: data.failedGoogle,
+            failedBing: data.failedBing,
+            ranAt: new Date().toISOString(),
+          },
+        }));
         await loadSiteStats(siteId);
         await loadSiteQuota(siteId);
         await loadCredits();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setRunStatuses((prev) => ({
+          ...prev,
+          [siteId]: {
+            phase: "error",
+            errorMsg: data.error ?? "Unknown error",
+            ranAt: new Date().toISOString(),
+          },
+        }));
       }
+    } catch (e) {
+      setRunStatuses((prev) => ({
+        ...prev,
+        [siteId]: {
+          phase: "error",
+          errorMsg: e instanceof Error ? e.message : "Network error",
+          ranAt: new Date().toISOString(),
+        },
+      }));
     } finally {
       setRunning((prev) => ({ ...prev, [siteId]: false }));
     }
@@ -687,6 +732,7 @@ export default function IndexingPage() {
                 quota={siteQuotas[site.id]}
                 syncingUrls={syncing[site.id] ?? false}
                 running={running[site.id] ?? false}
+                runStatus={runStatuses[site.id]}
                 copied={copied}
                 credits={credits}
                 t={t}
@@ -825,6 +871,7 @@ function SiteCard({
   quota,
   syncingUrls,
   running,
+  runStatus,
   copied,
   credits,
   t,
@@ -844,6 +891,7 @@ function SiteCard({
   quota?: Quota;
   syncingUrls: boolean;
   running: boolean;
+  runStatus?: RunStatus;
   copied: string | null;
   credits: number | null;
   t: ReturnType<typeof useTranslations<"indexing">>;
@@ -1229,13 +1277,12 @@ function SiteCard({
                     disabled={running}
                     className="flex items-center gap-1.5 rounded-md border border-gray-700 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-gray-800 disabled:opacity-50"
                   >
-                    <Play
-                      className={cn(
-                        "h-3.5 w-3.5",
-                        running && "animate-pulse"
-                      )}
-                    />
-                    {t("runNow")}
+                    {running ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Play className="h-3.5 w-3.5" />
+                    )}
+                    {running ? "Running…" : t("runNow")}
                   </button>
                 )}
               </div>
@@ -1262,6 +1309,63 @@ function SiteCard({
                   <CheckCircle className="h-3.5 w-3.5" />
                   IndexNow key verified
                 </span>
+              )}
+
+              {/* Run Now status panel */}
+              {runStatus && (
+                <div
+                  className={cn(
+                    "rounded-lg border px-4 py-3 text-sm",
+                    runStatus.phase === "running" &&
+                      "border-gray-700 bg-gray-950 text-gray-300",
+                    runStatus.phase === "done" &&
+                      "border-green-900/40 bg-green-900/10 text-green-300",
+                    runStatus.phase === "error" &&
+                      "border-red-900/40 bg-red-900/10 text-red-400"
+                  )}
+                >
+                  {runStatus.phase === "running" && (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
+                      Running auto-index job…
+                    </span>
+                  )}
+                  {runStatus.phase === "done" && (
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 font-medium">
+                        <CheckCircle className="h-3.5 w-3.5 shrink-0" />
+                        <span>
+                          Completed{" "}
+                          <span className="text-xs font-normal text-green-500/70">
+                            {relativeTime(runStatus.ranAt)}
+                          </span>
+                        </span>
+                      </div>
+                      <p className="text-xs text-green-400/80 pl-5">
+                        {runStatus.newUrls} new · {runStatus.changedUrls} changed · {runStatus.removedUrls} removed · {runStatus.submittedGoogle} → Google · {runStatus.submittedBing} → Bing
+                        {(runStatus.failedGoogle ?? 0) + (runStatus.failedBing ?? 0) > 0 && (
+                          <span className="text-red-400"> · {(runStatus.failedGoogle ?? 0) + (runStatus.failedBing ?? 0)} failed</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {runStatus.phase === "error" && (
+                    <div className="flex items-start gap-2">
+                      <XCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                      <span>
+                        Failed{" "}
+                        <span className="text-xs font-normal text-red-400/70">
+                          {relativeTime(runStatus.ranAt)}
+                        </span>
+                        {runStatus.errorMsg && (
+                          <span className="block text-xs mt-0.5 text-red-400/80">
+                            {runStatus.errorMsg}
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           )}
