@@ -206,7 +206,12 @@ async function main() {
   console.log(`Sites: ${sites.length}`);
   for (const s of sites) {
     await mysql.site.upsert({
-      where: { id: s.id as string },
+      where: {
+        userId_domain: {
+          userId: s.userId as string,
+          domain: s.domain as string,
+        },
+      },
       update: {},
       create: {
         id: s.id as string,
@@ -229,7 +234,12 @@ async function main() {
   console.log(`IndexedUrls: ${urls.length}`);
   for (const u of urls) {
     await mysql.indexedUrl.upsert({
-      where: { id: u.id as string },
+      where: {
+        siteId_url: {
+          siteId: u.siteId as string,
+          url: u.url as string,
+        },
+      },
       update: {},
       create: {
         id: u.id as string,
@@ -275,7 +285,12 @@ async function main() {
   console.log(`UserDailyQuotas: ${quotas.length}`);
   for (const q of quotas) {
     await mysql.userDailyQuota.upsert({
-      where: { id: q.id as string },
+      where: {
+        userId_date: {
+          userId: q.userId as string,
+          date: q.date as string,
+        },
+      },
       update: {},
       create: {
         id: q.id as string,
@@ -312,7 +327,12 @@ async function main() {
   console.log(`DailyReports: ${reports.length}`);
   for (const r of reports) {
     await mysql.dailyReport.upsert({
-      where: { id: r.id as string },
+      where: {
+        siteId_reportDate: {
+          siteId: r.siteId as string,
+          reportDate: r.reportDate as string,
+        },
+      },
       update: {},
       create: {
         id: r.id as string,
