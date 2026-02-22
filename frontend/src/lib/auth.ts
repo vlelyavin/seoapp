@@ -57,6 +57,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           token.role = dbUser.role;
           token.planId = dbUser.planId;
         }
+        // Auto-grant admin role if email matches ADMIN_EMAIL env var
+        const adminEmail = process.env.ADMIN_EMAIL;
+        if (adminEmail && token.email === adminEmail) {
+          token.role = "admin";
+        }
       }
       return token;
     },

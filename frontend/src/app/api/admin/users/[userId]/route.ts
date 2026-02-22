@@ -1,0 +1,82 @@
+import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+
+export async function PATCH(
+  req: Request,
+  { params }: { params: Promise<{ userId: string }> }
+) {
+  const session = await auth();
+  if (!session?.user || session.user.role !== "admin") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const { userId } = await params;
+  const body = await req.json();
+  const { planId, indexingCredits } = body;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const updateData: Record<string, any> = {};
+
+  if (planId !== undefined) {
+    const plan = await prisma.plan.findUnique({ where: { id: planId } });
+    if (!plan) {
+      return NextResponse.json({ error: "Plan not found" }, { status: 400 });
+    }
+    updateData.planId = planId;
+  }
+
+  if (indexingCredits !== undefined) {
+    const credits = parseInt(String(indexingCredits));
+    if (isNaN(credits) || credits < 0) {
+      return NextResponse.json(
+        { error: "Invalid credits value" },
+        { status: 400 }
+      );
+    }
+    updateData.indexingCredits = credits;
+  }
+
+  if (Object.keys(updateData).length === 0) {
+    return NextResponse.json({ error: "No fields to update" }, { status: 400 });
+  }
+
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: updateData,
+  });
+
+  return NextResponse.json({
+    id: user.id,
+    planId: user.planId,
+    indexingCredits: user.indexingCredits,
+  });
+}
+
+export async function DELETE(
+  _req: Request,
+  { params }: { params: Promise<{ userId: string }> }
+) {
+  const session = await auth();
+  if (!session?.user || session.user.role !== "admin") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const { userId } = await params;
+
+  if (userId === session.user.id) {
+    return NextResponse.json(
+      { error: "Cannot delete yourself" },
+      { status: 400 }
+    );
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  }
+
+  await prisma.user.delete({ where: { id: userId } });
+
+  return NextResponse.json({ success: true });
+}

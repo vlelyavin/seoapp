@@ -763,7 +763,7 @@ export default function IndexingPage() {
                 disabled={submitting}
                 className="rounded-md border border-gray-700 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-gray-800 disabled:opacity-50"
               >
-                {t("cancel", { ns: "common" }) ?? "Cancel"}
+                {t("cancel")}
               </button>
               <button
                 onClick={executeSubmit}

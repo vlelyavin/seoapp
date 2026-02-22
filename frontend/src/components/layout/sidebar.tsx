@@ -58,8 +58,8 @@ export function Sidebar({ open, onClose }: SidebarProps) {
   const adminItems = isAdmin
     ? [
         {
-          href: `/${locale}/dashboard/admin/users`,
-          label: t("users"),
+          href: `/${locale}/dashboard/admin`,
+          label: t("admin"),
           icon: Users,
         },
       ]
