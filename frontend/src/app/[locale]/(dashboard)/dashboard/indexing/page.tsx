@@ -953,7 +953,7 @@ export default function IndexingPage() {
               <button
                 onClick={() => setConfirmState(null)}
                 disabled={submitting}
-                className="flex-1 rounded-md border border-gray-700 px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-gray-800 disabled:opacity-50"
+                className="flex-1 rounded-md border border-gray-700 px-4 py-2 text-sm font-semibold text-gray-300 transition-colors hover:bg-gray-800 disabled:opacity-50"
               >
                 {t("cancel")}
               </button>
@@ -2731,7 +2731,7 @@ function IndexNowVerifyModal({
               <button
                 onClick={verify}
                 disabled={verifying || verified}
-                className="flex items-center gap-1.5 rounded-md border border-gray-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-gray-800 disabled:opacity-50"
+                className="flex items-center gap-1.5 rounded-md border border-gray-700 px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-gray-800 disabled:opacity-50"
               >
                 {verifying ? (
                   <Loader2 className="h-3 w-3 animate-spin" />
@@ -2766,7 +2766,7 @@ function IndexNowVerifyModal({
           </button>
           <button
             onClick={onClose}
-            className="flex-1 rounded-md border border-gray-700 px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-gray-800"
+            className="flex-1 rounded-md border border-gray-700 px-4 py-2 text-sm font-semibold text-gray-300 transition-colors hover:bg-gray-800"
           >
             Cancel
           </button>
