@@ -5,10 +5,13 @@ import { prisma } from "@/lib/prisma";
 
 /**
  * Dev-only login endpoint. Creates a dev user and sets NextAuth JWT cookie.
- * Only works when NODE_ENV=development.
+ * Requires BOTH NODE_ENV=development AND DEV_LOGIN_ENABLED=true.
  */
 export async function POST() {
-  if (process.env.NODE_ENV !== "development") {
+  if (
+    process.env.NODE_ENV !== "development" ||
+    process.env.DEV_LOGIN_ENABLED !== "true"
+  ) {
     return NextResponse.json({ error: "Not available" }, { status: 404 });
   }
 

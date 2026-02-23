@@ -10,6 +10,7 @@ import {
   sendCronErrorAlert,
 } from "@/lib/email";
 import { CREDIT_LOW_THRESHOLD } from "@/lib/credits";
+import { verifyCronAuth } from "@/lib/cron-auth";
 
 /**
  * POST /api/cron/daily-indexing
@@ -29,13 +30,8 @@ export async function POST(req: Request) {
   const startTime = Date.now();
 
   // ── Auth ──────────────────────────────────────────────────────────────────
-  const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret) {
-    const authHeader = req.headers.get("authorization");
-    if (authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-  }
+  const authError = verifyCronAuth(req);
+  if (authError) return authError;
 
   const today = todayUTC();
   let sitesProcessed = 0;

@@ -5,6 +5,7 @@ import { submitUrlsToIndexNow } from "@/lib/indexing-api";
 import { getDailyQuota, incrementGoogleSubmissions, GOOGLE_DAILY_SUBMISSION_LIMIT } from "@/lib/google-auth";
 import { deductCredits } from "@/lib/credits";
 import { sendCronErrorAlert } from "@/lib/email";
+import { verifyCronAuth } from "@/lib/cron-auth";
 
 const MAX_RETRIES = 3;
 
@@ -58,13 +59,8 @@ export async function POST(req: Request) {
   const startTime = Date.now();
 
   // ── Auth ──────────────────────────────────────────────────────────────────
-  const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret) {
-    const authHeader = req.headers.get("authorization");
-    if (authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-  }
+  const authError = verifyCronAuth(req);
+  if (authError) return authError;
 
   let retriedGoogle = 0;
   let retriedBing = 0;

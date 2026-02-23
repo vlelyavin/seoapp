@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getValidAccessToken, todayUTC, incrementInspections, GOOGLE_DAILY_INSPECTION_LIMIT } from "@/lib/google-auth";
 import { sendCronErrorAlert, sendTokenExpiredEmail } from "@/lib/email";
+import { verifyCronAuth } from "@/lib/cron-auth";
 
 /**
  * POST /api/cron/weekly-resync
@@ -21,13 +22,8 @@ export async function POST(req: Request) {
   const startTime = Date.now();
 
   // ── Auth ──────────────────────────────────────────────────────────────────
-  const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret) {
-    const authHeader = req.headers.get("authorization");
-    if (authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-  }
+  const authError = verifyCronAuth(req);
+  if (authError) return authError;
 
   let sitesProcessed = 0;
   let urlsChecked = 0;

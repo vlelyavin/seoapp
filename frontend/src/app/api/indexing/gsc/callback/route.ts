@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { encryptToken } from "@/lib/token-encryption";
 
 /**
  * GET /api/indexing/gsc/callback
@@ -74,10 +75,12 @@ export async function GET(request: Request) {
     await prisma.account.update({
       where: { id: account.id },
       data: {
-        access_token: tokens.access_token,
+        access_token: encryptToken(tokens.access_token),
         expires_at: expiresAt,
         scope: tokens.scope ?? account.scope,
-        ...(tokens.refresh_token ? { refresh_token: tokens.refresh_token } : {}),
+        ...(tokens.refresh_token
+          ? { refresh_token: encryptToken(tokens.refresh_token) }
+          : {}),
         ...(tokens.id_token ? { id_token: tokens.id_token } : {}),
       },
     });

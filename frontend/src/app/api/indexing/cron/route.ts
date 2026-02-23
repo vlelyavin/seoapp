@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { runAutoIndexForSite } from "@/lib/auto-indexer";
+import { verifyCronAuth } from "@/lib/cron-auth";
 
 /**
  * POST /api/indexing/cron
@@ -11,13 +12,8 @@ import { runAutoIndexForSite } from "@/lib/auto-indexer";
  * Header: Authorization: Bearer <CRON_SECRET>
  */
 export async function POST(req: Request) {
-  const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret) {
-    const authHeader = req.headers.get("authorization");
-    if (authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-  }
+  const authError = verifyCronAuth(req);
+  if (authError) return authError;
 
   const sites = await prisma.site.findMany({
     where: {

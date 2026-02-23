@@ -4,9 +4,28 @@ import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 // import { compare } from "bcryptjs";
 import { prisma } from "./prisma";
+import { encryptToken } from "./token-encryption";
+
+// Wrap PrismaAdapter to encrypt OAuth tokens before they're stored
+const baseAdapter = PrismaAdapter(prisma);
+const adapter: typeof baseAdapter = {
+  ...baseAdapter,
+  linkAccount: (account) => {
+    const encrypted = {
+      ...account,
+      ...(account.access_token
+        ? { access_token: encryptToken(account.access_token) }
+        : {}),
+      ...(account.refresh_token
+        ? { refresh_token: encryptToken(account.refresh_token) }
+        : {}),
+    };
+    return baseAdapter.linkAccount!(encrypted);
+  },
+};
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(prisma),
+  adapter,
   session: { strategy: "jwt" },
   pages: {
     signIn: "/en/login",
@@ -15,7 +34,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,
       clientSecret: process.env.AUTH_GOOGLE_SECRET,
-      allowDangerousEmailAccountLinking: true,
     }),
     // Credentials auth disabled — Google only
     // Credentials({

@@ -1,9 +1,10 @@
 /**
  * Google OAuth token helpers for the indexing feature.
- * Tokens are stored in the NextAuth `Account` table.
+ * Tokens are stored encrypted (AES-256-GCM) in the NextAuth `Account` table.
  */
 
 import { prisma } from "./prisma";
+import { encryptToken, decryptToken } from "./token-encryption";
 
 const GSC_SCOPE = "https://www.googleapis.com/auth/webmasters";
 const INDEXING_SCOPE = "https://www.googleapis.com/auth/indexing";
@@ -15,11 +16,21 @@ export interface GoogleTokens {
   scope: string | null;
 }
 
-/** Retrieve Google account tokens for a given user. Returns null if not found. */
+/** Retrieve Google account tokens for a given user (decrypts tokens). Returns null if not found. */
 export async function getGoogleAccount(userId: string) {
-  return prisma.account.findFirst({
+  const account = await prisma.account.findFirst({
     where: { userId, provider: "google" },
   });
+  if (!account) return null;
+
+  // Decrypt tokens transparently (handles both encrypted and legacy plaintext)
+  if (account.access_token) {
+    account.access_token = decryptToken(account.access_token);
+  }
+  if (account.refresh_token) {
+    account.refresh_token = decryptToken(account.refresh_token);
+  }
+  return account;
 }
 
 /**
@@ -84,9 +95,11 @@ async function refreshAccessToken(
   await prisma.account.update({
     where: { id: accountId },
     data: {
-      access_token: data.access_token,
+      access_token: encryptToken(data.access_token),
       expires_at: newExpiresAt,
-      ...(data.refresh_token ? { refresh_token: data.refresh_token } : {}),
+      ...(data.refresh_token
+        ? { refresh_token: encryptToken(data.refresh_token) }
+        : {}),
     },
   });
 
