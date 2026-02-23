@@ -269,7 +269,7 @@ export default function DashboardPage() {
                     e.stopPropagation();
                     setDeleteAuditId(audit.id);
                   }}
-                  className="shrink-0 rounded-md p-1 text-gray-400 opacity-100 sm:p-1.5 sm:opacity-0 transition-opacity hover:bg-red-900/20 hover:text-red-400 sm:group-hover:opacity-100"
+                  className="shrink-0 rounded-md p-2 text-gray-400 opacity-100 sm:opacity-0 transition-opacity hover:bg-red-900/20 hover:text-red-400 sm:group-hover:opacity-100"
                   title={t("deleteAudit")}
                 >
                   <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />

@@ -62,7 +62,7 @@ export default function SettingsPage() {
             type="email"
             value={session?.user?.email || ""}
             disabled
-            className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-500"
+            className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-base md:text-sm text-gray-500"
           />
         </div>
 
@@ -74,14 +74,14 @@ export default function SettingsPage() {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white outline-none transition-colors focus:border-copper focus:ring-2 focus:ring-copper/20"
+            className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-base md:text-sm text-white outline-none transition-colors focus:border-copper focus:ring-2 focus:ring-copper/20"
           />
         </div>
 
         <button
           type="submit"
           disabled={saving}
-          className="flex items-center gap-2 rounded-md bg-gradient-to-r from-copper to-copper-light px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="flex items-center gap-2 rounded-md bg-gradient-to-r from-copper to-copper-light px-4 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           <Save className="h-4 w-4" />
           {t("updateProfile")}

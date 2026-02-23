@@ -17,7 +17,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="w-full max-w-sm">
+    <div className="mx-4 w-full max-w-sm">
       <div className="rounded-xl border border-gray-800 bg-gray-900 p-6 shadow-sm">
         <h1 className="mb-4 text-center text-2xl font-bold text-white">
           {t("signIn")}

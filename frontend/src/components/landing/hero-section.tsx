@@ -57,7 +57,7 @@ export function HeroSection() {
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   placeholder={t("urlPlaceholder")}
-                  className="w-full rounded-lg border border-gray-800 bg-gray-950 py-3 pl-11 pr-4 text-sm text-white placeholder-gray-500 outline-none transition-colors focus:border-copper"
+                  className="w-full rounded-lg border border-gray-800 bg-gray-950 py-3 pl-11 pr-4 text-base md:text-sm text-white placeholder-gray-500 outline-none transition-colors focus:border-copper"
                 />
               </div>
               <button

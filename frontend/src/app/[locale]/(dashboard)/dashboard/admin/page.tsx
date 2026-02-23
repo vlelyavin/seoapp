@@ -328,7 +328,7 @@ export default function AdminDashboardPage() {
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 placeholder={t("searchByEmail")}
-                className="w-full rounded-lg border border-gray-700 bg-gray-800 py-2 pl-9 pr-3 text-sm text-white placeholder-gray-500 focus:border-copper focus:outline-none focus:ring-2 focus:ring-copper/20"
+                className="w-full rounded-lg border border-gray-700 bg-gray-800 py-2 pl-9 pr-3 text-base md:text-sm text-white placeholder-gray-500 focus:border-copper focus:outline-none focus:ring-2 focus:ring-copper/20"
               />
             </div>
             <select
@@ -337,7 +337,7 @@ export default function AdminDashboardPage() {
                 setPlanFilter(e.target.value);
                 setPage(1);
               }}
-              className="rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-300 focus:border-copper focus:outline-none focus:ring-2 focus:ring-copper/20"
+              className="rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-base md:text-sm text-gray-300 focus:border-copper focus:outline-none focus:ring-2 focus:ring-copper/20"
             >
               <option value="">{t("allPlans")}</option>
               <option value="free">{tPlans("free")}</option>
@@ -350,7 +350,7 @@ export default function AdminDashboardPage() {
         {/* Table */}
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead>
+            <thead className="sticky top-0 z-10">
               <tr className="border-b border-gray-700 bg-gray-800">
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">
                   {t("email")}
@@ -449,7 +449,7 @@ export default function AdminDashboardPage() {
                               if (e.key === "Escape")
                                 setEditingCredits(null);
                             }}
-                            className="w-20 rounded border border-gray-600 bg-gray-800 px-2 py-0.5 text-xs text-white"
+                            className="w-20 rounded border border-gray-600 bg-gray-800 px-2 py-0.5 text-base md:text-xs text-white"
                             autoFocus
                           />
                           <button
@@ -474,7 +474,7 @@ export default function AdminDashboardPage() {
                           className="group/credits flex items-center gap-1 text-gray-400"
                         >
                           <span>{user.indexingCredits}</span>
-                          <Pencil className="h-3 w-3 opacity-0 group-hover/credits:opacity-100" />
+                          <Pencil className="h-3 w-3 opacity-100 lg:opacity-0 lg:group-hover/credits:opacity-100" />
                         </button>
                       )}
                     </td>
@@ -520,81 +520,100 @@ export default function AdminDashboardPage() {
                               actionMenu === user.id ? null : user.id
                             );
                           }}
-                          className="rounded-md p-1.5 text-gray-400 hover:bg-gray-800 hover:text-gray-200"
+                          className="rounded-md p-2.5 text-gray-400 hover:bg-gray-800 hover:text-gray-200"
                         >
                           <MoreHorizontal className="h-4 w-4" />
                         </button>
 
                         {actionMenu === user.id && (
-                          <div
-                            className="absolute right-0 top-full z-20 mt-1 w-48 rounded-lg border border-gray-700 bg-gray-800 py-1 shadow-xl"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <button
-                              onClick={() => {
-                                setEditingCredits(user.id);
-                                setCreditsValue(
-                                  String(user.indexingCredits)
-                                );
-                                setActionMenu(null);
-                              }}
-                              className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-gray-300 hover:bg-gray-700"
+                          <>
+                            {/* Mobile: backdrop */}
+                            <div
+                              className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+                              onClick={() => setActionMenu(null)}
+                            />
+                            {/* Mobile: bottom sheet / Desktop: dropdown */}
+                            <div
+                              className="fixed inset-x-0 bottom-0 z-50 rounded-t-xl border-t border-gray-700 bg-gray-800 p-4 shadow-xl lg:absolute lg:inset-auto lg:right-0 lg:top-full lg:z-20 lg:mt-1 lg:w-48 lg:rounded-lg lg:border lg:p-0 lg:py-1"
+                              onClick={(e) => e.stopPropagation()}
                             >
-                              <Pencil className="h-3.5 w-3.5" />
-                              {t("editCredits")}
-                            </button>
+                              {/* Mobile close button */}
+                              <div className="mb-3 flex items-center justify-between lg:hidden">
+                                <span className="text-sm font-medium text-gray-300">{user.email}</span>
+                                <button
+                                  onClick={() => setActionMenu(null)}
+                                  className="rounded-md p-2 text-gray-400 hover:bg-gray-700"
+                                >
+                                  <X className="h-4 w-4" />
+                                </button>
+                              </div>
 
-                            {user.gscConnected && (
+                              <button
+                                onClick={() => {
+                                  setEditingCredits(user.id);
+                                  setCreditsValue(
+                                    String(user.indexingCredits)
+                                  );
+                                  setActionMenu(null);
+                                }}
+                                className="flex w-full items-center gap-2 px-3 py-3 text-left text-sm text-gray-300 hover:bg-gray-700 lg:py-2 lg:text-xs"
+                              >
+                                <Pencil className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
+                                {t("editCredits")}
+                              </button>
+
+                              {user.gscConnected && (
+                                <button
+                                  onClick={() => {
+                                    setConfirmAction({
+                                      type: "revokeGsc",
+                                      userId: user.id,
+                                      email: user.email,
+                                    });
+                                    setActionMenu(null);
+                                  }}
+                                  className="flex w-full items-center gap-2 px-3 py-3 text-left text-sm text-gray-300 hover:bg-gray-700 lg:py-2 lg:text-xs"
+                                >
+                                  <Unlink className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
+                                  {t("revokeGsc")}
+                                </button>
+                              )}
+
+                              {user.hasGoogleAccount && (
+                                <button
+                                  onClick={() => {
+                                    setConfirmAction({
+                                      type: "revokeGoogle",
+                                      userId: user.id,
+                                      email: user.email,
+                                    });
+                                    setActionMenu(null);
+                                  }}
+                                  className="flex w-full items-center gap-2 px-3 py-3 text-left text-sm text-gray-300 hover:bg-gray-700 lg:py-2 lg:text-xs"
+                                >
+                                  <Unlink className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
+                                  {t("revokeGoogle")}
+                                </button>
+                              )}
+
+                              <div className="my-1 border-t border-gray-700" />
+
                               <button
                                 onClick={() => {
                                   setConfirmAction({
-                                    type: "revokeGsc",
+                                    type: "delete",
                                     userId: user.id,
                                     email: user.email,
                                   });
                                   setActionMenu(null);
                                 }}
-                                className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-gray-300 hover:bg-gray-700"
+                                className="flex w-full items-center gap-2 px-3 py-3 text-left text-sm text-red-400 hover:bg-gray-700 lg:py-2 lg:text-xs"
                               >
-                                <Unlink className="h-3.5 w-3.5" />
-                                {t("revokeGsc")}
+                                <Trash2 className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
+                                {t("deleteAccount")}
                               </button>
-                            )}
-
-                            {user.hasGoogleAccount && (
-                              <button
-                                onClick={() => {
-                                  setConfirmAction({
-                                    type: "revokeGoogle",
-                                    userId: user.id,
-                                    email: user.email,
-                                  });
-                                  setActionMenu(null);
-                                }}
-                                className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-gray-300 hover:bg-gray-700"
-                              >
-                                <Unlink className="h-3.5 w-3.5" />
-                                {t("revokeGoogle")}
-                              </button>
-                            )}
-
-                            <div className="my-1 border-t border-gray-700" />
-
-                            <button
-                              onClick={() => {
-                                setConfirmAction({
-                                  type: "delete",
-                                  userId: user.id,
-                                  email: user.email,
-                                });
-                                setActionMenu(null);
-                              }}
-                              className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-red-400 hover:bg-gray-700"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                              {t("deleteAccount")}
-                            </button>
-                          </div>
+                            </div>
+                          </>
                         )}
                       </div>
                     </td>

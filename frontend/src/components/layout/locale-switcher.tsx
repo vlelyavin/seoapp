@@ -54,7 +54,7 @@ export function LocaleSwitcher() {
               key={loc}
               onClick={() => switchLocale(loc)}
               className={cn(
-                "block w-full whitespace-nowrap px-3 py-1.5 text-left text-sm",
+                "block w-full whitespace-nowrap px-3 py-2.5 text-left text-sm",
                 loc === locale
                   ? "bg-gray-800 text-white"
                   : "text-white hover:bg-gray-800"

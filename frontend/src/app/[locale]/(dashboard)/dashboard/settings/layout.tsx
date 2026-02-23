@@ -27,7 +27,7 @@ export default function SettingsLayout({
         {t("title")}
       </h1>
 
-      <div className="flex gap-1 border-b border-gray-800">
+      <div className="flex gap-1 overflow-x-auto border-b border-gray-800">
         {tabs.map((tab) => {
           const isActive =
             tab.href === basePath

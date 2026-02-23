@@ -52,7 +52,7 @@ export function Header({ sidebarOpen, onSidebarToggle }: HeaderProps) {
     <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-gray-800 bg-black/80 px-4 backdrop-blur-sm lg:px-6">
       <button
         onClick={onSidebarToggle}
-        className="flex h-8 w-8 items-center justify-center rounded-md text-white transition-colors hover:bg-gray-950"
+        className="flex h-10 w-10 items-center justify-center rounded-md text-white transition-colors hover:bg-gray-950"
         aria-label={sidebarOpen ? t("closeSidebar") : t("openSidebar")}
         aria-expanded={sidebarOpen}
         aria-controls="dashboard-sidebar"
@@ -78,7 +78,7 @@ export function Header({ sidebarOpen, onSidebarToggle }: HeaderProps) {
             </span>
             <button
               onClick={() => signOut({ callbackUrl: `/${locale}/login` })}
-              className="rounded-md p-2 text-white hover:bg-gray-950"
+              className="rounded-md p-3 text-white hover:bg-gray-950"
               title={t("logout")}
             >
               <LogOut className="h-4 w-4" />

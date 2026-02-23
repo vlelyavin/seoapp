@@ -188,7 +188,7 @@ export default function BrandingPage() {
             value={companyName}
             onChange={(e) => setCompanyName(e.target.value)}
             placeholder={t("companyNamePlaceholder")}
-            className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white outline-none placeholder-gray-500 transition-colors focus:border-copper focus:ring-2 focus:ring-copper/20"
+            className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-base md:text-sm text-white outline-none placeholder-gray-500 transition-colors focus:border-copper focus:ring-2 focus:ring-copper/20"
           />
         </div>
 
@@ -196,7 +196,7 @@ export default function BrandingPage() {
           <label className="mb-1.5 block text-sm font-medium text-gray-300">
             {t("logo")}
           </label>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             {logoSrc && !imageError && (
               <div className="relative">
                 <img
@@ -250,7 +250,7 @@ export default function BrandingPage() {
         <button
           type="submit"
           disabled={saving}
-          className="flex items-center gap-2 rounded-md bg-gradient-to-r from-copper to-copper-light px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="flex items-center gap-2 rounded-md bg-gradient-to-r from-copper to-copper-light px-4 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           <Save className="h-4 w-4" />
           {saving ? "..." : tCommon("save")}

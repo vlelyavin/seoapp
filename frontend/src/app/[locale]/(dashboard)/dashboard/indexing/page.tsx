@@ -853,7 +853,7 @@ export default function IndexingPage() {
             {/* Close button */}
             <button
               onClick={() => setShowCreditModal(false)}
-              className="absolute right-4 top-4 rounded-md p-1 text-gray-400 hover:bg-gray-800 hover:text-gray-200 transition-colors"
+              className="absolute right-4 top-4 rounded-md p-2 text-gray-400 hover:bg-gray-800 hover:text-gray-200 transition-colors"
             >
               <X className="h-4 w-4" />
             </button>
@@ -920,7 +920,7 @@ export default function IndexingPage() {
             <button
               onClick={() => !submitting && setConfirmState(null)}
               disabled={submitting}
-              className="absolute right-4 top-4 rounded-md p-1 text-gray-400 hover:bg-gray-800 hover:text-gray-200 disabled:opacity-50 transition-colors"
+              className="absolute right-4 top-4 rounded-md p-2 text-gray-400 hover:bg-gray-800 hover:text-gray-200 disabled:opacity-50 transition-colors"
             >
               <X className="h-4 w-4" />
             </button>
@@ -980,7 +980,7 @@ export default function IndexingPage() {
             <button
               onClick={() => !disconnectMode && setShowDisconnectModal(false)}
               disabled={!!disconnectMode}
-              className="absolute right-4 top-4 rounded-md p-1 text-gray-400 hover:bg-gray-800 hover:text-gray-200 transition-colors disabled:opacity-50"
+              className="absolute right-4 top-4 rounded-md p-2 text-gray-400 hover:bg-gray-800 hover:text-gray-200 transition-colors disabled:opacity-50"
             >
               <X className="h-4 w-4" />
             </button>
@@ -1373,7 +1373,7 @@ function SiteCard({
       {/* Header row */}
       <button
         onClick={onToggle}
-        className="flex w-full items-center justify-between px-6 py-4 text-left hover:bg-gray-800/50 transition-colors"
+        className="flex w-full items-center justify-between px-3 sm:px-6 py-4 text-left hover:bg-gray-800/50 transition-colors"
       >
         <div className="flex items-center gap-3">
           <Search className="h-5 w-5 text-copper shrink-0" />
@@ -1673,7 +1673,7 @@ function SiteCard({
                     value={urlSearch}
                     onChange={(e) => handleSearchChange(e.target.value)}
                     placeholder={t("searchUrls")}
-                    className="flex-1 min-w-0 rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-xs text-white placeholder-gray-500 outline-none transition-colors focus:border-copper focus:ring-2 focus:ring-copper/20"
+                    className="flex-1 min-w-0 rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-base md:text-xs text-white placeholder-gray-500 outline-none transition-colors focus:border-copper focus:ring-2 focus:ring-copper/20"
                   />
                   <button
                     onClick={() => loadUrls(urlFilter, urlCurrentPage, urlSearch)}
@@ -1720,7 +1720,7 @@ function SiteCard({
                   )}
                   <button
                     onClick={() => setSelectedUrls(new Set())}
-                    className="ml-auto rounded-md p-1 text-gray-400 hover:bg-gray-700 hover:text-white transition-colors"
+                    className="ml-auto rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white transition-colors"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -1849,7 +1849,7 @@ function SiteCard({
                   {/* Desktop table */}
                   <div className="hidden md:block overflow-x-auto rounded-lg border border-gray-800">
                     <table className="w-full text-sm">
-                      <thead>
+                      <thead className="sticky top-0 z-10">
                         <tr className="border-b border-gray-800 bg-gray-950">
                           <th className="w-10 px-3 py-3 text-left">
                             <input
@@ -2049,7 +2049,7 @@ function SiteCard({
                             setUrlCurrentPage((p) => Math.max(1, p - 1));
                           }}
                           disabled={urlCurrentPage <= 1}
-                          className="flex items-center gap-1 rounded-md border border-gray-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-gray-800 disabled:opacity-40"
+                          className="flex items-center gap-1 rounded-md border border-gray-700 px-4 py-2.5 text-xs font-medium text-white transition-colors hover:bg-gray-800 disabled:opacity-40"
                         >
                           <ChevronLeft className="h-3 w-3" />
                           {t("prevPage")}
@@ -2061,7 +2061,7 @@ function SiteCard({
                             );
                           }}
                           disabled={urlCurrentPage >= urlPage.totalPages}
-                          className="flex items-center gap-1 rounded-md border border-gray-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-gray-800 disabled:opacity-40"
+                          className="flex items-center gap-1 rounded-md border border-gray-700 px-4 py-2.5 text-xs font-medium text-white transition-colors hover:bg-gray-800 disabled:opacity-40"
                         >
                           {t("nextPage")}
                           <ChevronRight className="h-3 w-3" />
@@ -2139,7 +2139,7 @@ function SiteCard({
                           <span className={cn("h-2 w-2 shrink-0 rounded-full", dot)} />
 
                           {/* Label */}
-                          <span className={cn("text-xs font-medium shrink-0 w-40", text)}>
+                          <span className={cn("text-xs font-medium shrink-0 w-24 sm:w-40", text)}>
                             {entry.label}
                           </span>
 
@@ -2185,7 +2185,7 @@ function SiteCard({
                         <button
                           onClick={() => setLogCurrentPage((p) => Math.max(1, p - 1))}
                           disabled={logCurrentPage <= 1}
-                          className="flex items-center gap-1 rounded-md border border-gray-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-gray-800 disabled:opacity-40"
+                          className="flex items-center gap-1 rounded-md border border-gray-700 px-4 py-2.5 text-xs font-medium text-white transition-colors hover:bg-gray-800 disabled:opacity-40"
                         >
                           <ChevronLeft className="h-3 w-3" />
                           {t("prevPage")}
@@ -2195,7 +2195,7 @@ function SiteCard({
                             setLogCurrentPage((p) => Math.min(logPage.totalPages, p + 1))
                           }
                           disabled={logCurrentPage >= logPage.totalPages}
-                          className="flex items-center gap-1 rounded-md border border-gray-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-gray-800 disabled:opacity-40"
+                          className="flex items-center gap-1 rounded-md border border-gray-700 px-4 py-2.5 text-xs font-medium text-white transition-colors hover:bg-gray-800 disabled:opacity-40"
                         >
                           {t("nextPage")}
                           <ChevronRight className="h-3 w-3" />
@@ -2692,7 +2692,7 @@ function IndexNowVerifyModal({
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 rounded-md p-1 text-gray-400 hover:bg-gray-800 hover:text-gray-200 transition-colors"
+          className="absolute right-4 top-4 rounded-md p-2 text-gray-400 hover:bg-gray-800 hover:text-gray-200 transition-colors"
         >
           <X className="h-4 w-4" />
         </button>

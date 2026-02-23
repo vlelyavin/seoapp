@@ -108,7 +108,7 @@ export function AuditProgressView({ progress }: AuditProgressViewProps) {
                   {isPast ? "\u2713" : i + 1}
                 </div>
                 <span
-                  className={`whitespace-nowrap text-xs ${
+                  className={`text-center text-[10px] sm:text-xs ${
                     isActive
                       ? "font-medium text-white"
                       : "text-gray-400"
