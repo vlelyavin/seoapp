@@ -89,7 +89,7 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
       const response = await fetch(url);
       if (!response.ok) {
         const data = await response.json().catch(() => null);
-        throw new Error(data?.error || "Export failed");
+        throw new Error(data?.error || t("exportFailed"));
       }
 
       // Create download link
@@ -108,7 +108,7 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
     } catch (error) {
       console.error("Export failed:", error);
       setExportError(
-        error instanceof Error ? error.message : "Export failed"
+        error instanceof Error ? error.message : t("exportFailed")
       );
     } finally {
       setExportingFormat(null);

@@ -143,21 +143,13 @@
     "badge_warning": "Warning",
     "badge_error": "Error",
     "badge_info": "Info",
-    "cover_title": "SEO Audit Report",
-    "executive_summary": "Executive Summary",
-    "overall_score": "Overall Score",
-    "top_critical_issues": "Top Critical Issues",
     "category_overview": "Category Overview",
     "category_overview_description": "Summary of all analyzed categories sorted by severity.",
     "category": "Category",
     "status": "Status",
     "critical_count": "Critical",
     "warning_count": "Warnings",
-    "pages_analyzed": "{count} pages analyzed",
-    "detailed_findings": "Detailed Findings",
-    "verdict_good": "The website is in good shape overall. Minor improvements in {categories} would further boost search visibility.",
-    "verdict_average": "The website needs attention in several areas. The most urgent issues are in {categories}. Addressing these will improve search engine visibility.",
-    "verdict_poor": "The website has serious SEO problems across {count} categories. Priority should be given to {categories} — fixing these will have the biggest impact on search visibility."
+    "pages_analyzed": "{count} pages analyzed"
   },
   "analyzers": {
     "cms": {

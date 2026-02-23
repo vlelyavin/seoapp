@@ -31,30 +31,14 @@
     "email": "Email",
     "password": "Password",
     "name": "Name",
-    "confirmPassword": "Confirm Password",
-    "forgotPassword": "Forgot password?",
-    "noAccount": "Don't have an account?",
-    "hasAccount": "Already have an account?",
-    "orContinueWith": "Or continue with",
-    "google": "Google",
-    "signInError": "Invalid email or password",
-    "registerError": "Registration failed",
-    "emailRequired": "Email is required",
-    "passwordRequired": "Password is required",
-    "passwordMinLength": "Password must be at least 8 characters",
-    "passwordMismatch": "Passwords don't match",
-    "emailTaken": "This email is already registered"
+    "google": "Google"
   },
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome back",
     "recentAudits": "Recent Audits",
     "noAudits": "No audits yet. Start your first audit!",
-    "planUsage": "Plan Usage",
-    "auditsUsed": "{used} of {total} audits used this month",
-    "unlimited": "Unlimited",
     "startAudit": "Start New Audit",
-    "viewAll": "View All",
     "page": "{count, plural, =1 {page} other {pages}}",
     "deleteAudit": "Delete Audit",
     "confirmDelete": "Are you sure you want to delete this audit?",
@@ -131,22 +115,20 @@
     "progressAnalyzingName": "Analyzing: {name}...",
     "progressGeneratingReport": "Generating report...",
     "progressSpeedBlocking": "Running Speed test...",
-    "speedTestSuffix": "Speed test"
+    "speedTestSuffix": "Speed test",
+    "failedToStart": "Failed to start audit",
+    "connectionError": "Connection error. Make sure the server is running.",
+    "exportFailed": "Export failed"
   },
   "settings": {
     "title": "Settings",
     "profile": "Profile",
     "updateProfile": "Update Profile",
-    "changePassword": "Change Password",
-    "currentPassword": "Current Password",
-    "newPassword": "New Password",
-    "language": "Language",
     "name": "Name",
     "passwordMinLength": "Password must be at least 8 characters",
     "profileUpdated": "Profile updated",
     "passwordChanged": "Password changed",
     "failedToUpdate": "Failed to update",
-    "failedToChangePassword": "Failed to change password",
     "errorSaving": "Error saving",
     "tabGeneral": "General",
     "tabBranding": "Branding"
@@ -158,16 +140,15 @@
     "companyNamePlaceholder": "Your Company",
     "logo": "Logo",
     "uploadLogo": "Upload Logo",
-    "primaryColor": "Primary Color",
-    "accentColor": "Accent Color",
-    "preview": "Preview",
     "proRequired": "Agency plan required",
     "brandingSaved": "Branding settings saved",
     "errorSaving": "Error saving",
     "logoUploaded": "Logo uploaded successfully",
     "networkError": "Network error. Please try again.",
     "failedToLoad": "Failed to load",
-    "uploading": "Uploading..."
+    "uploading": "Uploading...",
+    "uploadFailed": "Upload failed",
+    "logoAlt": "Logo"
   },
   "admin": {
     "title": "Admin Dashboard",
@@ -200,7 +181,11 @@
     "showing": "Showing",
     "of": "of",
     "prev": "Prev",
-    "next": "Next"
+    "next": "Next",
+    "role": "Role",
+    "joined": "Joined",
+    "roleAdmin": "Admin",
+    "roleUser": "User"
   },
   "plans": {
     "free": "Free",
@@ -226,668 +211,6 @@
     "fullExports": "PDF, HTML, and DOCX exports",
     "watermarkIncluded": "Watermark in exported reports",
     "noWatermark": "No watermark in exported reports"
-  },
-  "analyzer_content": {
-    "cms": {
-      "display_name": "CMS / Platform",
-      "description": "Detection of the content management system or website platform.",
-      "theory": "<strong>CMS (Content Management System)</strong> — a system for creating and managing a website.\n\n<strong>Popular CMS platforms:</strong>\n• <strong>WordPress</strong> — the most popular (~40% of websites), requires SEO plugins\n• <strong>Shopify</strong> — e-commerce platform\n• <strong>Tilda</strong> — website builder\n• <strong>OpenCart/PrestaShop</strong> — online stores\n• <strong>1C-Bitrix</strong> — popular CMS in CIS countries\n\n<strong>Why knowing the CMS matters:</strong>\n• Helps select optimization tools and identify typical issues\n• Affects hosting and server configuration choices",
-      "summary": {
-        "cms_detected": "The website appears to be using {cms}",
-        "cms_unknown": "The platform could not be identified"
-      },
-      "issues": {
-        "cms_detected": "The website appears to be using {cms}",
-        "multiple_cms": "Other technologies also detected: {cms_list}",
-        "cms_unknown": "CMS not identified"
-      },
-      "details": {
-        "cms_detected": "Detected indicators: {evidence}",
-        "multiple_cms": "The website may use multiple technologies or a hybrid architecture.",
-        "cms_unknown": "The website may use a custom-built solution or an unrecognized CMS."
-      },
-      "recommendations": {
-        "cms_detected": "Review the SEO best practices for your platform."
-      }
-    },
-    "meta_tags": {
-      "display_name": "Meta Tags",
-      "description": "Title and Description meta tags affect ranking and click-through rate in search results.",
-      "theory": "<strong>Title (page title)</strong> — displayed in search results as the snippet heading. One of the most important ranking factors.\n\n<strong>Optimal length:</strong> 50-60 characters (~600px). Each page should have a unique Title with the primary keyword at the beginning.\n\n<strong>Description (meta description)</strong> — displayed below the heading in search results. Does not directly affect ranking but impacts CTR.\n\n<strong>Optimal length:</strong> 150-160 characters (~920px). Describe the content briefly, include a call to action.",
-      "summary": {
-        "missing": "Missing meta tags: {missing_titles} Title, {missing_descriptions} Description",
-        "duplicates": "Duplicates: {duplicate_titles} Title, {duplicate_descriptions} Description",
-        "all_ok": "All {total_pages} pages have correct meta tags"
-      },
-      "issues": {
-        "missing_title": "Missing Title: {count} pages",
-        "missing_description": "Missing Description: {count} pages",
-        "short_title": "Title too short: {count} pages",
-        "long_title": "Title too long: {count} pages",
-        "short_description": "Description too short: {count} pages",
-        "long_description": "Description too long: {count} pages",
-        "duplicate_title": "Duplicate Titles: {count} duplicate groups",
-        "duplicate_description": "Duplicate Descriptions: {count} duplicate groups"
-      },
-      "details": {
-        "missing_title": "Title is an important ranking factor. Every page should have a unique Title.",
-        "missing_description": "Meta Description affects click-through rate in search results.",
-        "short_title": "Optimal Title length: 50-60 characters.",
-        "long_title": "Optimal Title length: 50-60 characters. Long Titles will be truncated in search results.",
-        "short_description": "Optimal Description length: 150-160 characters.",
-        "long_description": "Optimal Description length: 150-160 characters.",
-        "duplicate_title": "Duplicate Titles make it harder for search engines to understand the uniqueness of content.",
-        "duplicate_description": "Unique Descriptions improve click-through rate in search results."
-      },
-      "recommendations": {
-        "missing_title": "Add a unique <title> tag for each page.",
-        "missing_description": "Add a unique meta description tag for each page.",
-        "short_title": "Expand the Title by including more relevant keywords.",
-        "long_title": "Shorten the Title to 60 characters.",
-        "short_description": "Expand the Description by providing more detail about the page content.",
-        "long_description": "Shorten the Description to 160 characters.",
-        "duplicate_title": "Create a unique Title for each page.",
-        "duplicate_description": "Create a unique Description for each page."
-      }
-    },
-    "headings": {
-      "display_name": "Headings H1-H6",
-      "description": "Analysis of H1-H6 headings: presence, uniqueness, and proper hierarchy.",
-      "theory": "<strong>Headings H1-H6</strong> — a heading hierarchy for structuring page content.\n\n<strong>Rules:</strong>\n• <strong>Exactly one H1</strong> per page (multiple H1s dilute focus)\n• H1 should be unique for each page, 20-70 characters\n• <strong>Hierarchy H1 → H2 → H3</strong> — do not skip levels (H1 → H3 without H2 is a violation)\n• Use H2 for main sections, H3 for subsections",
-      "summary": {
-        "problems_found": "Issues found: {problems}",
-        "all_ok": "All {total_pages} pages have a correct H1"
-      },
-      "issues": {
-        "missing_h1": "Missing H1: {count} pages",
-        "multiple_h1": "Multiple H1: {count} pages",
-        "h1_too_long": "H1 too long: {count} pages",
-        "duplicate_h1": "Duplicate H1: {count} groups",
-        "empty_h1": "Empty H1: {count} pages",
-        "hierarchy_violation": "Heading hierarchy violation: {count} pages"
-      },
-      "details": {
-        "missing_h1": "Every page should have one H1 heading.",
-        "multiple_h1": "A page should have only one H1. Multiple H1 tags can confuse search engines.",
-        "h1_too_long": "Optimal H1 length: 20-70 characters.",
-        "duplicate_h1": "Duplicate H1 tags across different pages reduce content uniqueness.",
-        "empty_h1": "An H1 without text provides no SEO value.",
-        "hierarchy_violation": "Skipping heading levels (e.g., H1 → H3 without H2) breaks semantic structure."
-      },
-      "recommendations": {
-        "missing_h1": "Add an H1 heading to every page.",
-        "multiple_h1": "Keep only one H1 per page and change the others to H2-H6.",
-        "h1_too_long": "Shorten the H1 to 70 characters.",
-        "duplicate_h1": "Create a unique H1 for each page.",
-        "empty_h1": "Fill in the H1 with relevant text containing target keywords.",
-        "hierarchy_violation": "Follow a consistent hierarchy: H1 → H2 → H3 → H4."
-      }
-    },
-    "page_404": {
-      "display_name": "404 Page",
-      "description": "A custom 404 page improves user experience when visiting a non-existent page.",
-      "theory": "<strong>404 Page</strong> is displayed when the requested page is not found.\n\n<strong>What it should contain:</strong>\n• A clear error message\n• A link to the homepage and site navigation\n• Site search (optional)\n\n<strong>Technical requirements:</strong>\n• HTTP status 404 (not 200 or a redirect — otherwise it is a \"soft 404\")\n• The same design as the rest of the website",
-      "summary": {
-        "ok": "The 404 page is configured correctly",
-        "missing": "A 404 page needs to be created or fixed",
-        "needs_improvement": "A 404 page exists but needs improvement",
-        "check_failed": "Could not check the 404 page"
-      },
-      "issues": {
-        "custom_404_ok": "Custom 404 page is configured correctly",
-        "no_custom_404": "Custom 404 page is missing",
-        "wrong_404_status": "404 page returns an incorrect HTTP status",
-        "404_no_navigation": "404 page does not contain navigation",
-        "404_no_home_link": "404 page does not contain a link to the homepage",
-        "404_no_search": "404 page does not contain a search function",
-        "404_check_failed": "Could not check the 404 page"
-      },
-      "details": {
-        "custom_404_ok": "A custom 404 page helps retain users on the website.",
-        "no_custom_404": "The default browser 404 page does not include navigation for your website.",
-        "wrong_404_status": "The 404 page should return HTTP status 404, not 200 or a redirect.",
-        "404_no_navigation": "Add a navigation menu to help users find their way.",
-        "404_no_home_link": "A link to the homepage helps users return to the main content.",
-        "404_no_search": "A search function helps users find the information they need.",
-        "404_check_failed": "An error occurred while checking the 404 page."
-      },
-      "recommendations": {
-        "no_custom_404": "Create a custom 404 page with navigation and useful links.",
-        "wrong_404_status": "Configure the server to return the correct 404 status code.",
-        "404_no_navigation": "Add the site menu to the 404 page.",
-        "404_no_home_link": "Add a prominent link to the homepage.",
-        "404_no_search": "Consider adding a search function to the 404 page.",
-        "404_check_failed": "Check the website availability."
-      }
-    },
-    "speed": {
-      "display_name": "Page Speed",
-      "description": "Page speed affects Google ranking and user experience.",
-      "theory": "<strong>Core Web Vitals</strong> — Google metrics for evaluating user experience. They are a ranking factor.\n\n<strong>Key metrics:</strong>\n• <strong>LCP (Largest Contentful Paint)</strong> — time to load the main content. Good: < 2.5s\n• <strong>FID (First Input Delay)</strong> — delay of the first interaction. Good: < 100ms\n• <strong>CLS (Cumulative Layout Shift)</strong> — visual stability. Good: < 0.1\n\n<strong>PageSpeed Score:</strong> 90-100 excellent, 50-89 needs improvement, 0-49 poor. Every second of delay reduces conversion by ~7%.",
-      "summary": {
-        "ok": "Speed is within normal range. Mobile: {mobile}/100, Desktop: {desktop}/100",
-        "needs_optimization": "Optimization needed. Mobile: {mobile}/100, Desktop: {desktop}/100",
-        "critical": "Critical speed issues. Mobile: {mobile}/100, Desktop: {desktop}/100",
-        "failed": "Could not retrieve speed data"
-      },
-      "issues": {
-        "pagespeed_unavailable": "Could not retrieve PageSpeed Insights data",
-        "mobile_score_critical": "Critically low Mobile Score: {count}/100",
-        "mobile_score_low": "Low Mobile Score: {count}/100",
-        "desktop_score_critical": "Critically low Desktop Score: {count}/100",
-        "desktop_score_low": "Low Desktop Score: {count}/100"
-      },
-      "details": {
-        "pagespeed_unavailable": "The API may be unavailable or the URL may be blocked.",
-        "mobile_score_critical": "The mobile version of the website loads very slowly.",
-        "mobile_score_low": "There is significant potential to improve mobile speed.",
-        "desktop_score_critical": "The desktop version of the website loads very slowly.",
-        "desktop_score_low": "There is potential to improve desktop speed.",
-        "mobile_fcp_slow": "First Contentful Paint measures the time until the first content appears.",
-        "desktop_fcp_slow": "First Contentful Paint measures the time until the first content appears.",
-        "mobile_lcp_slow": "Largest Contentful Paint measures the loading time of the largest element.",
-        "desktop_lcp_slow": "Largest Contentful Paint measures the loading time of the largest element.",
-        "mobile_cls_high": "Cumulative Layout Shift measures the visual stability of the page.",
-        "desktop_cls_high": "Cumulative Layout Shift measures the visual stability of the page."
-      },
-      "recommendations": {
-        "pagespeed_unavailable": "Check the URL manually at https://pagespeed.web.dev/",
-        "mobile_score_critical": "Urgently optimize: compress images, minify CSS/JS, implement caching.",
-        "mobile_score_low": "Optimize images, reduce the number of requests, use lazy loading.",
-        "desktop_score_critical": "Check server response time and optimize resources.",
-        "desktop_score_low": "Optimize the critical rendering path.",
-        "mobile_fcp_slow": "Optimize critical CSS, use preload for fonts.",
-        "desktop_fcp_slow": "Optimize critical CSS, use preload for fonts.",
-        "mobile_lcp_slow": "Optimize images, use a CDN, speed up server response.",
-        "desktop_lcp_slow": "Optimize images, use a CDN, speed up server response.",
-        "mobile_cls_high": "Set dimensions for images and ad blocks, avoid dynamic content.",
-        "desktop_cls_high": "Set dimensions for images and ad blocks, avoid dynamic content."
-      }
-    },
-    "images": {
-      "display_name": "Images",
-      "description": "Image optimization is important for page speed and SEO.",
-      "theory": "<strong>Alt text</strong> — describes the image for search engines, screen readers, and cases when the image fails to load.\n\n<strong>Alt rules:</strong>\n• Brief description up to 125 characters with keywords (no keyword stuffing)\n• Do not start with \"Image of...\" or \"Photo of...\"\n• For decorative images — use empty <code>alt=\"\"</code>\n\n<strong>Image formats:</strong>\n• <strong>WebP/AVIF</strong> — 25-50% smaller than JPEG, recommended\n• <strong>JPEG</strong> — photographs, <strong>PNG</strong> — transparency, <strong>SVG</strong> — vector graphics\n• Images over 200 KB slow down loading — compress and resize",
-      "summary": {
-        "all_ok": "All {count} images are optimized",
-        "problems": "Found {count} images. Issues: {problems}"
-      },
-      "issues": {
-        "missing_alt": "Images without alt: {count}",
-        "empty_alt": "Images with empty alt: {count}",
-        "large_size": "Large images (>400 KB): {count}",
-        "critical_size": "Very large images (>1 MB): {count}",
-        "legacy_format": "Outdated image format: {count}",
-        "images_ok": "All images are optimized"
-      },
-      "details": {
-        "missing_alt": "The alt attribute is important for accessibility and SEO. Search engines use alt text to understand image content.",
-        "empty_alt": "Empty alt is acceptable only for decorative images.",
-        "large_size": "Large images slow down loading, especially on mobile devices.",
-        "critical_size": "Images over 1 MB critically slow down page loading.",
-        "legacy_format": "JPEG and PNG formats can be replaced with WebP or AVIF for better compression."
-      },
-      "recommendations": {
-        "missing_alt": "Add a descriptive alt attribute to all images.",
-        "empty_alt": "Fill in the alt with an image description or mark as decorative (role='presentation').",
-        "large_size": "Optimize images or use lazy loading.",
-        "critical_size": "Reduce image size through compression and/or resolution reduction.",
-        "legacy_format": "Convert images to WebP format. This can reduce file size by 25-35%."
-      }
-    },
-    "content": {
-      "display_name": "Content",
-      "description": "Quality and unique content is the foundation of successful SEO.",
-      "summary": {
-        "all_ok": "All {total_pages} pages have sufficient content. Average word count: {avg_words}",
-        "problems": "Content issues: {problems}. Average word count: {avg_words}"
-      },
-      "theory": "<strong>Content quality</strong> — one of the most important ranking factors.\n\n<strong>Minimum content length requirements:</strong>\n• <strong>Product pages:</strong> 300-500 characters — description, specifications\n• <strong>Category pages:</strong> 1500-2500 characters — SEO text with keywords\n• <strong>Blog articles:</strong> 3000-5000+ characters\n• <strong>Homepage:</strong> 1000-2000 characters\n\n<strong>Thin Content:</strong>\nPages with minimal or non-unique text may not be indexed or may be penalized by the Panda algorithm.\n• Write unique content with keywords (avoid keyword stuffing)\n• Add useful information: tables, lists, FAQs",
-      "issues": {
-        "thin_content": "Pages with thin content: {count}",
-        "empty_pages": "Empty pages: {count}",
-        "no_structured_data": "Schema.org structured data is missing",
-        "has_structured_data": "Schema.org structured data detected",
-        "content_ok": "Content is fine"
-      },
-      "details": {
-        "thin_content": "Pages with little text may be demoted in search rankings.",
-        "empty_pages": "Pages without text content provide no value to search engines.",
-        "no_structured_data": "Structured data helps search engines understand the content.",
-        "has_structured_data": "Structured data can provide rich snippets in search results."
-      },
-      "recommendations": {
-        "thin_content": "Add useful content to these pages (minimum 300 words).",
-        "empty_pages": "Add unique text content or set up noindex for these pages.",
-        "no_structured_data": "Add Schema.org markup to key pages."
-      }
-    },
-    "links": {
-      "display_name": "Broken Links",
-      "description": "Broken links negatively affect SEO and user experience.",
-      "theory": "<strong>Broken Links</strong> — links pointing to non-existent pages. They waste crawl budget and interrupt PageRank flow.\n\n<strong>Types:</strong>\n• Internal — to pages on your own website\n• External — to other websites\n\n<strong>How to fix:</strong>\n• Remove the link or replace it with a working one\n• Set up a 301 redirect for deleted pages",
-      "summary": {
-        "no_broken": "Checked {internal} internal and {external} external links. No issues found.",
-        "broken_found": "Broken links found: {broken}"
-      },
-      "issues": {
-        "broken_internal": "Broken internal links: {count}",
-        "broken_external": "Broken external links: {count}",
-        "no_broken_links": "No broken links detected"
-      },
-      "details": {
-        "broken_internal": "Internal links to non-existent pages harm SEO and user experience.",
-        "broken_external": "Links to non-existent external resources can frustrate users."
-      },
-      "recommendations": {
-        "broken_internal": "Fix or remove broken links. Set up redirects for deleted pages.",
-        "broken_external": "Update or remove broken external links."
-      }
-    },
-    "favicon": {
-      "display_name": "Favicon",
-      "description": "A favicon helps identify the website in browser tabs and bookmarks.",
-      "theory": "<strong>Favicon</strong> — the website icon displayed in browser tabs, bookmarks, and mobile search results. It improves brand recognition and CTR.\n\n<strong>Recommended formats:</strong>\n• /favicon.ico — classic format, 16x16 or 32x32\n• PNG — for modern browsers\n• Apple Touch Icon — for iOS devices (180x180)\n\n<strong>How to add:</strong>\n• Place favicon.ico in the website root\n• Add link tags in the head for different formats",
-      "summary": {
-        "ok": "Favicon is configured correctly",
-        "missing": "Favicon is missing",
-        "needs_improvement": "Favicon exists but can be improved"
-      },
-      "issues": {
-        "favicon_ok": "Favicon is configured correctly",
-        "missing_favicon": "Favicon is missing",
-        "no_favicon_ico": "/favicon.ico is missing",
-        "no_apple_touch_icon": "Apple Touch Icon is missing",
-        "old_favicon_format": "SVG or PNG format is recommended"
-      },
-      "details": {
-        "favicon_ok": "The favicon helps users recognize your website.",
-        "missing_favicon": "Without a favicon, the website looks less professional.",
-        "no_favicon_ico": "Some browsers look for favicon.ico in the website root.",
-        "no_apple_touch_icon": "Apple Touch Icon is needed for proper display on iOS devices.",
-        "old_favicon_format": "SVG favicons scale without quality loss and support dark mode."
-      },
-      "recommendations": {
-        "missing_favicon": "Create and add a favicon to the website.",
-        "no_favicon_ico": "Add a favicon.ico file to the website root.",
-        "no_apple_touch_icon": "Add an Apple Touch Icon (180x180) for iOS devices.",
-        "old_favicon_format": "Add an SVG version of the favicon."
-      }
-    },
-    "external_links": {
-      "display_name": "External Links",
-      "description": "Analysis of outbound links to other websites.",
-      "theory": "<strong>External links</strong> — links from your website to other websites. They pass some PageRank; links to authoritative sources increase trust.\n\n<strong>Rel attributes:</strong>\n• <code>rel=\"nofollow\"</code> — do not pass PageRank\n• <code>rel=\"sponsored\"</code> — for advertising/paid links\n• <code>rel=\"ugc\"</code> — for user-generated content\n\n<strong>Recommendations:</strong>\n• Commercial/affiliate links — nofollow or sponsored\n• Authoritative sources — can be dofollow\n• Monitor the dofollow/nofollow balance",
-      "summary": {
-        "ok": "Found {count} external links to {domains} domains",
-        "with_warnings": "Found {count} external links. Warnings: {warnings}, info: {info}"
-      },
-      "issues": {
-        "external_links_found": "External links found: {count}",
-        "commercial_no_nofollow": "Commercial links without nofollow: {count}",
-        "many_dofollow": "Most external links lack nofollow ({count})",
-        "many_links_same_domain": "Many links to {domain}: {count}",
-        "external_links_ok": "External links are fine"
-      },
-      "details": {
-        "commercial_no_nofollow": "Links to commercial/affiliate websites should be marked with rel='nofollow' or rel='sponsored'.",
-        "many_dofollow": "A large number of dofollow links passes your 'link juice' to other websites.",
-        "many_links_same_domain": "Many links pointing to the same domain were found."
-      },
-      "recommendations": {
-        "commercial_no_nofollow": "Add rel='nofollow' or rel='sponsored' to commercial links.",
-        "many_dofollow": "Consider adding nofollow to less important external links.",
-        "many_links_same_domain": "Make sure this is intentional and the links are relevant."
-      }
-    },
-    "robots": {
-      "display_name": "Indexation",
-      "description": "Proper configuration of robots.txt and sitemap.xml ensures effective website indexation.",
-      "theory": "<strong>Robots.txt</strong> — a file that controls search engine crawler access to website pages.\n\n<strong>Main directives:</strong>\n• <code>User-agent: *</code> — rules for all crawlers\n• <code>Disallow: /admin/</code> — block indexation of a path\n• <code>Allow: /</code> — allow indexation\n• <code>Sitemap: URL</code> — link to the sitemap\n\n<strong>Sitemap.xml</strong> — a list of pages for indexation. It helps crawlers find all pages and speeds up indexation of new content.\n\n<strong>Recommendations:</strong>\n• Always have robots.txt and sitemap.xml\n• Reference the sitemap in robots.txt\n• Do not block CSS/JS files\n• Submit the sitemap in Google Search Console",
-      "summary": {
-        "ok": "Indexation settings are in order",
-        "problems": "Indexation issues: {problems}"
-      },
-      "issues": {
-        "robots_ok": "robots.txt is configured correctly",
-        "no_robots_txt": "robots.txt file is missing",
-        "robots_txt_errors": "Errors in robots.txt: {count}",
-        "no_sitemap_in_robots": "Sitemap is not referenced in robots.txt",
-        "sitemap_ok": "sitemap.xml found",
-        "no_sitemap": "sitemap.xml file is missing",
-        "sitemap_errors": "Sitemap issues: {count}",
-        "empty_sitemap": "Sitemap is empty",
-        "sitemap_urls_not_found": "URLs in sitemap not found on the website: {count}",
-        "pages_not_in_sitemap": "Pages not included in sitemap: {count}",
-        "sitemap_old_lastmod": "Outdated lastmod dates in sitemap: {count} URLs",
-        "noindex_pages": "Pages with noindex: {count}",
-        "canonical_issues": "Canonical issues: {count}"
-      },
-      "details": {
-        "no_robots_txt": "Without robots.txt, search crawlers will index all accessible pages.",
-        "robots_txt_errors": "Syntax errors can lead to incorrect interpretation of the file.",
-        "no_sitemap_in_robots": "It is recommended to specify the sitemap path in robots.txt.",
-        "no_sitemap": "Without sitemap.xml, it is harder for search engines to find all pages.",
-        "sitemap_errors": "Issues with the sitemap file can hinder indexation.",
-        "empty_sitemap": "The sitemap does not contain any URLs.",
-        "sitemap_urls_not_found": "These URLs are listed in the sitemap but were not found by the crawler or return errors.",
-        "pages_not_in_sitemap": "These pages were found on the website but are missing from sitemap.xml.",
-        "sitemap_old_lastmod": "More than half of the URLs have lastmod dates older than 6 months. Update the dates or the content.",
-        "noindex_pages": "These pages will not be indexed by search engines.",
-        "canonical_issues": "Canonical issues can lead to content duplication."
-      },
-      "recommendations": {
-        "no_robots_txt": "Create a robots.txt file and reference the sitemap in it.",
-        "robots_txt_errors": "Fix syntax errors in robots.txt.",
-        "no_sitemap_in_robots": "Add the line 'Sitemap: https://yoursite.com/sitemap.xml' to robots.txt.",
-        "no_sitemap": "Create a sitemap.xml with all important website pages.",
-        "sitemap_errors": "Validate the sitemap.xml file.",
-        "empty_sitemap": "Add page URLs to sitemap.xml.",
-        "sitemap_urls_not_found": "Check these URLs and remove non-existent ones from the sitemap.",
-        "pages_not_in_sitemap": "Add important pages to the sitemap for better indexation.",
-        "sitemap_old_lastmod": "Update lastmod dates in the sitemap when page content changes."
-      }
-    },
-    "structure": {
-      "display_name": "Site Structure",
-      "description": "Proper site structure ensures effective indexation and good user experience.",
-      "theory": "<strong>Site structure</strong> — the organization of pages and links between them.\n\n<strong>Click Depth:</strong>\n• Important pages should be within 1-3 clicks\n• Pages at depth 4+ are indexed less effectively\n\n<strong>Orphan Pages:</strong>\n• Pages without a single internal link — search crawlers may not find them\n\n<strong>Recommendations:</strong>\n• Use breadcrumbs and internal links within content\n• Check for orphan pages regularly",
-      "summary": {
-        "ok": "Site structure is optimal. Maximum depth: {depth} levels.",
-        "problems": "Maximum depth: {depth}. Issues: {problems}"
-      },
-      "issues": {
-        "deep_pages": "Deeply nested pages: {count}",
-        "orphan_pages": "Orphan pages (no incoming links): {count}",
-        "few_internal_links": "Pages with few links: {count}",
-        "very_deep_structure": "Site structure is too deep",
-        "structure_ok": "Site structure is optimal"
-      },
-      "details": {
-        "deep_pages": "These pages are more than 3 clicks away from the homepage. This makes them harder for users and search engines to find.",
-        "orphan_pages": "No other pages on the website link to these pages. Search engines will have difficulty finding them.",
-        "few_internal_links": "Pages with few internal links may have less impact on navigation.",
-        "very_deep_structure": "Search engines may not index pages at great depth."
-      },
-      "recommendations": {
-        "deep_pages": "Review the navigation structure and add links to these pages closer to the homepage.",
-        "orphan_pages": "Add internal links to these pages from relevant sections of the website.",
-        "few_internal_links": "Consider adding links to related pages.",
-        "very_deep_structure": "Restructure the website so that all important pages are accessible within 3-4 clicks."
-      }
-    },
-    "content_sections": {
-      "display_name": "Informational Sections",
-      "description": "Detection of blog, news, FAQ, and help sections on the website.",
-      "theory": "<strong>Informational sections</strong> — pages with useful content that attract organic traffic.\n\n<strong>Section types:</strong>\n• <strong>Blog/News</strong> — articles, updates, expert content\n• <strong>FAQ</strong> — frequently asked questions and answers (may appear in rich snippets)\n• <strong>Knowledge Base/Help</strong> — documentation, guides",
-      "summary": {
-        "detected": "Detected: {sections}",
-        "not_detected": "No informational sections detected"
-      },
-      "issues": {
-        "blog_detected": "Blog/news detected: {count} pages",
-        "faq_detected": "FAQ/help detected: {count} pages",
-        "faq_has_schema": "FAQ with Schema.org markup: {count} pages",
-        "faq_no_schema": "FAQ without Schema.org markup",
-        "blog_missing_features": "Blog: some elements are missing",
-        "no_blog": "Blog/news not detected",
-        "no_faq": "FAQ not detected"
-      },
-      "details": {
-        "blog_detected": "Having a blog helps attract organic traffic.",
-        "faq_detected": "FAQ helps users find answers and may appear in rich snippets.",
-        "faq_has_schema": "FAQ may appear in Google rich snippets.",
-        "faq_no_schema": "FAQPage markup allows FAQ to be displayed in Google search results.",
-        "blog_missing_features": "These elements improve SEO and blog user experience.",
-        "no_blog": "Informational content helps attract organic traffic and build authority.",
-        "no_faq": "An FAQ section helps answer common user questions."
-      },
-      "recommendations": {
-        "faq_no_schema": "Add Schema.org FAQPage markup to FAQ pages.",
-        "blog_missing_features": "Add the missing elements to blog pages.",
-        "no_blog": "Consider creating a blog with useful articles for your audience.",
-        "no_faq": "Consider creating an FAQ section with Schema.org markup."
-      }
-    },
-    "schema": {
-      "display_name": "Structured Data",
-      "description": "Analysis of Schema.org markup and structured data across website pages.",
-      "theory": "<strong>Schema.org</strong> — a structured data markup standard that helps search engines better understand page content.\n\n<strong>Main types:</strong>\n• <strong>JSON-LD</strong> — the Google-recommended format (script in the head)\n• <strong>Microdata</strong> — itemscope/itemprop attributes in HTML\n\n<strong>Popular types:</strong>\n• Organization — company information\n• Product — products with prices and reviews\n• BreadcrumbList — breadcrumb navigation\n• Article — articles and news\n• FAQPage — FAQ pages",
-      "summary": {
-        "found": "Found {types} Schema.org types across {pages} pages",
-        "missing": "Structured data is missing"
-      },
-      "issues": {
-        "has_structured_data": "Found {count} Schema.org types",
-        "no_structured_data": "Structured data is missing on {count} pages",
-        "missing_organization": "Organization markup is missing on the homepage",
-        "missing_breadcrumbs": "BreadcrumbList markup is missing",
-        "json_ld_errors": "Errors in JSON-LD markup on {count} pages"
-      },
-      "details": {
-        "has_structured_data": "JSON-LD and Microdata markup detected on website pages.",
-        "no_structured_data": "Pages without Schema.org markup will not receive rich snippets in search results.",
-        "missing_organization": "Organization schema helps Google display company information in the Knowledge Panel.",
-        "missing_breadcrumbs": "Breadcrumbs (BreadcrumbList) improve navigation in search results.",
-        "json_ld_errors": "JSON-LD blocks with incorrect syntax were found."
-      },
-      "recommendations": {
-        "has_structured_data": "Continue using structured data and expand coverage.",
-        "no_structured_data": "Add JSON-LD markup to all important website pages.",
-        "missing_organization": "Add Organization JSON-LD markup with the name, logo, and contact details to the homepage.",
-        "missing_breadcrumbs": "Add BreadcrumbList JSON-LD markup to display the page path in search results.",
-        "json_ld_errors": "Check and fix the JSON-LD syntax. Use the Google Rich Results Test validator."
-      }
-    },
-    "social_tags": {
-      "display_name": "Social Meta Tags",
-      "description": "Analysis of Open Graph and Twitter Card tags for proper display on social media.",
-      "theory": "<strong>Open Graph (OG)</strong> — a markup protocol that controls how a page appears when shared on Facebook, LinkedIn, Telegram, and other platforms.\n\n<strong>Required OG tags:</strong>\n• og:title — title (up to 60 characters)\n• og:description — description (up to 200 characters)\n• og:image — image 1200x630 px\n\n<strong>Twitter Cards:</strong>\n• twitter:card — card type (summary_large_image)\n• If OG tags are present, Twitter can use them as fallback",
-      "summary": {
-        "stats": "OG tags: {og}/{total} pages. Twitter Cards: {twitter}/{total2}",
-        "no_pages": "No pages to analyze"
-      },
-      "issues": {
-        "og_tags_ok": "Open Graph tags are present on all {count} pages",
-        "missing_og_tags": "Open Graph tags are missing on {count} pages",
-        "missing_og_image": "og:image is missing on {count} pages",
-        "missing_og_description": "og:description is missing on {count} pages",
-        "missing_twitter_card": "Twitter Card tags are missing on {count} pages"
-      },
-      "details": {
-        "og_tags_ok": "All pages have correct OG tags for display on social media.",
-        "missing_og_tags": "Pages without OG tags will display incorrectly when shared on social media.",
-        "missing_og_image": "Without og:image, social networks may pick a random image or show no preview.",
-        "missing_og_description": "Without og:description, social networks will use the standard meta description or a text fragment.",
-        "missing_twitter_card": "Without twitter:card, links on Twitter/X will display without an expanded preview."
-      },
-      "recommendations": {
-        "og_tags_ok": "Continue keeping OG tags up to date.",
-        "missing_og_tags": "Add og:title, og:description, and og:image meta tags to all pages.",
-        "missing_og_image": "Add an og:image sized 1200x630 px for each page.",
-        "missing_og_description": "Add og:description with a brief, engaging page description (up to 200 characters).",
-        "missing_twitter_card": "Add <meta name=\"twitter:card\" content=\"summary_large_image\"> for expanded previews."
-      }
-    },
-    "security": {
-      "display_name": "HTTPS & Security",
-      "description": "Checking HTTPS, security headers, and mixed content.",
-      "theory": "<strong>HTTPS as a ranking factor.</strong> Since 2014, Google considers HTTPS as a ranking signal.\n\n<strong>Security headers:</strong>\n• <strong>HSTS</strong> — forces the browser to use HTTPS\n• <strong>X-Content-Type-Options: nosniff</strong> — prevents MIME-sniffing\n• <strong>X-Frame-Options</strong> — protection against clickjacking\n• <strong>Content-Security-Policy</strong> — controls resource sources\n\n<strong>Mixed content:</strong> HTTP resources on HTTPS pages are blocked by browsers.",
-      "summary": {
-        "ok": "HTTPS and security are in order",
-        "problems": "Issues found: {problems}"
-      },
-      "issues": {
-        "no_https": "The website does not use HTTPS",
-        "mixed_content": "Mixed content: {count} pages",
-        "missing_hsts": "HSTS header is missing",
-        "missing_x_content_type": "X-Content-Type-Options is missing",
-        "missing_x_frame": "X-Frame-Options is missing",
-        "missing_csp": "Content-Security-Policy is missing",
-        "security_ok": "HTTPS and security are in order"
-      },
-      "details": {
-        "no_https": "HTTPS has been a Google ranking factor since 2014. Without an SSL certificate, the website is marked as insecure.",
-        "mixed_content": "HTTP resources (images, scripts, styles) found on HTTPS pages. Browsers may block such resources.",
-        "missing_hsts": "HSTS forces the browser to always use an HTTPS connection.",
-        "missing_x_content_type": "The X-Content-Type-Options: nosniff header prevents MIME-sniffing attacks.",
-        "missing_x_frame": "The X-Frame-Options header protects against clickjacking attacks.",
-        "missing_csp": "CSP controls which sources are allowed to load resources on the page.",
-        "security_ok": "The website uses HTTPS, essential security headers are present, and no mixed content was detected."
-      },
-      "recommendations": {
-        "no_https": "Install an SSL certificate and set up a redirect from HTTP to HTTPS.",
-        "mixed_content": "Replace all HTTP resource links with HTTPS or use protocol-relative URLs.",
-        "missing_hsts": "Add the header: Strict-Transport-Security: max-age=31536000; includeSubDomains",
-        "missing_x_content_type": "Add the header: X-Content-Type-Options: nosniff",
-        "missing_x_frame": "Add the header: X-Frame-Options: DENY or SAMEORIGIN",
-        "missing_csp": "Configure Content-Security-Policy to control resource sources."
-      }
-    },
-    "mobile": {
-      "display_name": "Mobile Responsiveness",
-      "description": "Checking basic mobile version requirements for the website.",
-      "theory": "<strong>Mobile-First Indexing</strong> — since 2019, Google indexes the mobile version of a website as the primary one.\n\n<strong>Key requirements:</strong>\n• <strong>Viewport</strong> — meta tag <code>&lt;meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"&gt;</code>\n• <strong>Responsive design</strong> — CSS media queries for different screen sizes\n• <strong>No Flash</strong> — Flash is not supported by mobile browsers",
-      "summary": {
-        "ok": "All {count} pages have a viewport",
-        "problems": "Issues: {problems}"
-      },
-      "issues": {
-        "viewport_ok": "All pages have a correct viewport",
-        "missing_viewport": "{count} pages without viewport",
-        "bad_viewport": "Incorrect viewport: {count} pages",
-        "flash_content": "Flash content: {count} pages"
-      },
-      "details": {
-        "viewport_ok": "The viewport meta tag is properly configured on all pages.",
-        "missing_viewport": "Without the viewport meta tag, mobile browsers display the page at desktop scale.",
-        "bad_viewport": "The viewport does not contain width=device-width, which may cause scaling issues.",
-        "flash_content": "Flash is not supported by mobile browsers and most modern desktop browsers."
-      },
-      "recommendations": {
-        "missing_viewport": "Add <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> to the <head>.",
-        "bad_viewport": "Ensure the viewport contains width=device-width.",
-        "flash_content": "Replace Flash content with HTML5, CSS3, or JavaScript."
-      }
-    },
-    "url_quality": {
-      "display_name": "URL Quality",
-      "description": "Analysis of URL structure and quality across website pages.",
-      "theory": "<strong>SEO-friendly URLs</strong> — an important ranking factor and usability element.\n\n<strong>Rules:</strong>\n• Length up to 75 characters, lowercase Latin letters only\n• Hyphens for word separation (not underscores)\n• No special characters, non-ASCII characters, or unnecessary parameters\n• No double slashes or trailing slashes",
-      "summary": {
-        "ok": "All URLs are well-structured",
-        "problems": "Issues found: {problems}"
-      },
-      "issues": {
-        "urls_ok": "All URLs meet standards",
-        "long_urls": "Long URLs: {count} pages",
-        "uppercase_urls": "URLs with uppercase letters: {count}",
-        "special_chars": "URLs with special characters: {count}",
-        "underscores": "URLs with underscores: {count}",
-        "dynamic_params": "URLs with parameters: {count}",
-        "double_slashes": "Double slashes in URLs: {count}"
-      },
-      "details": {
-        "urls_ok": "The website URL structure meets SEO best practices.",
-        "long_urls": "URLs with a path length over 75 characters are harder for users and search engines to process.",
-        "uppercase_urls": "URLs with uppercase letters can create duplicate pages.",
-        "special_chars": "Non-ASCII characters in URLs are encoded in percent format, making them harder to read.",
-        "underscores": "Google recommends using hyphens instead of underscores for word separation in URLs.",
-        "dynamic_params": "URLs with multiple GET parameters look less appealing and can create duplicates.",
-        "double_slashes": "Double slashes in URL paths create duplicate pages and hinder indexation."
-      },
-      "recommendations": {
-        "long_urls": "Shorten URLs by using only key terms.",
-        "uppercase_urls": "Use only lowercase characters in URLs and set up 301 redirects.",
-        "special_chars": "Use only Latin letters, numbers, and hyphens in URLs.",
-        "underscores": "Replace underscores with hyphens and set up 301 redirects.",
-        "dynamic_params": "Use clean, human-readable URLs instead of dynamic parameters.",
-        "double_slashes": "Fix double slashes and set up 301 redirects to the correct URL."
-      }
-    },
-    "hreflang": {
-      "display_name": "Hreflang",
-      "description": "Analysis of multilingual and regional page version settings.",
-      "theory": "<strong>Hreflang</strong> — an attribute that tells search engines about language and regional versions of a page.\n\n<strong>Format:</strong> <code>&lt;link rel=\"alternate\" hreflang=\"uk\" href=\"...\"&gt;</code>\n\n<strong>Rules:</strong>\n• Every page must reference itself (self-referencing)\n• Bidirectional confirmation: page A → B, B → A\n• x-default for the main/default version\n• Language codes per ISO 639-1 standard",
-      "summary": {
-        "missing": "Hreflang tags are missing (single-language website)",
-        "found": "Found {langs} language versions across {pages} pages"
-      },
-      "issues": {
-        "no_hreflang": "Hreflang tags are missing (single-language website)",
-        "hreflang_found": "Language versions found on pages",
-        "missing_self_reference": "Missing self-reference: {count} pages",
-        "missing_return_tags": "Missing return tags: {count}",
-        "invalid_lang_codes": "Invalid language codes",
-        "missing_x_default": "Missing x-default hreflang"
-      },
-      "details": {
-        "no_hreflang": "No hreflang tags were found on the website pages. This is normal for a single-language website.",
-        "hreflang_found": "Hreflang tags are correctly configured.",
-        "missing_self_reference": "Every page with hreflang must have a tag referencing itself.",
-        "missing_return_tags": "Hreflang tags must be bidirectional: if page A links to B, then B must link back to A.",
-        "invalid_lang_codes": "Language codes that do not comply with the ISO 639-1 standard were detected.",
-        "missing_x_default": "x-default specifies the page version for users whose language does not match any of the specified ones."
-      },
-      "recommendations": {
-        "no_hreflang": "If the website has language versions, add hreflang tags for each version.",
-        "missing_self_reference": "Add an hreflang tag with a link to the current page for its language version.",
-        "missing_return_tags": "Add corresponding hreflang tags on the target pages pointing back.",
-        "invalid_lang_codes": "Use correct language codes per the ISO 639-1 standard (e.g.: uk, en, de, fr).",
-        "missing_x_default": "Add hreflang=\"x-default\" with a link to the main page version."
-      }
-    },
-    "duplicates": {
-      "display_name": "Content Duplicates",
-      "description": "Detection of pages with similar or identical content.",
-      "theory": "<strong>Content duplicates</strong> — pages with identical or very similar text.\n\n<strong>Problems:</strong>\n• Google selects only one version for indexation (canonical)\n• Other versions lose traffic and link equity\n• A large number of duplicates signals low quality\n\n<strong>Solutions:</strong>\n• rel=\"canonical\" — specify the primary version\n• 301 redirect — redirect to the primary version\n• Make the content on each page unique",
-      "summary": {
-        "found": "Found {count} duplicate groups",
-        "ok": "No duplicates detected"
-      },
-      "issues": {
-        "no_duplicates": "No duplicates detected",
-        "exact_duplicates": "Exact duplicates: {count} groups",
-        "near_duplicates": "Near duplicates: {count} groups"
-      },
-      "details": {
-        "no_duplicates": "Pages checked — no content duplicates found.",
-        "exact_duplicates": "Pages with virtually identical content. Google will select only one version for indexation.",
-        "near_duplicates": "Pages with similar content (over 80% match). They may compete with each other in search results."
-      },
-      "recommendations": {
-        "no_duplicates": "Continue creating unique content for each page.",
-        "exact_duplicates": "Set a canonical tag (rel=\"canonical\") or configure a 301 redirect to the primary page version.",
-        "near_duplicates": "Merge similar pages or add unique content to each of them."
-      }
-    },
-    "redirects": {
-      "display_name": "Redirects",
-      "description": "Analysis of redirections and redirect chains on the website.",
-      "theory": "<strong>Redirects</strong> — forwarding from one URL to another.\n\n<strong>Types:</strong>\n• <strong>301</strong> — permanent (passes ~90% of link equity)\n• <strong>302</strong> — temporary (does not pass link equity)\n\n<strong>Problems:</strong>\n• Chains of 2+ hops slow down loading and waste crawl budget\n• Google may stop following after 3-5 hops\n• Internal links should point to the final URL",
-      "summary": {
-        "found": "Found {count} redirect chains",
-        "ok": "No redirect issues detected"
-      },
-      "issues": {
-        "no_redirect_issues": "No redirect issues detected",
-        "redirect_chains": "Redirect chains (2 hops): {count}",
-        "long_redirect_chains": "Long chains (3+ hops): {count}",
-        "internal_links_to_redirects": "Internal links to redirects: {count}"
-      },
-      "details": {
-        "no_redirect_issues": "No problematic redirect chains were found on the website.",
-        "redirect_chains": "Chains with two hops add latency and waste crawl budget.",
-        "long_redirect_chains": "Long redirect chains waste crawl budget. Google may stop following after 3+ hops.",
-        "internal_links_to_redirects": "Internal links point to URLs that redirect. This adds unnecessary latency."
-      },
-      "recommendations": {
-        "no_redirect_issues": "Continue ensuring that internal links point to final URLs.",
-        "redirect_chains": "Reduce chains to a single redirect by setting up a direct 301 to the final URL.",
-        "long_redirect_chains": "Replace long chains with a direct 301 redirect to the final URL.",
-        "internal_links_to_redirects": "Update internal links by replacing redirect URLs with final destination URLs."
-      }
-    }
   },
   "indexing": {
     "title": "Indexing",
@@ -979,7 +302,97 @@
     "pageOf": "Page {page} of {total}",
     "submitResult": "Google: {google}, Bing: {bing} submitted. {skipped} skipped (404).",
     "loadingUrls": "Loading URLs…",
-    "syncUrlsSuccess": "Synced {total} URLs."
+    "syncUrlsSuccess": "Synced {total} URLs.",
+    "relativeJustNow": "just now",
+    "relativeMinutes": "{count}m ago",
+    "relativeHours": "{count}h ago",
+    "relativeDays": "{count}d ago",
+    "statusUnknown": "Unknown",
+    "statusIndexed": "Indexed",
+    "statusNotIndexed": "Not indexed",
+    "statusDiscovered": "Discovered",
+    "statusBlocked": "Blocked",
+    "statusRedirect": "Redirect",
+    "statusRemovalSent": "Removal sent",
+    "disconnectedDeleteData": "Disconnected. All site data deleted.",
+    "disconnectedKeepData": "Disconnected. URL data retained.",
+    "disconnectTitle": "Disconnect Google Search Console",
+    "disconnectDescription": "Your Google access token will be revoked. Choose what happens to your saved URL data, inspection results, and submission history.",
+    "keepData": "Keep Data",
+    "deleteAllData": "Delete All Data",
+    "checkoutFailed": "Failed to start checkout.",
+    "gscTitle": "Google Search Console",
+    "creditsCount": "{count} credits",
+    "confirmSubmitBoth": "Submit {count} URL(s) to Google & Bing?",
+    "tabLog": "Log",
+    "logFilterAll": "All",
+    "logFilterGoogle": "Google",
+    "logFilterBing": "Bing",
+    "logFilterFailed": "Failed",
+    "logFilterDiscovered": "Discovered",
+    "logFilterRemoved": "Removed",
+    "logFilter404": "404",
+    "logFilterRemoval": "Removal",
+    "running": "Running…",
+    "tooltipAutoGoogle": "Automatically submits new and updated pages to Google via the Indexing API.",
+    "tooltipAutoBingDisabled": "Validate domain ownership first — click to set up IndexNow verification.",
+    "tooltipAutoBing": "Automatically pings Bing via IndexNow when pages are added or updated. Free.",
+    "indexnowVerified": "IndexNow key verified",
+    "indexnowNotVerified": "IndexNow file not verified",
+    "reVerify": "Re-verify",
+    "runStatusRunning": "Running auto-index job…",
+    "runStatusCompleted": "Completed",
+    "runStatusSummary": "{newUrls} new · {changedUrls} changed · {removedUrls} removed · {submittedGoogle} → Google · {submittedBing} → Bing",
+    "runStatusFailed": "{count} failed",
+    "runStatusError": "Failed",
+    "quotaExhausted": "Google submission quota exhausted for today.",
+    "quotaUsed": "{used} used",
+    "quotaLimit": "{limit} limit",
+    "urlHeader": "URL",
+    "syncedTime": "synced {time}",
+    "inspectedTime": "inspected {time}",
+    "reconnectRequired": "Reconnect GSC to use this feature",
+    "requestRemoval": "Request removal from Google",
+    "requestRemovalTooltip": "Request removal from Google (URL_DELETED). For Bing, use Bing Webmaster Tools.",
+    "noLogs": "No activity logged yet.",
+    "logPageOf": "Page {page} of {total} · {entries} entries",
+    "percentIndexed": "{percent}% indexed",
+    "noDataYet": "No data yet",
+    "submittedGoogle": "Submitted Google",
+    "submittedBing": "Submitted Bing",
+    "showLess": "Show less",
+    "showAll": "Show all {count}",
+    "indexnowVerifyFailedAt": "IndexNow verification file not found at {keyUrl}. Please re-upload the file to your website root directory to continue using Bing indexing.",
+    "indexnowVerifyNetworkError": "Could not verify IndexNow file — the website may be unreachable.",
+    "indexnowVerifySuccess": "IndexNow key verified successfully.",
+    "indexnowVerifyFailed": "IndexNow verification file not found. Please re-upload the file to your website root directory.",
+    "removalRequestSent": "Removal request sent to Google.",
+    "removalRequestFailed": "Failed to request removal.",
+    "inspectComplete": "Inspection complete.",
+    "verifyModalTitle": "Verify IndexNow Key",
+    "verifyModalDesc": "To submit pages to Bing via IndexNow, place a verification file on your server once.",
+    "verifyStep1": "1. Create a plain-text file with exactly this content:",
+    "copyKey": "Copy key",
+    "verifyStep2": "2. Upload it so it’s accessible at this URL:",
+    "verifyStep3": "3. Verify the file is accessible:",
+    "verifyBtnVerifying": "Verifying…",
+    "verifyBtnVerified": "Verified!",
+    "verifyBtnVerify": "Verify",
+    "keyFileConfirmed": "Key file confirmed",
+    "keyFileNotFound": "Key file not found or content mismatch. Make sure the file is accessible at the URL below.",
+    "networkError": "Network error — could not reach the server.",
+    "proceedToSubmit": "Proceed to Submit →",
+    "totalUrls": "{total} URLs",
+    "tipCrawledNotIndexed": "Google found this page but chose not to index it. Improve content quality or submit via the Indexing API.",
+    "tipDiscoveredNotIndexed": "Google knows about this page but hasn’t crawled it yet. Submit for indexing to speed this up.",
+    "tipUnknownToGoogle": "Google has never seen this URL. Submit it now via the Indexing API.",
+    "tipBlockedRobots": "Your robots.txt is blocking Google from crawling this page.",
+    "tipBlockedNoindex": "This page has a noindex meta tag. Remove it if you want this page indexed.",
+    "tipSoft404": "Google thinks this page is a soft 404. Add meaningful content.",
+    "tipNotFound404": "This page returns a 404. Either restore the content or remove it from your sitemap.",
+    "tipIndexed": "This URL is indexed by Google. No action needed.",
+    "tipStatusUnknown": "Status unknown. Run an inspection to get details.",
+    "tipDefault": "Status: {status}. Run a URL inspection for more details."
   },
   "marketing": {
     "nav": {

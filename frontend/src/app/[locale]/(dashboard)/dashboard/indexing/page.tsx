@@ -161,37 +161,39 @@ interface LogPage {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function relativeTime(dateStr: string | null | undefined): string {
+function relativeTime(dateStr: string | null | undefined, t?: ReturnType<typeof useTranslations<"indexing">>): string {
   if (!dateStr) return "—";
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60_000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return t ? t("relativeJustNow") : "just now";
+  if (mins < 60) return t ? t("relativeMinutes", { count: mins }) : `${mins}m ago`;
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
+  if (hrs < 24) return t ? t("relativeHours", { count: hrs }) : `${hrs}h ago`;
   const days = Math.floor(hrs / 24);
-  return `${days}d ago`;
+  return t ? t("relativeDays", { count: days }) : `${days}d ago`;
 }
 
 function gscStatusColor(
-  status: string | null | undefined
+  status: string | null | undefined,
+  t?: ReturnType<typeof useTranslations<"indexing">>
 ): { bg: string; text: string; label: string } {
+  const l = (key: string, fallback: string) => t ? t(key as Parameters<typeof t>[0]) : fallback;
   if (!status)
-    return { bg: "bg-gray-800", text: "text-gray-400", label: "Unknown" };
+    return { bg: "bg-gray-800", text: "text-gray-400", label: l("statusUnknown", "Unknown") };
   const s = status.toLowerCase();
   if (s.includes("submitted and indexed") || s === "indexed")
-    return { bg: "bg-green-900/20", text: "text-green-400", label: "Indexed" };
+    return { bg: "bg-green-900/20", text: "text-green-400", label: l("statusIndexed", "Indexed") };
   if (s.includes("crawled") && s.includes("not indexed"))
     return {
       bg: "bg-orange-900/20",
       text: "text-orange-400",
-      label: "Not indexed",
+      label: l("statusNotIndexed", "Not indexed"),
     };
   if (s.includes("discovered"))
     return {
       bg: "bg-yellow-900/20",
       text: "text-yellow-400",
-      label: "Discovered",
+      label: l("statusDiscovered", "Discovered"),
     };
   if (
     s.includes("blocked") ||
@@ -200,47 +202,48 @@ function gscStatusColor(
     s.includes("server error") ||
     s.includes("noindex")
   )
-    return { bg: "bg-red-900/20", text: "text-red-400", label: "Blocked" };
+    return { bg: "bg-red-900/20", text: "text-red-400", label: l("statusBlocked", "Blocked") };
   if (s.includes("redirect") || s.includes("duplicate"))
     return {
       bg: "bg-yellow-900/20",
       text: "text-yellow-400",
-      label: "Redirect",
+      label: l("statusRedirect", "Redirect"),
     };
-  return { bg: "bg-gray-800", text: "text-gray-400", label: "Unknown" };
+  return { bg: "bg-gray-800", text: "text-gray-400", label: l("statusUnknown", "Unknown") };
 }
 
-function ourStatusColor(status: string): {
+function ourStatusColor(status: string, t?: ReturnType<typeof useTranslations<"indexing">>): {
   bg: string;
   text: string;
   label: string;
 } {
+  const l = (key: string, fallback: string) => t ? t(key as Parameters<typeof t>[0]) : fallback;
   switch (status) {
     case "submitted":
       return {
         bg: "bg-copper/10",
         text: "text-copper-light",
-        label: "Submitted",
+        label: l("submitted", "Submitted"),
       };
     case "failed":
-      return { bg: "bg-red-900/20", text: "text-red-400", label: "Failed" };
+      return { bg: "bg-red-900/20", text: "text-red-400", label: l("failed", "Failed") };
     case "pending":
       return {
         bg: "bg-yellow-900/20",
         text: "text-yellow-400",
-        label: "Pending",
+        label: l("pending", "Pending"),
       };
     case "removal_requested":
       return {
         bg: "bg-orange-900/20",
         text: "text-orange-400",
-        label: "Removal sent",
+        label: l("statusRemovalSent", "Removal sent"),
       };
     default:
       return {
         bg: "bg-gray-800",
         text: "text-gray-500",
-        label: "Not submitted",
+        label: l("notSubmitted", "Not submitted"),
       };
   }
 }
@@ -360,8 +363,8 @@ export default function IndexingPage() {
         if (deleteData) setSites([]);
         showToast(
           deleteData
-            ? "Disconnected. All site data deleted."
-            : "Disconnected. URL data retained."
+            ? t("disconnectedDeleteData")
+            : t("disconnectedKeepData")
         );
       }
     } finally {
@@ -645,7 +648,7 @@ export default function IndexingPage() {
         window.open(checkout_url, "_blank");
         setShowCreditModal(false);
       } else {
-        showToast("Failed to start checkout.", false);
+        showToast(t("checkoutFailed"), false);
       }
     } finally {
       setBuyingPack(null);
@@ -711,7 +714,7 @@ export default function IndexingPage() {
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2 className="text-lg font-semibold text-white">
-              Google Search Console
+              {t("gscTitle")}
             </h2>
             <p className="mt-1 text-sm text-gray-400">{t("connectDesc")}</p>
           </div>
@@ -879,7 +882,7 @@ export default function IndexingPage() {
                       {pack.id}
                     </p>
                     <p className="text-sm text-gray-400">
-                      {pack.credits} credits
+                      {t("creditsCount", { count: pack.credits })}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
@@ -939,7 +942,7 @@ export default function IndexingPage() {
                 : confirmState.engines.includes("bing") &&
                     !confirmState.engines.includes("google")
                   ? t("confirmSubmitBing", { count: confirmState.count })
-                  : `Submit ${confirmState.count} URLs to Google & Bing?`}
+                  : t("confirmSubmitBoth", { count: confirmState.count })}
             </p>
             {/* Actions: primary LEFT, cancel RIGHT */}
             <div className="flex gap-3">
@@ -987,10 +990,10 @@ export default function IndexingPage() {
             </div>
             {/* Title + description */}
             <h3 className="mb-2 text-base font-semibold text-white">
-              Disconnect Google Search Console
+              {t("disconnectTitle")}
             </h3>
             <p className="mb-6 text-sm text-gray-400">
-              Your Google access token will be revoked. Choose what happens to your saved URL data, inspection results, and submission history.
+              {t("disconnectDescription")}
             </p>
             {/* Buttons: Keep Data (left, accent) | Delete All Data (right, red) */}
             <div className="flex gap-3">
@@ -1002,7 +1005,7 @@ export default function IndexingPage() {
                 {disconnectMode === "keep" && (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 )}
-                Keep Data
+                {t("keepData")}
               </button>
               <button
                 onClick={() => handleDisconnectConfirm(true)}
@@ -1012,7 +1015,7 @@ export default function IndexingPage() {
                 {disconnectMode === "delete" && (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 )}
-                Delete All Data
+                {t("deleteAllData")}
               </button>
             </div>
           </div>
@@ -1211,7 +1214,7 @@ function SiteCard({
       }
       if (res.ok) {
         await loadUrls(urlFilter, urlCurrentPage, urlSearch);
-        showToast(t("inspect") + " complete.");
+        showToast(t("inspectComplete"));
       }
     } finally {
       setInspecting((prev) => ({ ...prev, [url]: false }));
@@ -1258,12 +1261,12 @@ function SiteCard({
         onVerifyFail();
         const keyUrl = data.keyUrl ?? `${site.domain}/${site.indexnowKey}.txt`;
         showToast(
-          `IndexNow verification file not found at ${keyUrl}. Please re-upload the file to your website's root directory to continue using Bing indexing.`,
+          t("indexnowVerifyFailedAt", { keyUrl }),
           false
         );
       }
     } catch {
-      showToast("Could not verify IndexNow file — the website may be unreachable.", false);
+      showToast(t("indexnowVerifyNetworkError"), false);
     }
   };
 
@@ -1276,13 +1279,13 @@ function SiteCard({
       const data = await res.json();
       if (data.verified) {
         onVerifySuccess();
-        showToast("IndexNow key verified successfully.", true);
+        showToast(t("indexnowVerifySuccess"), true);
       } else {
         onVerifyFail();
-        showToast("IndexNow verification file not found. Please re-upload the file to your website's root directory.", false);
+        showToast(t("indexnowVerifyFailed"), false);
       }
     } catch {
-      showToast("Could not verify IndexNow file — the website may be unreachable.", false);
+      showToast(t("indexnowVerifyNetworkError"), false);
     } finally {
       setReVerifying(false);
     }
@@ -1302,11 +1305,11 @@ function SiteCard({
         }
       );
       if (res.ok) {
-        showToast("Removal request sent to Google.");
+        showToast(t("removalRequestSent"));
         await loadUrls(urlFilter, urlCurrentPage, urlSearch);
       } else {
         const data = await res.json().catch(() => ({}));
-        showToast(data.error ?? "Failed to request removal", false);
+        showToast(data.error ?? t("removalRequestFailed"), false);
       }
     } finally {
       setRemovingUrl((prev) => ({ ...prev, [urlId]: false }));
@@ -1342,18 +1345,18 @@ function SiteCard({
     { id: "overview" as const, label: t("tabOverview") },
     { id: "urls" as const, label: t("tabUrls") },
     { id: "report" as const, label: t("tabReport") },
-    { id: "log" as const, label: "Log" },
+    { id: "log" as const, label: t("tabLog") },
   ];
 
   const LOG_FILTERS = [
-    { id: "all", label: "All" },
-    { id: "submitted_google", label: "Google" },
-    { id: "submitted_indexnow", label: "Bing" },
-    { id: "failed", label: "Failed" },
-    { id: "url_discovered", label: "Discovered" },
-    { id: "url_removed", label: "Removed" },
-    { id: "url_404", label: "404" },
-    { id: "removal_requested", label: "Removal" },
+    { id: "all", label: t("logFilterAll") },
+    { id: "submitted_google", label: t("logFilterGoogle") },
+    { id: "submitted_indexnow", label: t("logFilterBing") },
+    { id: "failed", label: t("logFilterFailed") },
+    { id: "url_discovered", label: t("logFilterDiscovered") },
+    { id: "url_removed", label: t("logFilterRemoved") },
+    { id: "url_404", label: t("logFilter404") },
+    { id: "removal_requested", label: t("logFilterRemoval") },
   ];
 
   const URL_FILTERS = [
@@ -1532,7 +1535,7 @@ function SiteCard({
                     ) : (
                       <Play className="h-3.5 w-3.5" />
                     )}
-                    {running ? "Running…" : t("runNow")}
+                    {running ? t("running") : t("runNow")}
                   </button>
                 )}
               </div>
@@ -1541,7 +1544,7 @@ function SiteCard({
               <div className="space-y-3">
                 <Toggle
                   label={t("autoIndexGoogle")}
-                  tooltip="Automatically submits new and updated pages to Google via the Indexing API."
+                  tooltip={t("tooltipAutoGoogle")}
                   checked={site.autoIndexGoogle}
                   onChange={onToggleAutoGoogle}
                 />
@@ -1549,8 +1552,8 @@ function SiteCard({
                   label={t("autoIndexBing")}
                   tooltip={
                     !site.indexnowKeyVerified
-                      ? "Validate domain ownership first — click to set up IndexNow verification."
-                      : "Automatically pings Bing via IndexNow when pages are added or updated. Free."
+                      ? t("tooltipAutoBingDisabled")
+                      : t("tooltipAutoBing")
                   }
                   checked={site.autoIndexBing}
                   onChange={onToggleAutoBing}
@@ -1565,12 +1568,12 @@ function SiteCard({
                   {site.indexnowKeyVerified ? (
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-green-900/20 px-3 py-1 text-xs font-medium text-green-400">
                       <CheckCircle className="h-3.5 w-3.5" />
-                      IndexNow key verified
+                      {t("indexnowVerified")}
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-yellow-900/20 px-3 py-1 text-xs font-medium text-yellow-400">
                       <AlertTriangle className="h-3.5 w-3.5" />
-                      IndexNow file not verified
+                      {t("indexnowNotVerified")}
                     </span>
                   )}
                   <button
@@ -1579,7 +1582,7 @@ function SiteCard({
                     className="flex items-center gap-1 text-xs text-gray-400 hover:text-white transition-colors disabled:opacity-50"
                   >
                     <RefreshCw className={cn("h-3 w-3", reVerifying && "animate-spin")} />
-                    {reVerifying ? "Verifying…" : "Re-verify"}
+                    {reVerifying ? t("verifying") : t("reVerify")}
                   </button>
                 </div>
               )}
@@ -1600,7 +1603,7 @@ function SiteCard({
                   {runStatus.phase === "running" && (
                     <span className="flex items-center gap-2">
                       <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
-                      Running auto-index job…
+                      {t("runStatusRunning")}
                     </span>
                   )}
                   {runStatus.phase === "done" && (
@@ -1608,16 +1611,16 @@ function SiteCard({
                       <div className="flex items-center gap-2 font-medium">
                         <CheckCircle className="h-3.5 w-3.5 shrink-0" />
                         <span>
-                          Completed{" "}
+                          {t("runStatusCompleted")}{" "}
                           <span className="text-xs font-normal text-green-500/70">
-                            {relativeTime(runStatus.ranAt)}
+                            {relativeTime(runStatus.ranAt, t)}
                           </span>
                         </span>
                       </div>
                       <p className="text-xs text-green-400/80 pl-5">
-                        {runStatus.newUrls} new · {runStatus.changedUrls} changed · {runStatus.removedUrls} removed · {runStatus.submittedGoogle} → Google · {runStatus.submittedBing} → Bing
+                        {t("runStatusSummary", { newUrls: runStatus.newUrls ?? 0, changedUrls: runStatus.changedUrls ?? 0, removedUrls: runStatus.removedUrls ?? 0, submittedGoogle: runStatus.submittedGoogle ?? 0, submittedBing: runStatus.submittedBing ?? 0 })}
                         {(runStatus.failedGoogle ?? 0) + (runStatus.failedBing ?? 0) > 0 && (
-                          <span className="text-red-400"> · {(runStatus.failedGoogle ?? 0) + (runStatus.failedBing ?? 0)} failed</span>
+                          <span className="text-red-400"> · {t("runStatusFailed", { count: (runStatus.failedGoogle ?? 0) + (runStatus.failedBing ?? 0) })}</span>
                         )}
                       </p>
                     </div>
@@ -1626,9 +1629,9 @@ function SiteCard({
                     <div className="flex items-start gap-2">
                       <XCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                       <span>
-                        Failed{" "}
+                        {t("runStatusError")}{" "}
                         <span className="text-xs font-normal text-red-400/70">
-                          {relativeTime(runStatus.ranAt)}
+                          {relativeTime(runStatus.ranAt, t)}
                         </span>
                         {runStatus.errorMsg && (
                           <span className="block text-xs mt-0.5 text-red-400/80">
@@ -1728,7 +1731,7 @@ function SiteCard({
               {quota && quota.googleSubmissions.remaining === 0 && (
                 <div className="flex items-center gap-2 rounded-lg border border-red-800 bg-red-900/20 px-3 py-2 text-xs text-red-300">
                   <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-                  Google submission quota exhausted for today.
+                  {t("quotaExhausted")}
                 </div>
               )}
 
@@ -1756,8 +1759,8 @@ function SiteCard({
                   {/* Mobile card list */}
                   <div className="md:hidden space-y-2">
                     {urlPage.urls.map((url) => {
-                      const gsc = gscStatusColor(url.gscStatus);
-                      const our = ourStatusColor(url.indexingStatus);
+                      const gsc = gscStatusColor(url.gscStatus, t);
+                      const our = ourStatusColor(url.indexingStatus, t);
                       const isInspecting = inspecting[url.url] ?? false;
                       return (
                         <div key={url.id} className="rounded-lg border border-gray-800 bg-gray-950 p-3">
@@ -1797,8 +1800,8 @@ function SiteCard({
                               </div>
                               {/* Timestamps */}
                               <div className="flex flex-wrap gap-3 text-xs text-gray-600">
-                                {url.lastSyncedAt && <span>synced {relativeTime(url.lastSyncedAt)}</span>}
-                                {url.lastInspectedAt && <span>inspected {relativeTime(url.lastInspectedAt)}</span>}
+                                {url.lastSyncedAt && <span>{t("syncedTime", { time: relativeTime(url.lastSyncedAt, t) })}</span>}
+                                {url.lastInspectedAt && <span>{t("inspectedTime", { time: relativeTime(url.lastInspectedAt, t) })}</span>}
                               </div>
                             </div>
                             {/* Action buttons */}
@@ -1806,14 +1809,14 @@ function SiteCard({
                               <button
                                 onClick={() => inspectUrl(url.url)}
                                 disabled={isInspecting || !gscConnected}
-                                title={!gscConnected ? "Reconnect GSC to use this feature" : t("inspect")}
+                                title={!gscConnected ? t("reconnectRequired") : t("inspect")}
                                 className="flex h-9 w-9 items-center justify-center rounded-md border border-gray-700 text-gray-400 transition-colors hover:bg-gray-800 hover:text-white disabled:opacity-50"
                               >
                                 {isInspecting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Search className="h-3.5 w-3.5" />}
                               </button>
                               <button
                                 onClick={() => onRequestSubmit(site.id, [url.id], ["google"], 1)}
-                                title={!gscConnected ? "Reconnect GSC to use this feature" : t("submitToGoogle")}
+                                title={!gscConnected ? t("reconnectRequired") : t("submitToGoogle")}
                                 disabled={!gscConnected || quota?.googleSubmissions.remaining === 0}
                                 className="flex h-9 w-9 items-center justify-center rounded-md border border-gray-700 text-xs font-semibold text-gray-400 transition-colors hover:bg-copper/20 hover:text-copper-light hover:border-copper/30 disabled:opacity-50"
                               >
@@ -1831,7 +1834,7 @@ function SiteCard({
                               <button
                                 onClick={() => requestRemoval(url.id)}
                                 disabled={removingUrl[url.id] || url.indexingStatus === "removal_requested"}
-                                title="Request removal from Google"
+                                title={t("requestRemoval")}
                                 className="flex h-9 w-9 items-center justify-center rounded-md border border-gray-700 text-gray-400 transition-colors hover:bg-red-900/20 hover:text-red-400 hover:border-red-900/40 disabled:opacity-50"
                               >
                                 {removingUrl[url.id] ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
@@ -1857,7 +1860,7 @@ function SiteCard({
                             />
                           </th>
                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                            URL
+                            {t("urlHeader")}
                           </th>
                           <th className="hidden md:table-cell px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                             {t("gscStatus")}
@@ -1875,8 +1878,8 @@ function SiteCard({
                       </thead>
                       <tbody className="divide-y divide-gray-800">
                         {urlPage.urls.map((url) => {
-                          const gsc = gscStatusColor(url.gscStatus);
-                          const our = ourStatusColor(url.indexingStatus);
+                          const gsc = gscStatusColor(url.gscStatus, t);
+                          const our = ourStatusColor(url.indexingStatus, t);
                           const isInspecting = inspecting[url.url] ?? false;
 
                           return (
@@ -1937,10 +1940,11 @@ function SiteCard({
                                   <GscStatusBadge
                                     status={url.gscStatus}
                                     gsc={gsc}
+                                    t={t}
                                   />
                                   {url.lastInspectedAt && (
                                     <p className="text-xs text-gray-600">
-                                      inspected {relativeTime(url.lastInspectedAt)}
+                                      {t("inspectedTime", { time: relativeTime(url.lastInspectedAt, t) })}
                                     </p>
                                   )}
                                 </div>
@@ -1957,14 +1961,14 @@ function SiteCard({
                                 </span>
                               </td>
                               <td className="hidden lg:table-cell px-4 py-3 text-xs text-gray-500">
-                                {relativeTime(url.lastSyncedAt)}
+                                {relativeTime(url.lastSyncedAt, t)}
                               </td>
                               <td className="px-4 py-3">
                                 <div className="flex items-center gap-1">
                                   <button
                                     onClick={() => inspectUrl(url.url)}
                                     disabled={isInspecting || !gscConnected}
-                                    title={!gscConnected ? "Reconnect GSC to use this feature" : t("inspect")}
+                                    title={!gscConnected ? t("reconnectRequired") : t("inspect")}
                                     className="flex h-8 w-8 items-center justify-center rounded-md border border-gray-700 text-gray-400 transition-colors hover:bg-gray-800 hover:text-white disabled:opacity-50"
                                   >
                                     {isInspecting ? (
@@ -1982,7 +1986,7 @@ function SiteCard({
                                         1
                                       )
                                     }
-                                    title={!gscConnected ? "Reconnect GSC to use this feature" : t("submitToGoogle")}
+                                    title={!gscConnected ? t("reconnectRequired") : t("submitToGoogle")}
                                     disabled={
                                       !gscConnected ||
                                       quota?.googleSubmissions.remaining === 0
@@ -2010,7 +2014,7 @@ function SiteCard({
                                       removingUrl[url.id] ||
                                       url.indexingStatus === "removal_requested"
                                     }
-                                    title="Request removal from Google (URL_DELETED). For Bing, use Bing Webmaster Tools."
+                                    title={t("requestRemovalTooltip")}
                                     className="flex h-8 w-8 items-center justify-center rounded-md border border-gray-700 text-gray-400 transition-colors hover:bg-red-900/20 hover:text-red-400 hover:border-red-900/40 disabled:opacity-50"
                                   >
                                     {removingUrl[url.id] ? (
@@ -2037,7 +2041,7 @@ function SiteCard({
                           total: urlPage.totalPages,
                         })}
                         {" · "}
-                        {urlPage.total} URLs
+                        {t("totalUrls", { total: urlPage.total })}
                       </span>
                       <div className="flex gap-2">
                         <button
@@ -2119,7 +2123,7 @@ function SiteCard({
               ) : !logPage || logPage.logs.length === 0 ? (
                 <div className="rounded-lg border border-gray-800 bg-gray-950 p-10 text-center">
                   <BarChart3 className="mx-auto h-8 w-8 text-gray-600 mb-2" />
-                  <p className="text-sm text-gray-400">No activity logged yet.</p>
+                  <p className="text-sm text-gray-400">{t("noLogs")}</p>
                 </div>
               ) : (
                 <>
@@ -2164,7 +2168,7 @@ function SiteCard({
 
                           {/* Timestamp */}
                           <span className="shrink-0 text-xs text-gray-500">
-                            {relativeTime(entry.createdAt)}
+                            {relativeTime(entry.createdAt, t)}
                           </span>
                         </div>
                       );
@@ -2175,7 +2179,7 @@ function SiteCard({
                   {logPage.totalPages > 1 && (
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-xs text-gray-500">
-                        Page {logPage.page} of {logPage.totalPages} · {logPage.total} entries
+                        {t("logPageOf", { page: logPage.page, total: logPage.totalPages, entries: logPage.total })}
                       </span>
                       <div className="flex gap-2">
                         <button
@@ -2247,8 +2251,8 @@ function SiteCard({
                     )}
                     <p className="text-xs text-gray-500 mt-1">
                       {report.overall.total > 0
-                        ? `${Math.round((report.overall.indexed / report.overall.total) * 100)}% indexed`
-                        : "No data yet"}
+                        ? t("percentIndexed", { percent: Math.round((report.overall.indexed / report.overall.total) * 100) })
+                        : t("noDataYet")}
                     </p>
                   </div>
 
@@ -2260,12 +2264,12 @@ function SiteCard({
                       color="blue"
                     />
                     <StatBox
-                      label="Submitted Google"
+                      label={t("submittedGoogle")}
                       value={report.today.submittedGoogle}
                       color="green"
                     />
                     <StatBox
-                      label="Submitted Bing"
+                      label={t("submittedBing")}
                       value={report.today.submittedBing}
                       color="orange"
                     />
@@ -2285,6 +2289,8 @@ function SiteCard({
                       label=""
                       used={report.quota.googleUsed}
                       limit={report.quota.googleLimit}
+                      usedLabel={t("quotaUsed", { used: report.quota.googleUsed })}
+                      limitLabel={t("quotaLimit", { limit: report.quota.googleLimit })}
                     />
                   </div>
 
@@ -2293,6 +2299,8 @@ function SiteCard({
                     <ExpandableList
                       title={t("newPages")}
                       items={report.today.newPagesList}
+                      showLessLabel={t("showLess")}
+                      showAllLabel={t("showAll", { count: report.today.newPagesList.length })}
                     />
                   )}
 
@@ -2302,6 +2310,8 @@ function SiteCard({
                       title={t("pages404Found")}
                       items={report.today.pages404List}
                       danger
+                      showLessLabel={t("showLess")}
+                      showAllLabel={t("showAll", { count: report.today.pages404List.length })}
                     />
                   )}
                 </>
@@ -2322,6 +2332,7 @@ function SiteCard({
             action();
           }}
           onVerifySuccess={onVerifySuccess}
+          t={t}
         />
       )}
     </div>
@@ -2333,12 +2344,14 @@ function SiteCard({
 function GscStatusBadge({
   status,
   gsc,
+  t,
 }: {
   status: string | null;
   gsc: { bg: string; text: string; label: string };
+  t: ReturnType<typeof useTranslations<"indexing">>;
 }) {
   const [showTip, setShowTip] = useState(false);
-  const tip = status ? getTip(status) : null;
+  const tip = status ? getTip(status, t) : null;
 
   return (
     <div className="relative inline-flex items-center gap-1">
@@ -2369,24 +2382,17 @@ function GscStatusBadge({
   );
 }
 
-function getTip(gscStatus: string): string {
+function getTip(gscStatus: string, t: ReturnType<typeof useTranslations<"indexing">>): string {
   const tips: Record<string, string> = {
-    "Crawled - currently not indexed":
-      "Google found this page but chose not to index it. Improve content quality or submit via the Indexing API.",
-    "Discovered - currently not indexed":
-      "Google knows about this page but hasn't crawled it yet. Submit for indexing to speed this up.",
-    "URL is unknown to Google":
-      "Google has never seen this URL. Submit it now via the Indexing API.",
-    "Blocked by robots.txt":
-      "Your robots.txt is blocking Google from crawling this page.",
-    "Blocked due to noindex":
-      "This page has a noindex meta tag. Remove it if you want this page indexed.",
-    "Soft 404":
-      "Google thinks this page is a soft 404. Add meaningful content.",
-    "Not found (404)":
-      "This page returns a 404. Either restore the content or remove it from your sitemap.",
-    "Submitted and indexed": "This URL is indexed by Google. No action needed.",
-    Indexed: "This URL is indexed by Google. No action needed.",
+    "Crawled - currently not indexed": t("tipCrawledNotIndexed"),
+    "Discovered - currently not indexed": t("tipDiscoveredNotIndexed"),
+    "URL is unknown to Google": t("tipUnknownToGoogle"),
+    "Blocked by robots.txt": t("tipBlockedRobots"),
+    "Blocked due to noindex": t("tipBlockedNoindex"),
+    "Soft 404": t("tipSoft404"),
+    "Not found (404)": t("tipNotFound404"),
+    "Submitted and indexed": t("tipIndexed"),
+    Indexed: t("tipIndexed"),
   };
   return tips[gscStatus] ?? gscStatus;
 }
@@ -2416,10 +2422,14 @@ function ExpandableList({
   title,
   items,
   danger = false,
+  showLessLabel = "Show less",
+  showAllLabel,
 }: {
   title: string;
   items: string[];
   danger?: boolean;
+  showLessLabel?: string;
+  showAllLabel?: string;
 }) {
   const [expanded, setExpanded] = useState(false);
   const shown = expanded ? items : items.slice(0, 5);
@@ -2435,7 +2445,7 @@ function ExpandableList({
             onClick={() => setExpanded((v) => !v)}
             className="text-xs text-gray-500 hover:text-white transition"
           >
-            {expanded ? "Show less" : `Show all ${items.length}`}
+            {expanded ? showLessLabel : (showAllLabel ?? `Show all ${items.length}`)}
           </button>
         )}
       </div>
@@ -2519,10 +2529,14 @@ function QuotaBar({
   label,
   used,
   limit,
+  usedLabel,
+  limitLabel,
 }: {
   label: string;
   used: number;
   limit: number;
+  usedLabel?: string;
+  limitLabel?: string;
 }) {
   const pct = limit > 0 ? Math.min(100, Math.round((used / limit) * 100)) : 0;
   return (
@@ -2537,8 +2551,8 @@ function QuotaBar({
       )}
       {!label && (
         <div className="flex justify-between text-xs text-gray-400 mb-1">
-          <span>{used} used</span>
-          <span>{limit} limit</span>
+          <span>{usedLabel ?? `${used} used`}</span>
+          <span>{limitLabel ?? `${limit} limit`}</span>
         </div>
       )}
       <div className="h-1.5 w-full rounded-full bg-gray-800">
@@ -2625,11 +2639,13 @@ function IndexNowVerifyModal({
   onClose,
   onProceed,
   onVerifySuccess,
+  t,
 }: {
   site: Site;
   onClose: () => void;
   onProceed: () => void;
   onVerifySuccess: () => void;
+  t: ReturnType<typeof useTranslations<"indexing">>;
 }) {
   const [verifying, setVerifying] = useState(false);
   const [verified, setVerified] = useState(false);
@@ -2657,10 +2673,10 @@ function IndexNowVerifyModal({
         setVerified(true);
         onVerifySuccess();
       } else {
-        setVerifyError("Key file not found or content mismatch. Make sure the file is accessible at the URL below.");
+        setVerifyError(t("keyFileNotFound"));
       }
     } catch {
-      setVerifyError("Network error — could not reach the server.");
+      setVerifyError(t("networkError"));
     } finally {
       setVerifying(false);
     }
@@ -2686,18 +2702,18 @@ function IndexNowVerifyModal({
         </div>
         {/* Title */}
         <h3 className="mb-2 text-base font-semibold text-white">
-          Verify IndexNow Key
+          {t("verifyModalTitle")}
         </h3>
 
         <p className="text-sm text-gray-400 mb-5">
-          To submit pages to Bing via IndexNow, place a verification file on your server once.
+          {t("verifyModalDesc")}
         </p>
 
         <div className="space-y-4">
           {/* Step 1 */}
           <div>
             <p className="text-xs font-medium text-gray-300 mb-1.5">
-              1. Create a plain-text file with exactly this content:
+              {t("verifyStep1")}
             </p>
             <div className="flex items-center gap-2 rounded-md border border-gray-800 bg-gray-950 px-3 py-2">
               <code className="flex-1 text-xs text-green-400 break-all">
@@ -2706,7 +2722,7 @@ function IndexNowVerifyModal({
               <button
                 onClick={copyKey}
                 className="shrink-0 text-gray-400 hover:text-white transition"
-                title="Copy key"
+                title={t("copyKey")}
               >
                 {keyCopied ? (
                   <Check className="h-4 w-4 text-green-400" />
@@ -2720,7 +2736,7 @@ function IndexNowVerifyModal({
           {/* Step 2 */}
           <div>
             <p className="text-xs font-medium text-gray-300 mb-1.5">
-              2. Upload it so it&apos;s accessible at this URL:
+              {t("verifyStep2")}
             </p>
             <code className="block text-xs text-gray-300 rounded-md border border-gray-800 bg-gray-950 px-3 py-2 break-all">
               {keyFileUrl}
@@ -2730,7 +2746,7 @@ function IndexNowVerifyModal({
           {/* Step 3 */}
           <div>
             <p className="text-xs font-medium text-gray-300 mb-2">
-              3. Verify the file is accessible:
+              {t("verifyStep3")}
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <button
@@ -2745,12 +2761,12 @@ function IndexNowVerifyModal({
                 ) : (
                   <Check className="h-3 w-3" />
                 )}
-                {verifying ? "Verifying…" : verified ? "Verified!" : "Verify"}
+                {verifying ? t("verifyBtnVerifying") : verified ? t("verifyBtnVerified") : t("verifyBtnVerify")}
               </button>
               {verified && (
                 <span className="text-xs text-green-400 flex items-center gap-1">
                   <CheckCircle className="h-3.5 w-3.5" />
-                  Key file confirmed
+                  {t("keyFileConfirmed")}
                 </span>
               )}
               {verifyError && (
@@ -2767,13 +2783,13 @@ function IndexNowVerifyModal({
             disabled={!verified}
             className="flex-1 rounded-md bg-gradient-to-r from-copper to-copper-light px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
           >
-            Proceed to Submit →
+            {t("proceedToSubmit")}
           </button>
           <button
             onClick={onClose}
             className="flex-1 rounded-md border border-gray-700 px-4 py-2 text-sm font-semibold text-gray-300 transition-colors hover:bg-gray-800"
           >
-            Cancel
+            {t("cancel")}
           </button>
         </div>
       </div>

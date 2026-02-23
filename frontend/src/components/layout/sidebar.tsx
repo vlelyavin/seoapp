@@ -21,6 +21,7 @@ interface SidebarProps {
 
 export function Sidebar({ open, onClose }: SidebarProps) {
   const t = useTranslations("nav");
+  const tPlans = useTranslations("plans");
   const locale = useLocale();
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -160,7 +161,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
               {t("currentPlan")}
             </p>
             <p className="text-sm font-semibold capitalize text-white">
-              {session.user.planId === "free" ? "Free" : session.user.planId === "pro" ? "Pro" : "Agency"}
+              {tPlans(session.user.planId as "free" | "pro" | "agency")}
             </p>
           </Link>
         </div>

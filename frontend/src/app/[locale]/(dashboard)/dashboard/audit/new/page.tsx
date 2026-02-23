@@ -89,14 +89,14 @@ export default function NewAuditPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Failed to start audit");
+        setError(data.error || t("failedToStart"));
         return;
       }
 
       // Navigate to progress page
       router.push(`/${locale}/dashboard/audit/${data.id}?fastApiId=${data.fastApiId}`);
     } catch {
-      setError("Connection error. Make sure the server is running.");
+      setError(t("connectionError"));
     } finally {
       setLoading(false);
     }

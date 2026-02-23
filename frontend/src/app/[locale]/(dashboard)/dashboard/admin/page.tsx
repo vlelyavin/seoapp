@@ -50,6 +50,7 @@ export default function AdminDashboardPage() {
   const { data: session } = useSession();
   const t = useTranslations("admin");
   const tCommon = useTranslations("common");
+  const tPlans = useTranslations("plans");
   const locale = useLocale();
 
   const isAdmin = session?.user?.role === "admin";
@@ -339,9 +340,9 @@ export default function AdminDashboardPage() {
               className="rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-300 focus:border-copper focus:outline-none focus:ring-2 focus:ring-copper/20"
             >
               <option value="">{t("allPlans")}</option>
-              <option value="free">Free</option>
-              <option value="pro">Pro</option>
-              <option value="agency">Agency</option>
+              <option value="free">{tPlans("free")}</option>
+              <option value="pro">{tPlans("pro")}</option>
+              <option value="agency">{tPlans("agency")}</option>
             </select>
           </div>
         </div>
@@ -408,7 +409,7 @@ export default function AdminDashboardPage() {
                       <span className="text-white">{user.email}</span>
                       {user.role === "admin" && (
                         <span className="ml-2 inline-flex rounded bg-copper/20 px-1.5 py-0.5 text-[10px] font-medium text-copper-light">
-                          admin
+                          {t("roleAdmin")}
                         </span>
                       )}
                     </td>
@@ -427,9 +428,9 @@ export default function AdminDashboardPage() {
                         }
                         className="rounded border border-gray-600 bg-gray-800 px-1.5 py-0.5 text-xs text-gray-300"
                       >
-                        <option value="free">Free</option>
-                        <option value="pro">Pro</option>
-                        <option value="agency">Agency</option>
+                        <option value="free">{tPlans("free")}</option>
+                        <option value="pro">{tPlans("pro")}</option>
+                        <option value="agency">{tPlans("agency")}</option>
                       </select>
                     </td>
 

@@ -132,7 +132,7 @@ export default function BrandingPage() {
         setMessage(t("logoUploaded"));
       } else {
         const data = await res.json();
-        setUploadError(data.error || "Upload failed");
+        setUploadError(data.error || t("uploadFailed"));
         setPreviewUrl((prev) => {
           if (prev?.startsWith("blob:")) {
             URL.revokeObjectURL(prev);
@@ -201,7 +201,7 @@ export default function BrandingPage() {
               <div className="relative">
                 <img
                   src={logoSrc}
-                  alt="Logo"
+                  alt={t("logoAlt")}
                   className="h-16 w-16 rounded border border-gray-700 object-contain"
                   onError={() => {
                     console.error("Failed to load logo image:", logoSrc);

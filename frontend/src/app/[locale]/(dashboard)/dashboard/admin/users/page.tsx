@@ -19,6 +19,7 @@ interface UserRow {
 export default function AdminUsersPage() {
   const { data: session } = useSession();
   const t = useTranslations("admin");
+  const tPlans = useTranslations("plans");
   const locale = useLocale();
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,8 +103,8 @@ export default function AdminUsersPage() {
                     onChange={(e) => updateUser(user.id, { role: e.target.value })}
                     className="rounded border border-gray-600 bg-gray-800 px-1.5 py-0.5 text-xs text-gray-300"
                   >
-                    <option value="user">user</option>
-                    <option value="admin">admin</option>
+                    <option value="user">{t("roleUser")}</option>
+                    <option value="admin">{t("roleAdmin")}</option>
                   </select>
                 </td>
                 <td className="px-4 py-2">
@@ -112,9 +113,9 @@ export default function AdminUsersPage() {
                     onChange={(e) => updateUser(user.id, { planId: e.target.value })}
                     className="rounded border border-gray-600 bg-gray-800 px-1.5 py-0.5 text-xs text-gray-300"
                   >
-                    <option value="free">Free</option>
-                    <option value="pro">Pro</option>
-                    <option value="agency">Agency</option>
+                    <option value="free">{tPlans("free")}</option>
+                    <option value="pro">{tPlans("pro")}</option>
+                    <option value="agency">{tPlans("agency")}</option>
                   </select>
                 </td>
                 <td className="px-4 py-2 text-gray-400">
