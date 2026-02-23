@@ -605,11 +605,17 @@ export default function IndexingPage() {
     }
   };
 
-  // ── Mark site as IndexNow-verified in local state ─────────────────────────
+  // ── Mark site as IndexNow-verified / failed in local state ───────────────
 
   const handleVerifySuccess = useCallback((siteId: string) => {
     setSites((prev) =>
       prev.map((s) => (s.id === siteId ? { ...s, indexnowKeyVerified: true } : s))
+    );
+  }, []);
+
+  const handleVerifyFail = useCallback((siteId: string) => {
+    setSites((prev) =>
+      prev.map((s) => (s.id === siteId ? { ...s, indexnowKeyVerified: false } : s))
     );
   }, []);
 
@@ -822,6 +828,7 @@ export default function IndexingPage() {
                 onRunNow={() => runNow(site.id)}
                 onCopyKey={(k) => copyKey(k)}
                 onVerifySuccess={() => handleVerifySuccess(site.id)}
+                onVerifyFail={() => handleVerifyFail(site.id)}
                 showToast={showToast}
               />
             ))
@@ -1034,6 +1041,7 @@ function SiteCard({
   onRunNow,
   onCopyKey,
   onVerifySuccess,
+  onVerifyFail,
   showToast,
 }: {
   site: Site;
@@ -1060,6 +1068,7 @@ function SiteCard({
   onRunNow: () => void;
   onCopyKey: (k: string) => void;
   onVerifySuccess: () => void;
+  onVerifyFail: () => void;
   showToast: (msg: string, ok?: boolean) => void;
 }) {
   const [activeTab, setActiveTab] = useState<"overview" | "urls" | "report" | "log">(
@@ -1088,6 +1097,9 @@ function SiteCard({
 
   // IndexNow verification modal state: null = closed, else holds the action to run after verify
   const [indexNowModal, setIndexNowModal] = useState<{ action: () => void } | null>(null);
+
+  // Re-verify state
+  const [reVerifying, setReVerifying] = useState(false);
 
   const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -1226,15 +1238,50 @@ function SiteCard({
     }
   };
 
-  // ── Verify IndexNow key ───────────────────────────────────────────────────
+  // ── IndexNow submit guard (with live pre-operation verification check) ──────
 
-  // ── IndexNow submit guard ─────────────────────────────────────────────────
-
-  const bingSubmit = (action: () => void) => {
+  const bingSubmit = async (action: () => void) => {
     if (!site.indexnowKeyVerified) {
       setIndexNowModal({ action });
-    } else {
-      action();
+      return;
+    }
+    // Live pre-operation check
+    try {
+      const res = await fetch(`/api/indexing/sites/${site.id}/verify-key`);
+      const data = await res.json();
+      if (data.verified) {
+        action();
+      } else {
+        onVerifyFail();
+        const keyUrl = data.keyUrl ?? `${site.domain}/${site.indexnowKey}.txt`;
+        showToast(
+          `IndexNow verification file not found at ${keyUrl}. Please re-upload the file to your website's root directory to continue using Bing indexing.`,
+          false
+        );
+      }
+    } catch {
+      showToast("Could not verify IndexNow file — the website may be unreachable.", false);
+    }
+  };
+
+  // ── Re-verify IndexNow key manually ──────────────────────────────────────
+
+  const reVerify = async () => {
+    setReVerifying(true);
+    try {
+      const res = await fetch(`/api/indexing/sites/${site.id}/verify-key`);
+      const data = await res.json();
+      if (data.verified) {
+        onVerifySuccess();
+        showToast("IndexNow key verified successfully.", true);
+      } else {
+        onVerifyFail();
+        showToast("IndexNow verification file not found. Please re-upload the file to your website's root directory.", false);
+      }
+    } catch {
+      showToast("Could not verify IndexNow file — the website may be unreachable.", false);
+    } finally {
+      setReVerifying(false);
     }
   };
 
@@ -1509,12 +1556,29 @@ function SiteCard({
                 />
               </div>
 
-              {/* IndexNow key status badge — shown when already verified */}
-              {site.indexnowKey && site.indexnowKeyVerified && (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-green-900/20 px-3 py-1 text-xs font-medium text-green-400">
-                  <CheckCircle className="h-3.5 w-3.5" />
-                  IndexNow key verified
-                </span>
+              {/* IndexNow key status + Re-verify button */}
+              {site.indexnowKey && (
+                <div className="flex items-center gap-2 flex-wrap">
+                  {site.indexnowKeyVerified ? (
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-green-900/20 px-3 py-1 text-xs font-medium text-green-400">
+                      <CheckCircle className="h-3.5 w-3.5" />
+                      IndexNow key verified
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-yellow-900/20 px-3 py-1 text-xs font-medium text-yellow-400">
+                      <AlertTriangle className="h-3.5 w-3.5" />
+                      IndexNow file not verified
+                    </span>
+                  )}
+                  <button
+                    onClick={reVerify}
+                    disabled={reVerifying}
+                    className="flex items-center gap-1 text-xs text-gray-400 hover:text-white transition-colors disabled:opacity-50"
+                  >
+                    <RefreshCw className={cn("h-3 w-3", reVerifying && "animate-spin")} />
+                    {reVerifying ? "Verifying…" : "Re-verify"}
+                  </button>
+                </div>
               )}
 
               {/* Run Now status panel */}

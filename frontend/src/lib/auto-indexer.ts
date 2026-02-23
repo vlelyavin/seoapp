@@ -48,6 +48,7 @@ export async function runAutoIndexForSite(
     autoIndexGoogle: boolean;
     autoIndexBing: boolean;
     indexnowKey: string | null;
+    indexnowKeyVerified: boolean;
   }
 ): Promise<AutoIndexResult> {
   const result: AutoIndexResult = {
@@ -338,6 +339,45 @@ export async function runAutoIndexForSite(
 
   // 6. IndexNow (Bing/Yandex/DuckDuckGo)
   if (site.autoIndexBing && aliveUrls.length > 0 && site.indexnowKey) {
+    // Pre-check: verify the IndexNow key file is still accessible
+    const baseDomain = site.domain.startsWith("sc-domain:")
+      ? `https://${site.domain.replace("sc-domain:", "")}`
+      : site.domain.replace(/\/$/, "");
+    const keyUrl = `${baseDomain}/${site.indexnowKey}.txt`;
+
+    let keyValid = false;
+    try {
+      const verifyRes = await fetch(keyUrl, {
+        signal: AbortSignal.timeout(7_000),
+        headers: { "User-Agent": "IndexNow-Verify/1.0" },
+      });
+      if (verifyRes.ok) {
+        const text = await verifyRes.text();
+        keyValid = text.trim() === site.indexnowKey;
+      }
+    } catch {
+      keyValid = false;
+    }
+
+    if (!keyValid) {
+      // Mark as not verified in DB and log the failure
+      await prisma.site.update({
+        where: { id: site.id },
+        data: { indexnowKeyVerified: false },
+      });
+      await prisma.indexingLog.create({
+        data: {
+          siteId: site.id,
+          userId: site.userId,
+          action: "failed",
+          details: JSON.stringify({
+            error: `IndexNow verification file not found at ${keyUrl}. Bing submissions skipped.`,
+          }),
+        },
+      });
+      result.errors.push(`IndexNow verification file not found at ${keyUrl}`);
+    } else {
+
     const host = site.domain.startsWith("sc-domain:")
       ? site.domain.replace("sc-domain:", "")
       : new URL(site.domain).hostname;
@@ -381,6 +421,7 @@ export async function runAutoIndexForSite(
         }
       }
     }
+    } // end else (keyValid)
   }
 
   // Ensure creditsRemaining is populated if not already set
