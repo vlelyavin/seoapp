@@ -2,10 +2,12 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { requestRemovalFromGoogle } from "@/lib/indexing-api";
+import { reserveGoogleQuota, releaseGoogleQuota } from "@/lib/google-auth";
 
 /**
  * POST /api/indexing/sites/[siteId]/request-removal
  * Sends a URL_DELETED notification to the Google Indexing API for a single URL.
+ * Counts against daily Google quota to prevent rate-limit abuse.
  * Body: { urlId: string }
  */
 export async function POST(
@@ -39,10 +41,21 @@ export async function POST(
     return NextResponse.json({ error: "URL not found" }, { status: 404 });
   }
 
+  // Reserve 1 quota slot (removal uses Google Indexing API, same rate limits)
+  const reserved = await reserveGoogleQuota(session.user.id, 1);
+  if (reserved <= 0) {
+    return NextResponse.json(
+      { error: "Google daily quota exhausted" },
+      { status: 429 }
+    );
+  }
+
   // Send URL_DELETED notification to Google Indexing API
   const result = await requestRemovalFromGoogle(session.user.id, indexedUrl.url);
 
   if (!result.success) {
+    // Release the reserved quota on failure
+    await releaseGoogleQuota(session.user.id, 1);
     return NextResponse.json(
       { error: result.error ?? "Google API error", httpStatus: result.httpStatus },
       { status: 502 }

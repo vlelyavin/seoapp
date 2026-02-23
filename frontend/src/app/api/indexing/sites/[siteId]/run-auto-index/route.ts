@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { runAutoIndexForSite } from "@/lib/auto-indexer";
-import { INDEXED_GSC_STATUSES } from "@/lib/google-auth";
+import { INDEXED_GSC_STATUSES, acquireAutoIndexLock, releaseAutoIndexLock } from "@/lib/google-auth";
 
 /**
  * POST /api/indexing/sites/[siteId]/run-auto-index
@@ -24,7 +24,21 @@ export async function POST(
     return NextResponse.json({ error: "Site not found" }, { status: 404 });
   }
 
-  const result = await runAutoIndexForSite(site);
+  // Acquire auto-index lock to prevent concurrent runs
+  const locked = await acquireAutoIndexLock(site.id);
+  if (!locked) {
+    return NextResponse.json(
+      { error: "Auto-index already in progress" },
+      { status: 409 }
+    );
+  }
+
+  let result;
+  try {
+    result = await runAutoIndexForSite(site);
+  } finally {
+    await releaseAutoIndexLock(site.id);
+  }
 
   // Write DailyReport for this manual run
   try {

@@ -7,15 +7,14 @@ import { prisma } from "./prisma";
 import { fetchSitemapUrls, fallbackSitemapUrl } from "./sitemap-parser";
 import { checkUrls } from "./url-checker";
 import {
-  getDailyQuota,
-  incrementGoogleSubmissions,
-  GOOGLE_DAILY_SUBMISSION_LIMIT,
+  reserveGoogleQuota,
+  releaseGoogleQuota,
 } from "./google-auth";
 import {
   submitUrlsBatchToGoogle,
   submitUrlsToIndexNow,
 } from "./indexing-api";
-import { deductCredits, CREDIT_LOW_THRESHOLD } from "./credits";
+import { deductCredits, refundCredits, CREDIT_LOW_THRESHOLD } from "./credits";
 
 export interface AutoIndexResult {
   siteId: string;
@@ -201,31 +200,34 @@ export async function runAutoIndexForSite(
   const googleSubmittedUrls = new Set<string>();
   if (site.autoIndexGoogle && aliveUrls.length > 0) {
     try {
-      const quota = await getDailyQuota(site.userId);
-      const quotaRemaining = GOOGLE_DAILY_SUBMISSION_LIMIT - quota.googleSubmissions;
+      // Atomically reserve quota (prevents concurrent runs from exceeding limit)
+      const reserved = await reserveGoogleQuota(site.userId, aliveUrls.length);
 
-      if (quotaRemaining <= 0) {
+      if (reserved <= 0) {
         result.googleQuotaExhausted = true;
       } else {
-        // Check user credit balance
-        const user = await prisma.user.findUnique({
-          where: { id: site.userId },
-          select: { indexingCredits: true },
-        });
-        const creditBalance = user?.indexingCredits ?? 0;
+        const toSubmit = aliveUrls.slice(0, reserved);
 
-        if (creditBalance <= 0) {
+        // Deduct credits upfront before submitting (deduct-before-submit pattern)
+        let creditsDeducted = 0;
+        try {
+          const remaining = await deductCredits(
+            site.userId,
+            toSubmit.length,
+            `Auto-index: pre-deduct ${toSubmit.length} URL(s) for ${site.domain}`
+          );
+          creditsDeducted = toSubmit.length;
+          result.creditsRemaining = remaining;
+        } catch {
+          // Insufficient credits — release the reserved quota and bail
+          await releaseGoogleQuota(site.userId, reserved);
           result.insufficientCredits = true;
           result.creditsRemaining = 0;
-        } else {
-          // Only submit as many URLs as we have credits and quota for
-          const maxSubmit = Math.min(aliveUrls.length, quotaRemaining, creditBalance);
-          const toSubmit = aliveUrls.slice(0, maxSubmit);
+          // Skip to IndexNow
+          creditsDeducted = 0;
+        }
 
-          if (maxSubmit < aliveUrls.length) {
-            result.insufficientCredits = creditBalance < aliveUrls.length;
-          }
-
+        if (creditsDeducted > 0) {
           const { submitted, rateLimited, failed } = await submitUrlsBatchToGoogle(
             site.userId,
             toSubmit
@@ -233,38 +235,45 @@ export async function runAutoIndexForSite(
 
           result.submittedGoogle = submitted.length;
           result.failedGoogle = failed.length;
+          result.creditsUsed = submitted.length;
           result.googleQuotaExhausted = rateLimited.length > 0;
 
-          if (submitted.length > 0) {
-            // Deduct credits for successful submissions
+          // Refund credits for failed + rate-limited URLs
+          const refundCount = failed.length + rateLimited.length;
+          if (refundCount > 0) {
             try {
-              const remaining = await deductCredits(
+              const remaining = await refundCredits(
                 site.userId,
-                submitted.length,
-                `Auto-index: submitted ${submitted.length} URL(s) for ${site.domain}`
+                refundCount,
+                `Auto-index refund: ${refundCount} URL(s) failed/rate-limited for ${site.domain}`
               );
-              result.creditsUsed = submitted.length;
               result.creditsRemaining = remaining;
-
-              // Check low-credit threshold
-              if (remaining < CREDIT_LOW_THRESHOLD) {
-                const userData = await prisma.user.findUnique({
-                  where: { id: site.userId },
-                  select: { creditLowWarningSent: true },
-                });
-                if (!userData?.creditLowWarningSent) {
-                  await prisma.user.update({
-                    where: { id: site.userId },
-                    data: { creditLowWarningSent: true },
-                  });
-                }
-              }
             } catch {
-              // Credit deduction failed — refund not needed, just log
-              result.errors.push("Credit deduction failed after successful Google submissions");
+              result.errors.push("Credit refund failed for failed/rate-limited URLs");
+            }
+          }
+
+          // Release unused quota for failed + rate-limited URLs
+          const quotaRelease = failed.length + rateLimited.length;
+          if (quotaRelease > 0) {
+            await releaseGoogleQuota(site.userId, quotaRelease);
+          }
+
+          if (submitted.length > 0) {
+            // Check low-credit threshold
+            if (result.creditsRemaining < CREDIT_LOW_THRESHOLD) {
+              const userData = await prisma.user.findUnique({
+                where: { id: site.userId },
+                select: { creditLowWarningSent: true },
+              });
+              if (!userData?.creditLowWarningSent) {
+                await prisma.user.update({
+                  where: { id: site.userId },
+                  data: { creditLowWarningSent: true },
+                });
+              }
             }
 
-            await incrementGoogleSubmissions(site.userId, submitted.length);
             const now = new Date();
             for (const s of submitted) {
               googleSubmittedUrls.add(s.url);

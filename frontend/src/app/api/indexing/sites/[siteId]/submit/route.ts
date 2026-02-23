@@ -3,8 +3,9 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import {
   getDailyQuota,
-  incrementGoogleSubmissions,
   GOOGLE_DAILY_SUBMISSION_LIMIT,
+  reserveGoogleQuota,
+  releaseGoogleQuota,
 } from "@/lib/google-auth";
 import {
   submitUrlsBatchToGoogle,
@@ -150,14 +151,14 @@ export async function POST(
 
   // ── Google submission ─────────────────────────────────────────────────────
   if (wantsGoogle && aliveUrls.length > 0) {
-    const quota = await getDailyQuota(session.user.id);
-    const remaining = GOOGLE_DAILY_SUBMISSION_LIMIT - quota.googleSubmissions;
+    // Atomically reserve quota (prevents concurrent requests from exceeding limit)
+    const reserved = await reserveGoogleQuota(session.user.id, aliveUrls.length);
 
-    if (remaining <= 0) {
+    if (reserved <= 0) {
       skippedQuotaFull = aliveUrls.length;
     } else {
-      const toSubmit = aliveUrls.slice(0, remaining);
-      skippedQuotaFull = aliveUrls.length - toSubmit.length;
+      const toSubmit = aliveUrls.slice(0, reserved);
+      skippedQuotaFull = aliveUrls.length - reserved;
 
       // Deduct credits upfront (before API call)
       const creditsToDeduct = toSubmit.length;
@@ -191,8 +192,13 @@ export async function POST(
         );
       }
 
+      // Release unused quota for failed + rate-limited URLs
+      const quotaRelease = failed.length + rateLimited.length;
+      if (quotaRelease > 0) {
+        await releaseGoogleQuota(session.user.id, quotaRelease);
+      }
+
       if (submitted.length > 0) {
-        await incrementGoogleSubmissions(session.user.id, submitted.length);
         for (const s of submitted) {
           googleSubmittedUrls.add(s.url);
           const record = urlRecords.find((r) => r.url === s.url);

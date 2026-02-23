@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getValidAccessToken, INDEXED_GSC_STATUSES } from "@/lib/google-auth";
+import { getValidAccessToken, INDEXED_GSC_STATUSES, acquireSyncLock, releaseSyncLock } from "@/lib/google-auth";
 import { fetchSitemapUrls, fallbackSitemapUrl } from "@/lib/sitemap-parser";
 
 /**
@@ -25,9 +25,29 @@ export async function POST(
     return NextResponse.json({ error: "Site not found" }, { status: 404 });
   }
 
+  // Acquire sync lock to prevent concurrent syncs
+  const locked = await acquireSyncLock(site.id);
+  if (!locked) {
+    return NextResponse.json(
+      { error: "Sync already in progress" },
+      { status: 409 }
+    );
+  }
+
+  try {
+    return await doSync(site, session.user.id);
+  } finally {
+    await releaseSyncLock(site.id);
+  }
+}
+
+async function doSync(
+  site: { id: string; userId: string; domain: string; sitemapUrl: string | null },
+  userId: string
+) {
   let accessToken: string;
   try {
-    accessToken = await getValidAccessToken(session.user.id);
+    accessToken = await getValidAccessToken(userId);
   } catch (e) {
     return NextResponse.json(
       { error: e instanceof Error ? e.message : "Token error" },
@@ -142,7 +162,7 @@ export async function POST(
   // Log sync
   await prisma.indexingLog.create({
     data: {
-      userId: session.user.id,
+      userId,
       action: "synced",
       details: JSON.stringify({
         siteId: site.id,

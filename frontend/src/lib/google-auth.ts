@@ -154,6 +154,118 @@ export async function incrementInspections(userId: string, count: number) {
 export const GOOGLE_DAILY_SUBMISSION_LIMIT = 200;
 export const GOOGLE_DAILY_INSPECTION_LIMIT = 2000;
 
+/**
+ * Atomically reserve Google quota: checks remaining quota and increments in a
+ * single transaction. Returns the number of URLs actually reserved (0 if quota
+ * is exhausted). Prevents concurrent submissions from both passing the quota
+ * check and exceeding the daily limit.
+ */
+export async function reserveGoogleQuota(
+  userId: string,
+  requested: number
+): Promise<number> {
+  const date = todayUTC();
+  return prisma.$transaction(async (tx) => {
+    const quota = await tx.userDailyQuota.upsert({
+      where: { userId_date: { userId, date } },
+      create: { userId, date },
+      update: {},
+    });
+
+    const remaining = GOOGLE_DAILY_SUBMISSION_LIMIT - quota.googleSubmissions;
+    if (remaining <= 0) return 0;
+
+    const toReserve = Math.min(requested, remaining);
+
+    await tx.userDailyQuota.update({
+      where: { id: quota.id },
+      data: { googleSubmissions: { increment: toReserve } },
+    });
+
+    return toReserve;
+  });
+}
+
+/**
+ * Release previously reserved quota that was not actually used (e.g., rate
+ * limited or failed submissions). Decrements the counter atomically.
+ */
+export async function releaseGoogleQuota(
+  userId: string,
+  count: number
+): Promise<void> {
+  if (count <= 0) return;
+  const date = todayUTC();
+  await prisma.userDailyQuota.upsert({
+    where: { userId_date: { userId, date } },
+    create: { userId, date },
+    update: { googleSubmissions: { decrement: count } },
+  });
+}
+
+/** Stale lock threshold: 10 minutes in milliseconds */
+const LOCK_STALE_MS = 10 * 60 * 1000;
+
+/**
+ * Try to acquire a sync lock on a site. Returns true if acquired, false if
+ * another operation is in progress.
+ */
+export async function acquireSyncLock(siteId: string): Promise<boolean> {
+  const now = new Date();
+  const staleThreshold = new Date(now.getTime() - LOCK_STALE_MS);
+
+  // Atomically set syncLockedAt only if it's null or stale
+  const result = await prisma.site.updateMany({
+    where: {
+      id: siteId,
+      OR: [
+        { syncLockedAt: null },
+        { syncLockedAt: { lt: staleThreshold } },
+      ],
+    },
+    data: { syncLockedAt: now },
+  });
+
+  return result.count > 0;
+}
+
+/** Release the sync lock on a site. */
+export async function releaseSyncLock(siteId: string): Promise<void> {
+  await prisma.site.update({
+    where: { id: siteId },
+    data: { syncLockedAt: null },
+  });
+}
+
+/**
+ * Try to acquire an auto-index lock on a site. Returns true if acquired.
+ */
+export async function acquireAutoIndexLock(siteId: string): Promise<boolean> {
+  const now = new Date();
+  const staleThreshold = new Date(now.getTime() - LOCK_STALE_MS);
+
+  const result = await prisma.site.updateMany({
+    where: {
+      id: siteId,
+      OR: [
+        { autoIndexLockedAt: null },
+        { autoIndexLockedAt: { lt: staleThreshold } },
+      ],
+    },
+    data: { autoIndexLockedAt: now },
+  });
+
+  return result.count > 0;
+}
+
+/** Release the auto-index lock on a site. */
+export async function releaseAutoIndexLock(siteId: string): Promise<void> {
+  await prisma.site.update({
+    where: { id: siteId },
+    data: { autoIndexLockedAt: null },
+  });
+}
+
 /** GSC statuses that count as "indexed". Use this everywhere instead of contains:"indexed". */
 export const INDEXED_GSC_STATUSES = [
   "Submitted and indexed",

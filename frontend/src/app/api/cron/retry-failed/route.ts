@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { submitUrlToGoogle } from "@/lib/indexing-api";
 import { submitUrlsToIndexNow } from "@/lib/indexing-api";
-import { getDailyQuota, incrementGoogleSubmissions, GOOGLE_DAILY_SUBMISSION_LIMIT } from "@/lib/google-auth";
-import { deductCredits } from "@/lib/credits";
+import { reserveGoogleQuota, releaseGoogleQuota } from "@/lib/google-auth";
+import { deductCredits, refundCredits } from "@/lib/credits";
 import { sendCronErrorAlert } from "@/lib/email";
 import { verifyCronAuth } from "@/lib/cron-auth";
 
@@ -118,20 +118,25 @@ export async function POST(req: Request) {
       // ── Retry Google ────────────────────────────────────────────────────
       if (submissionMethod === "google_api" && site.autoIndexGoogle) {
         try {
-          // Check quota
-          const quota = await getDailyQuota(site.userId);
-          const quotaRemaining = GOOGLE_DAILY_SUBMISSION_LIMIT - quota.googleSubmissions;
-          if (quotaRemaining <= 0) {
+          // Atomically reserve 1 quota slot
+          const reserved = await reserveGoogleQuota(site.userId, 1);
+          if (reserved <= 0) {
             errors.push(`${site.domain}: Google quota exhausted, skipping retry`);
             continue;
           }
 
-          // Check credits
-          const user = await prisma.user.findUnique({
-            where: { id: site.userId },
-            select: { indexingCredits: true },
-          });
-          if (!user || user.indexingCredits <= 0) {
+          // Deduct 1 credit upfront (deduct-before-submit)
+          let creditDeducted = false;
+          try {
+            await deductCredits(
+              site.userId,
+              1,
+              `Retry: pre-deduct for ${urlRecord.url} on ${site.domain}`
+            );
+            creditDeducted = true;
+          } catch {
+            // Insufficient credits — release the reserved quota
+            await releaseGoogleQuota(site.userId, 1);
             errors.push(`${site.domain}: insufficient credits for retry`);
             await prisma.indexedUrl.update({
               where: { id: urlRecord.id },
@@ -144,20 +149,6 @@ export async function POST(req: Request) {
           const result = await submitUrlToGoogle(site.userId, urlRecord.url);
 
           if (result.success) {
-            // Deduct 1 credit for successful retry
-            try {
-              await deductCredits(
-                site.userId,
-                1,
-                `Retry: submitted ${urlRecord.url} for ${site.domain}`
-              );
-            } catch {
-              // Log but don't fail
-              errors.push(`${site.domain}: credit deduction failed for retry of ${urlRecord.url}`);
-            }
-
-            await incrementGoogleSubmissions(site.userId, 1);
-
             await prisma.indexedUrl.update({
               where: { id: urlRecord.id },
               data: {
@@ -181,7 +172,20 @@ export async function POST(req: Request) {
 
             succeededGoogle++;
           } else {
-            // Still failed
+            // Submission failed — refund the credit and release quota
+            if (creditDeducted) {
+              try {
+                await refundCredits(
+                  site.userId,
+                  1,
+                  `Retry refund: ${urlRecord.url} failed for ${site.domain}`
+                );
+              } catch {
+                errors.push(`${site.domain}: credit refund failed for retry of ${urlRecord.url}`);
+              }
+            }
+            await releaseGoogleQuota(site.userId, 1);
+
             await prisma.indexedUrl.update({
               where: { id: urlRecord.id },
               data: {

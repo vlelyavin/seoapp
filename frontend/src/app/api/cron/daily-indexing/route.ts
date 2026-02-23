@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { runAutoIndexForSite } from "@/lib/auto-indexer";
-import { todayUTC, INDEXED_GSC_STATUSES } from "@/lib/google-auth";
+import { todayUTC, INDEXED_GSC_STATUSES, acquireAutoIndexLock, releaseAutoIndexLock } from "@/lib/google-auth";
 import {
   sendDailyReportEmail,
   sendLowCreditsEmail,
@@ -69,7 +69,20 @@ export async function POST(req: Request) {
       const urls404ForEmail: string[] = [];
 
       try {
-        const result = await runAutoIndexForSite(site);
+        // Acquire lock — skip site if manual run is in progress
+        const locked = await acquireAutoIndexLock(site.id);
+        if (!locked) {
+          sitesSkipped++;
+          errors.push(`${site.domain}: auto-index already in progress, skipped`);
+          continue;
+        }
+
+        let result;
+        try {
+          result = await runAutoIndexForSite(site);
+        } finally {
+          await releaseAutoIndexLock(site.id);
+        }
 
         // Tally aggregate stats
         sitesProcessed++;
