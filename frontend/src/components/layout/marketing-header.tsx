@@ -11,19 +11,20 @@ export function MarketingHeader() {
   const { data: session } = useSession();
 
   const navLinks = [
-    { href: `/${locale}`, label: t("audit") },
     { href: `/${locale}/indexing`, label: t("indexing") },
     { href: `/${locale}/pricing`, label: t("pricing") },
   ];
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-800 bg-black/80 backdrop-blur-sm">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 lg:px-6">
-        <Link href={`/${locale}`} className="flex items-center gap-2">
-          <span className="text-lg font-bold text-white">SEO Audit</span>
-        </Link>
+      <div className="relative mx-auto flex h-14 max-w-6xl items-center px-4 lg:px-6">
+        <div className="flex flex-1 items-center">
+          <Link href={`/${locale}`} className="flex items-center gap-2">
+            <span className="text-lg font-bold text-white">SEO Audit</span>
+          </Link>
+        </div>
 
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-1 md:flex">
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -35,7 +36,7 @@ export function MarketingHeader() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-1 items-center justify-end gap-3">
           <LocaleSwitcher />
           {session?.user ? (
             <Link
