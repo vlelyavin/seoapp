@@ -38,7 +38,8 @@ class ContentAnalyzer(BaseAnalyzer):
         tables: List[Dict[str, Any]] = []
 
         # Analyze content on each page
-        thin_content = []
+        thin_content = []  # < 100 words (WARNING)
+        low_content = []   # 100-299 words (INFO)
         empty_pages = []
         word_counts = []
 
@@ -51,8 +52,10 @@ class ContentAnalyzer(BaseAnalyzer):
 
             if word_count == 0:
                 empty_pages.append(url)
-            elif word_count < settings.MIN_CONTENT_WORDS:
+            elif word_count < 100:
                 thin_content.append((url, word_count))
+            elif word_count < settings.MIN_CONTENT_WORDS:
+                low_content.append((url, word_count))
 
         # Sort by word count (ascending) for thin content
         thin_content.sort(key=lambda x: x[1])
@@ -75,10 +78,21 @@ class ContentAnalyzer(BaseAnalyzer):
                 category="thin_content",
                 severity=SeverityLevel.WARNING,
                 message=self.t("analyzer_content.content.issues.thin_content", count=len(thin_content)),
-                details=self.t("analyzer_content.content.details.thin_content", min_words=settings.MIN_CONTENT_WORDS),
+                details=self.t("analyzer_content.content.details.thin_content", min_words=100),
                 affected_urls=[url for url, _ in thin_content[:20]],
                 recommendation=self.t("analyzer_content.content.recommendations.thin_content"),
                 count=len(thin_content),
+            ))
+
+        if low_content:
+            issues.append(self.create_issue(
+                category="low_content",
+                severity=SeverityLevel.INFO,
+                message=self.t("analyzer_content.content.issues.thin_content", count=len(low_content)),
+                details=self.t("analyzer_content.content.details.thin_content", min_words=settings.MIN_CONTENT_WORDS),
+                affected_urls=[url for url, _ in low_content[:20]],
+                recommendation=self.t("analyzer_content.content.recommendations.thin_content"),
+                count=len(low_content),
             ))
 
         # Create table with thin content pages
@@ -96,6 +110,13 @@ class ContentAnalyzer(BaseAnalyzer):
             })
 
         for url, count in thin_content[:15]:
+            table_data.append({
+                h_url: url[:70] + "..." if len(url) > 70 else url,
+                h_word_count: count,
+                h_status: self.t("analyzer_content.content.issues.status_thin"),
+            })
+
+        for url, count in low_content[:10]:
             table_data.append({
                 h_url: url[:70] + "..." if len(url) > 70 else url,
                 h_word_count: count,
@@ -120,7 +141,7 @@ class ContentAnalyzer(BaseAnalyzer):
             avg_words = min_words = max_words = 0
 
         # Summary
-        ok_pages = total_pages - len(empty_pages) - len(thin_content)
+        ok_pages = total_pages - len(empty_pages) - len(thin_content) - len(low_content)
 
         if not issues:
             summary = self.t("analyzer_content.content.summary.all_ok", total_pages=total_pages, avg_words=avg_words)
@@ -130,6 +151,8 @@ class ContentAnalyzer(BaseAnalyzer):
                 parts.append(self.t("analyzer_content.content.issues.empty_pages", count=len(empty_pages)))
             if thin_content:
                 parts.append(self.t("analyzer_content.content.issues.thin_content", count=len(thin_content)))
+            if low_content:
+                parts.append(self.t("analyzer_content.content.issues.thin_content", count=len(low_content)))
             summary = self.t("analyzer_content.content.summary.problems", problems=", ".join(parts), avg_words=avg_words)
 
         severity = self._determine_overall_severity(issues)
@@ -142,6 +165,7 @@ class ContentAnalyzer(BaseAnalyzer):
                 "total_pages": total_pages,
                 "empty_pages": len(empty_pages),
                 "thin_content": len(thin_content),
+                "low_content": len(low_content),
                 "ok_pages": ok_pages,
                 "avg_words": avg_words,
                 "min_words": min_words,

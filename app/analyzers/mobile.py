@@ -37,7 +37,6 @@ class MobileAnalyzer(BaseAnalyzer):
 
         pages_no_viewport: List[str] = []
         pages_bad_viewport: List[str] = []
-        pages_with_flash: List[str] = []
         total_ok = 0
 
         for url, page in pages.items():
@@ -65,30 +64,8 @@ class MobileAnalyzer(BaseAnalyzer):
             elif not has_correct_viewport:
                 pages_bad_viewport.append(url)
 
-            # Detect Flash content
-            has_flash = False
-
-            # Check <object> tags
-            for obj in soup.find_all('object'):
-                obj_type = obj.get('type', '')
-                if obj_type == 'application/x-shockwave-flash':
-                    has_flash = True
-                    break
-
-            # Check <embed> tags
-            if not has_flash:
-                for embed in soup.find_all('embed'):
-                    embed_type = embed.get('type', '')
-                    embed_src = embed.get('src', '')
-                    if embed_type == 'application/x-shockwave-flash' or embed_src.endswith('.swf'):
-                        has_flash = True
-                        break
-
-            if has_flash:
-                pages_with_flash.append(url)
-
             # Count pages that are fully OK
-            if has_correct_viewport and not has_flash:
+            if has_correct_viewport:
                 total_ok += 1
 
         # Create issues
@@ -125,19 +102,8 @@ class MobileAnalyzer(BaseAnalyzer):
                 count=len(pages_bad_viewport),
             ))
 
-        if pages_with_flash:
-            issues.append(self.create_issue(
-                category="flash_content",
-                severity=SeverityLevel.ERROR,
-                message=self.t("analyzer_content.mobile.issues.flash_content", count=len(pages_with_flash)),
-                details=self.t("analyzer_content.mobile.details.flash_content"),
-                affected_urls=pages_with_flash[:20],
-                recommendation=self.t("analyzer_content.mobile.recommendations.flash_content"),
-                count=len(pages_with_flash),
-            ))
-
         # Summary
-        if not pages_no_viewport and not pages_bad_viewport and not pages_with_flash:
+        if not pages_no_viewport and not pages_bad_viewport:
             summary = self.t("analyzer_content.mobile.summary.ok", count=total_ok)
             severity = SeverityLevel.SUCCESS
         else:
@@ -146,8 +112,6 @@ class MobileAnalyzer(BaseAnalyzer):
                 parts.append(self.t("analyzer_content.mobile.issues.missing_viewport", count=len(pages_no_viewport)))
             if pages_bad_viewport:
                 parts.append(self.t("analyzer_content.mobile.issues.bad_viewport", count=len(pages_bad_viewport)))
-            if pages_with_flash:
-                parts.append(self.t("analyzer_content.mobile.issues.flash_content", count=len(pages_with_flash)))
             summary = self.t("analyzer_content.mobile.summary.problems", problems=", ".join(parts))
             severity = self._determine_overall_severity(issues)
 
@@ -159,6 +123,5 @@ class MobileAnalyzer(BaseAnalyzer):
                 "total_ok": total_ok,
                 "pages_no_viewport": len(pages_no_viewport),
                 "pages_bad_viewport": len(pages_bad_viewport),
-                "pages_with_flash": len(pages_with_flash),
             },
         )

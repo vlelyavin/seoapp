@@ -180,7 +180,7 @@ class HeadingsAnalyzer(BaseAnalyzer):
             table_data.append({
                 h_url: url,
                 h_problem: self.t("analyzer_content.headings.issues.problem_hierarchy_skip", from_level=from_lvl, to_level=to_lvl),
-                h_h1: page.h1_tags[0] if pages.get(url) and pages[url].h1_tags else "-",
+                h_h1: pages[url].h1_tags[0] if pages.get(url) and pages[url].h1_tags else "-",
             })
 
         if table_data:

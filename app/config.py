@@ -36,9 +36,9 @@ class Settings(BaseSettings):
     MIN_CONTENT_WORDS: int = 300
 
     # Title/Description optimal lengths
-    TITLE_MIN_LENGTH: int = 50
+    TITLE_MIN_LENGTH: int = 30
     TITLE_MAX_LENGTH: int = 60
-    DESCRIPTION_MIN_LENGTH: int = 150
+    DESCRIPTION_MIN_LENGTH: int = 70
     DESCRIPTION_MAX_LENGTH: int = 160
 
     # Structure limits

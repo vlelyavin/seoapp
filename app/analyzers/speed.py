@@ -43,9 +43,9 @@ class SpeedAnalyzer(BaseAnalyzer):
     }
 
     DESKTOP_TARGETS = {
-        'fcp': 1.0,
-        'lcp': 1.5,
-        'speed_index': 1.0,
+        'fcp': 1.8,
+        'lcp': 2.5,
+        'speed_index': 3.4,
     }
 
     async def analyze(

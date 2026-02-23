@@ -432,7 +432,11 @@ class WebCrawler:
 
 
 async def check_url_status(url: str, timeout: int = 5) -> int:
-    """Check HTTP status of a URL without downloading content."""
+    """Check HTTP status of a URL without downloading content.
+
+    Uses HEAD first; falls back to GET if HEAD returns 4xx/5xx,
+    since some servers block HEAD but respond normally to GET.
+    """
     try:
         from .http_client import get_session
 
@@ -440,6 +444,12 @@ async def check_url_status(url: str, timeout: int = 5) -> int:
         timeout_config = aiohttp.ClientTimeout(total=timeout)
 
         async with session.head(url, timeout=timeout_config, allow_redirects=True) as response:
+            status = response.status
+            if status < 400:
+                return status
+
+        # HEAD returned an error — retry with GET (some servers reject HEAD)
+        async with session.get(url, timeout=timeout_config, allow_redirects=True) as response:
             return response.status
     except asyncio.TimeoutError:
         return 408

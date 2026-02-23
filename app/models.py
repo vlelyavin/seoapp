@@ -163,12 +163,20 @@ class AuditResult(BaseModel):
 
     @property
     def overall_score(self) -> int:
-        """Calculate overall SEO score (0-100) from analyzer severities."""
+        """Calculate overall SEO score (0-100) from analyzer severities.
+
+        Uses a weighted average with a cap: if any analyzer has ERROR severity,
+        the final score is capped at 70 so critical failures are always visible.
+        """
         if not self.results:
             return 0
         weights = {"success": 100, "info": 80, "warning": 40, "error": 0}
         total = sum(weights.get(r.severity.value, 50) for r in self.results.values())
-        return round(total / len(self.results))
+        score = round(total / len(self.results))
+        has_error = any(r.severity == SeverityLevel.ERROR for r in self.results.values())
+        if has_error:
+            score = min(score, 70)
+        return score
 
     @property
     def score_color(self) -> str:

@@ -1007,9 +1007,11 @@ async def run_audit(audit_id: str, request: AuditRequest):
             page.clear_cache()
         logger.info(f"Cleared cached data from {len(pages)} pages")
 
-        # Calculate totals
+        # Calculate totals (exclude SUCCESS-level issues from counts)
         for result in results.values():
             for issue in result.issues:
+                if issue.severity == SeverityLevel.SUCCESS:
+                    continue
                 if issue.severity == SeverityLevel.ERROR:
                     audit.critical_issues += issue.count
                 elif issue.severity == SeverityLevel.WARNING:

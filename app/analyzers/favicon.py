@@ -58,13 +58,11 @@ class FaviconAnalyzer(BaseAnalyzer):
         if home_page and home_page.html_content:
             soup = home_page.get_soup()
             if soup is None:
-                return AnalyzerResult(
-                    analyzer_id=self.analyzer_id,
+                return self.create_result(
                     severity=SeverityLevel.ERROR,
                     summary=self.t("analyzer_content.favicon.issues.no_favicon"),
                     issues=[],
-                    tables=[],
-                    metadata={}
+                    data={},
                 )
 
             # Find all favicon links

@@ -58,6 +58,7 @@ class SecurityAnalyzer(BaseAnalyzer):
                     break
 
         headers_status: Dict[str, Dict[str, str]] = {}
+        headers_present_count = 0
         security_headers = {
             "strict-transport-security": {
                 "name": "Strict-Transport-Security (HSTS)",
@@ -103,6 +104,7 @@ class SecurityAnalyzer(BaseAnalyzer):
 
                 if header_value:
                     # Header present — check value if needed
+                    headers_present_count += 1
                     status = self.t("analyzer_content.security.issues.status_present")
                     value_display = header_value[:80]
 
@@ -241,10 +243,7 @@ class SecurityAnalyzer(BaseAnalyzer):
                 "is_https": is_https,
                 "mixed_content_pages": len(pages_with_mixed_content),
                 "headers_checked": len(security_headers),
-                "headers_present": sum(
-                    1 for h in headers_status.values()
-                    if h.get("status", "").startswith("✓")
-                ),
+                "headers_present": headers_present_count,
             },
             tables=tables,
         )
