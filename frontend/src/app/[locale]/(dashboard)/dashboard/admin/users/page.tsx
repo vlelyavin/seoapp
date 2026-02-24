@@ -77,7 +77,7 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[77rem]">
+    <div>
       <Breadcrumbs items={[
         { label: tBreadcrumbs("dashboard"), href: `/${locale}/dashboard` },
         { label: tBreadcrumbs("admin"), href: `/${locale}/dashboard/admin` },

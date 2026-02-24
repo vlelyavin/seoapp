@@ -673,7 +673,7 @@ export default function IndexingPage() {
   const creditsLow = credits !== null && credits < 10;
 
   return (
-    <div className="mx-auto max-w-[77rem] space-y-6">
+    <div className="space-y-6">
       {/* Toast */}
       {toast && (
         <div

@@ -121,7 +121,7 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
 
   return (
     <div>
-      <div className="flex gap-6">
+      <div className="flex flex-col-reverse gap-6">
         {/* Left sidebar nav */}
         <aside className="hidden w-56 shrink-0 xl:block">
         <div className="sticky top-0 space-y-1">
@@ -129,7 +129,7 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
             <button
               key={name}
               onClick={() => scrollTo(name)}
-              className="flex w-full items-center gap-2 rounded-lg px-2 py-[calc(var(--spacing)*1)] text-left text-sm text-gray-300 hover:bg-gray-900"
+              className="flex w-full items-center gap-2 rounded-lg px-2 py-[calc(var(--spacing)*1.25)] text-left text-sm text-gray-300 hover:bg-gray-900"
             >
               <span
                 className={cn(

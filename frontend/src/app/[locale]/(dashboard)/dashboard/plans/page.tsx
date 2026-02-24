@@ -67,7 +67,7 @@ export default function PlansPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[77rem] space-y-6">
+    <div className="space-y-6">
       <div>
         <Breadcrumbs items={[
           { label: tBreadcrumbs("dashboard"), href: `/${locale}/dashboard` },
