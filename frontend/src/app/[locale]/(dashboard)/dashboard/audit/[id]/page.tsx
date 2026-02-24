@@ -206,8 +206,11 @@ export default function AuditPage({
     loadCached();
   }, [auditId, locale, fastApiId]);
 
-  const breadcrumbLabel = auditUrl
-    ? `${tBreadcrumbs("audit")} ${auditUrl}`
+  const displayUrl = auditUrl
+    ? auditUrl.replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/$/, "")
+    : "";
+  const breadcrumbLabel = displayUrl
+    ? `${tBreadcrumbs("audit")} ${displayUrl}`
     : tBreadcrumbs("audit");
 
   const breadcrumbItems = [

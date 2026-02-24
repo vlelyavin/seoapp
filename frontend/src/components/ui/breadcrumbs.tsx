@@ -7,7 +7,7 @@ interface BreadcrumbItem {
 
 export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
   return (
-    <nav className="mb-1 flex items-center gap-2 text-sm">
+    <nav className="mb-4 flex items-center gap-2 text-sm">
       {items.map((item, i) => (
         <span key={i} className="flex items-center gap-2">
           {i > 0 && <span className="text-gray-600">/</span>}

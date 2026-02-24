@@ -212,7 +212,7 @@ export default function NewAuditPage() {
                   {REAL_ANALYZER_NAMES.map((name) => (
                     <label
                       key={name}
-                      className="flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-sm hover:bg-gray-800"
+                      className="flex cursor-pointer items-center gap-2 text-sm"
                     >
                       <Checkbox
                         checked={selectedAnalyzers.includes(name)}
@@ -227,7 +227,7 @@ export default function NewAuditPage() {
 
                 {/* PageSpeed Screenshots option */}
                 <div className="mt-3 border-t border-gray-700 pt-3">
-                  <label className="flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-sm hover:bg-gray-800">
+                  <label className="flex cursor-pointer items-center gap-2 text-sm">
                     <Checkbox
                       checked={includeScreenshots}
                       onChange={() => toggleAnalyzer("speed_screenshots")}
@@ -246,7 +246,7 @@ export default function NewAuditPage() {
 
           {/* Show pages crawled option */}
           <div className="mt-4">
-            <label className="flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-sm hover:bg-gray-800">
+            <label className="flex cursor-pointer items-center gap-2 text-sm">
               <Checkbox
                 checked={showPagesCrawled}
                 onChange={() => setShowPagesCrawled((prev) => !prev)}

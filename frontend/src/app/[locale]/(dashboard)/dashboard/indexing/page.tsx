@@ -694,8 +694,7 @@ export default function IndexingPage() {
           { label: tBreadcrumbs("dashboard"), href: `/${locale}/dashboard` },
           { label: tBreadcrumbs("indexing") },
         ]} />
-      </div>
-      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="flex items-center justify-between flex-wrap gap-3">
         <h1 className="text-2xl font-bold text-white">{t("title")}</h1>
 
         {/* Credits indicator */}
@@ -717,6 +716,7 @@ export default function IndexingPage() {
               : t("creditsRemaining", { count: credits })}
           </button>
         )}
+        </div>
       </div>
 
       {/* GSC Connection Card */}
