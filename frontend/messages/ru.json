@@ -406,7 +406,8 @@
       "pricing": "Тарифы",
       "dashboard": "Панель управления",
       "signIn": "Войти",
-      "signUp": "Регистрация"
+      "signUp": "Регистрация",
+      "logout": "Выйти"
     },
     "landing": {
       "sectionLabel": "Инструмент SEO аудита",

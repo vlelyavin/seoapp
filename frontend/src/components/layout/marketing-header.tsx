@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
-import { useSession, signIn } from "next-auth/react";
+import { useSession, signIn, signOut } from "next-auth/react";
+import { LogOut } from "lucide-react";
 import { LocaleSwitcher } from "./locale-switcher";
 
 export function MarketingHeader() {
@@ -14,6 +16,20 @@ export function MarketingHeader() {
     { href: `/${locale}/indexing`, label: t("indexing") },
     { href: `/${locale}/pricing`, label: t("pricing") },
   ];
+
+  const user = session?.user;
+  const rawName = user?.name?.trim();
+  const firstName = rawName ? rawName.split(/\s+/)[0] : undefined;
+  const emailLocal = user?.email?.split("@")[0];
+  const displayName = firstName || emailLocal || "";
+  const initials = rawName
+    ? rawName
+        .split(/\s+/)
+        .map((w) => w[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : emailLocal?.[0]?.toUpperCase() || "?";
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-800 bg-black/80 backdrop-blur-sm">
@@ -38,13 +54,38 @@ export function MarketingHeader() {
 
         <div className="flex flex-1 items-center justify-end gap-3">
           <LocaleSwitcher />
-          {session?.user ? (
-            <Link
-              href={`/${locale}/dashboard`}
-              className="rounded-md bg-white px-3 py-1.5 text-sm font-medium text-black transition-colors hover:bg-gray-200"
-            >
-              {t("dashboard")}
-            </Link>
+          {user ? (
+            <div className="flex items-center gap-2">
+              <Link
+                href={`/${locale}/dashboard`}
+                className="rounded-md bg-gradient-to-r from-copper to-copper-light px-3 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
+              >
+                {t("dashboard")}
+              </Link>
+              {user.image ? (
+                <Image
+                  src={user.image}
+                  width={28}
+                  height={28}
+                  alt=""
+                  className="rounded-full"
+                />
+              ) : (
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-700 text-xs font-medium text-white">
+                  {initials}
+                </div>
+              )}
+              <span className="hidden text-sm text-white sm:inline">
+                {displayName}
+              </span>
+              <button
+                onClick={() => signOut({ callbackUrl: `/${locale}` })}
+                className="rounded-md p-1.5 text-gray-400 transition-colors hover:bg-gray-800 hover:text-white"
+                title={t("logout")}
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            </div>
           ) : (
             <button
               onClick={() => signIn("google", { callbackUrl: `/${locale}/dashboard` })}
