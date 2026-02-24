@@ -2085,9 +2085,9 @@ function SiteCard({
                         setLogPage(null);
                       }}
                       className={cn(
-                        "rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors min-h-[36px]",
+                        "rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
                         logFilter === f.id
-                          ? "bg-copper text-white"
+                          ? "bg-gradient-to-r from-copper to-copper-light text-white"
                           : "bg-gray-800 text-gray-400 hover:text-white"
                       )}
                     >
@@ -2100,7 +2100,7 @@ function SiteCard({
                     setLogPage(null);
                     loadLog(logFilter, logCurrentPage);
                   }}
-                  className="min-h-[36px] rounded-md border border-gray-700 px-2 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+                  className="rounded-md border border-gray-700 px-2 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
                 >
                   <RefreshCw className="h-3.5 w-3.5" />
                 </button>
