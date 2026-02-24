@@ -40,6 +40,10 @@ export async function GET(
     });
 
     if (!res.ok) {
+      await prisma.site.update({
+        where: { id: siteId },
+        data: { indexnowKeyVerified: false },
+      });
       return NextResponse.json({ verified: false, keyUrl, status: res.status });
     }
 
@@ -53,6 +57,10 @@ export async function GET(
 
     return NextResponse.json({ verified, keyUrl, status: res.status });
   } catch (e) {
+    await prisma.site.update({
+      where: { id: siteId },
+      data: { indexnowKeyVerified: false },
+    });
     return NextResponse.json({
       verified: false,
       keyUrl,
