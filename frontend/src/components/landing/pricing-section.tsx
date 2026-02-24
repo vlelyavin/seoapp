@@ -32,7 +32,7 @@ export function PricingSection({ showIntro = true }: { showIntro?: boolean }) {
             <p className="mb-4 text-center text-sm font-medium not-italic text-copper">
               {t("sectionLabel")}
             </p>
-            <h2 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+            <h2 className="text-center text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
               {t("introTitle")}
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-center text-lg text-gray-400">
