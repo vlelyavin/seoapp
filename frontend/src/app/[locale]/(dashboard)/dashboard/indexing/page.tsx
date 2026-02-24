@@ -1685,36 +1685,41 @@ function SiteCard({
           {activeTab === "urls" && (
             <div className="px-4 sm:px-6 py-4 sm:py-5 space-y-4">
               {/* Filter tabs + search row */}
-              <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                <div className="flex flex-wrap gap-1">
-                  {URL_FILTERS.map((f) => (
-                    <button
-                      key={f.id}
-                      onClick={() => handleFilterChange(f.id)}
-                      className={cn(
-                        "rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
-                        urlFilter === f.id
-                          ? "bg-gradient-to-r from-copper to-copper-light text-white"
-                          : "bg-gray-900 text-gray-400 hover:text-white"
-                      )}
-                    >
-                      {f.label}
-                    </button>
-                  ))}
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-4">
+                <div className="w-full overflow-x-auto sm:w-auto">
+                  <div className="inline-flex h-11 items-center gap-1 whitespace-nowrap rounded-lg border border-gray-800 bg-black p-1">
+                    {URL_FILTERS.map((f) => (
+                      <button
+                        key={f.id}
+                        onClick={() => handleFilterChange(f.id)}
+                        className={cn(
+                          "inline-flex h-9 shrink-0 items-center justify-center rounded-md px-2.5 text-xs font-medium transition-colors",
+                          urlFilter === f.id
+                            ? "border border-gray-700 bg-gray-900 text-white shadow-sm"
+                            : "border border-transparent text-gray-400 hover:text-gray-200"
+                        )}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={urlSearch}
-                    onChange={(e) => handleSearchChange(e.target.value)}
-                    placeholder={t("searchUrls")}
-                    className="flex-1 min-w-0 rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-base md:text-xs text-white placeholder-gray-500 outline-none transition-colors focus:border-copper focus:ring-2 focus:ring-copper/20"
-                  />
+                <div className="flex min-w-0 flex-1 items-center gap-2">
+                  <div className="relative min-w-0 flex-1">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                    <input
+                      type="text"
+                      value={urlSearch}
+                      onChange={(e) => handleSearchChange(e.target.value)}
+                      placeholder={t("searchUrls")}
+                      className="h-11 w-full rounded-lg border border-gray-800 bg-black py-1.5 pl-9 pr-3 text-base md:text-sm text-white outline-none placeholder-gray-500 transition-colors focus:border-copper focus:ring-2 focus:ring-copper/20"
+                    />
+                  </div>
                   <button
                     onClick={() => loadUrls(urlFilter, urlCurrentPage, urlSearch)}
-                    className="shrink-0 rounded-md border border-gray-700 p-2 text-gray-400 hover:bg-gray-900 hover:text-white transition-colors"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-gray-800 bg-black text-gray-400 transition-colors hover:text-white"
                   >
-                    <RefreshCw className="h-3.5 w-3.5" />
+                    <RefreshCw className="h-4 w-4" />
                   </button>
                 </div>
               </div>
@@ -1835,7 +1840,6 @@ function SiteCard({
                               {/* Timestamps */}
                               <div className="flex flex-wrap gap-3 text-xs text-gray-600">
                                 {url.lastSyncedAt && <span>{t("syncedTime", { time: relativeTime(url.lastSyncedAt, t) })}</span>}
-                                {url.lastInspectedAt && <span>{t("inspectedTime", { time: relativeTime(url.lastInspectedAt, t) })}</span>}
                               </div>
                             </div>
                             {/* Action buttons */}
@@ -1978,18 +1982,11 @@ function SiteCard({
                                 </div>
                               </td>
                               <td className="hidden md:table-cell px-4 py-3">
-                                <div className="space-y-0.5">
-                                  <GscStatusBadge
-                                    status={url.gscStatus}
-                                    gsc={gsc}
-                                    t={t}
-                                  />
-                                  {url.lastInspectedAt && (
-                                    <p className="text-xs text-gray-600">
-                                      {t("inspectedTime", { time: relativeTime(url.lastInspectedAt, t) })}
-                                    </p>
-                                  )}
-                                </div>
+                                <GscStatusBadge
+                                  status={url.gscStatus}
+                                  gsc={gsc}
+                                  t={t}
+                                />
                               </td>
                               <td className="hidden sm:table-cell px-4 py-3">
                                 <span
@@ -2120,35 +2117,37 @@ function SiteCard({
           {activeTab === "log" && (
             <div className="px-4 sm:px-6 py-4 sm:py-5 space-y-4">
               {/* Filter + refresh row */}
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="flex flex-wrap gap-1">
-                  {LOG_FILTERS.map((f) => (
-                    <button
-                      key={f.id}
-                      onClick={() => {
-                        setLogFilter(f.id);
-                        setLogCurrentPage(1);
-                        setLogPage(null);
-                      }}
-                      className={cn(
-                        "rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
-                        logFilter === f.id
-                          ? "bg-gradient-to-r from-copper to-copper-light text-white"
-                          : "bg-gray-900 text-gray-400 hover:text-white"
-                      )}
-                    >
-                      {f.label}
-                    </button>
-                  ))}
+              <div className="flex items-center gap-4">
+                <div className="w-full overflow-x-auto sm:w-auto">
+                  <div className="inline-flex h-11 items-center gap-1 whitespace-nowrap rounded-lg border border-gray-800 bg-black p-1">
+                    {LOG_FILTERS.map((f) => (
+                      <button
+                        key={f.id}
+                        onClick={() => {
+                          setLogFilter(f.id);
+                          setLogCurrentPage(1);
+                          setLogPage(null);
+                        }}
+                        className={cn(
+                          "inline-flex h-9 shrink-0 items-center justify-center rounded-md px-2.5 text-xs font-medium transition-colors",
+                          logFilter === f.id
+                            ? "border border-gray-700 bg-gray-900 text-white shadow-sm"
+                            : "border border-transparent text-gray-400 hover:text-gray-200"
+                        )}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <button
                   onClick={() => {
                     setLogPage(null);
                     loadLog(logFilter, logCurrentPage);
                   }}
-                  className="rounded-md border border-gray-700 px-2 text-gray-400 hover:bg-gray-900 hover:text-white transition-colors"
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-gray-800 bg-black text-gray-400 transition-colors hover:text-white"
                 >
-                  <RefreshCw className="h-3.5 w-3.5" />
+                  <RefreshCw className="h-4 w-4" />
                 </button>
               </div>
 
