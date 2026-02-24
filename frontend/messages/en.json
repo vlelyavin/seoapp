@@ -456,7 +456,7 @@
         "introTitle": "Two tools. Two pricing models.",
         "introSubtitle": "Audit subscriptions cover your SEO analysis. Indexing credits cover Google URL submissions. Pick what you need.",
         "auditSectionTitle": "SEO Audit Plans",
-        "auditSectionDesc": "Run unlimited audits, export reports, white-label for clients.",
+        "auditSectionDesc": "Run unlimited audits, export reports, white-label for clients. 21 analyzers. From meta tags to Google Pagespeed.",
         "ctaFree": "Get Started Free",
         "ctaPaid": "Get Started",
         "planAudience": {
@@ -534,7 +534,7 @@
       },
       "pricing": {
         "title": "Indexing Credits",
-        "sectionDesc": "Submit URLs to Google for indexing.",
+        "sectionDesc": "Submit URLs to Google for indexing. IndexNow submissions to Bing, Yandex, and DuckDuckGo are always free — no credits needed.",
         "oneTime": "one-time",
         "starterName": "Starter",
         "starterPrice": "$5",
