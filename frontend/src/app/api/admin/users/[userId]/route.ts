@@ -18,7 +18,7 @@ export async function PATCH(
   } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
-  const { planId, indexingCredits } = body as { planId?: string; indexingCredits?: unknown };
+  const { planId } = body as { planId?: string };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateData: Record<string, any> = {};
@@ -29,17 +29,6 @@ export async function PATCH(
       return NextResponse.json({ error: "Plan not found" }, { status: 400 });
     }
     updateData.planId = planId;
-  }
-
-  if (indexingCredits !== undefined) {
-    const credits = parseInt(String(indexingCredits));
-    if (isNaN(credits) || credits < 0) {
-      return NextResponse.json(
-        { error: "Invalid credits value" },
-        { status: 400 }
-      );
-    }
-    updateData.indexingCredits = credits;
   }
 
   if (Object.keys(updateData).length === 0) {
@@ -54,7 +43,6 @@ export async function PATCH(
   return NextResponse.json({
     id: user.id,
     planId: user.planId,
-    indexingCredits: user.indexingCredits,
   });
 }
 

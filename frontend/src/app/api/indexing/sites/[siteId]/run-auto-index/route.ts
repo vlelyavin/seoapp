@@ -65,8 +65,6 @@ export async function POST(
         pages404: result.skipped404,
         totalIndexed,
         totalUrls,
-        creditsUsed: result.creditsUsed,
-        creditsRemaining: result.creditsRemaining,
       },
       update: {
         newPagesFound: { increment: result.newUrls },
@@ -79,8 +77,6 @@ export async function POST(
         pages404: { increment: result.skipped404 },
         totalIndexed,
         totalUrls,
-        creditsUsed: { increment: result.creditsUsed },
-        creditsRemaining: result.creditsRemaining,
       },
     });
   } catch {

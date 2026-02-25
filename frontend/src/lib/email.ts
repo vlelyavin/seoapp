@@ -116,7 +116,6 @@ export interface DailyReportEmailData {
   pages404: number;
   totalIndexed: number;
   totalUrls: number;
-  creditsRemaining: number;
 }
 
 /**
@@ -147,7 +146,6 @@ export async function sendDailyReportEmail(
       ${statRow("Submitted to Bing / IndexNow", `${data.submittedBing}${data.submittedBingFailed > 0 ? ` (${data.submittedBingFailed} failed)` : ""}`)}
       ${statRow("404s detected", data.pages404)}
       ${statRow("Index coverage", coverage)}
-      ${statRow("Credits remaining", data.creditsRemaining)}
     </table>
 
     ${ctaButton("View in Dashboard", dashboardUrl)}
@@ -161,42 +159,7 @@ export async function sendDailyReportEmail(
 }
 
 /**
- * B) Low credits alert.
- * Sent when credits drop below CREDIT_LOW_THRESHOLD after a submission run.
- */
-export async function sendLowCreditsEmail(
-  userEmail: string,
-  balance: number
-): Promise<boolean> {
-  const dashboardUrl = `${APP_URL}/dashboard/indexator`;
-
-  const body = `
-    <h2 style="margin:0 0 8px;font-size:20px;color:#111827;">Low Indexing Credits</h2>
-    <p style="margin:0 0 24px;color:#6b7280;font-size:14px;">
-      Your indexing credit balance is running low.
-    </p>
-
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
-      ${statRow("Credits remaining", balance)}
-    </table>
-
-    <p style="color:#374151;font-size:14px;line-height:1.6;">
-      When your balance reaches 0, Google Indexing API submissions will be paused.
-      Bing / IndexNow submissions are free and will continue.
-    </p>
-
-    ${ctaButton("Buy More Credits", dashboardUrl)}
-  `;
-
-  return sendEmail(
-    userEmail,
-    `Low indexing credits — ${balance} remaining`,
-    baseLayout("Low Indexing Credits", body)
-  );
-}
-
-/**
- * C) 404 alert.
+ * B) 404 alert.
  * Sent when new 404s are detected during the daily job.
  */
 export async function send404AlertEmail(

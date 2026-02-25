@@ -4,12 +4,12 @@ import { Link, usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
 import {
-  CreditCard,
   LayoutDashboard,
   Plus,
   Search,
   Settings,
   Users,
+  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -45,7 +45,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
     {
       href: "/dashboard/plans",
       label: t("plans"),
-      icon: CreditCard,
+      icon: Zap,
     },
     {
       href: "/dashboard/settings",

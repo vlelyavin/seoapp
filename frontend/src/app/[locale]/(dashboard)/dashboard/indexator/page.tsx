@@ -14,7 +14,6 @@ import {
   ChevronUp,
   Play,
   ShieldCheck,
-  CreditCard,
   ExternalLink,
   Info,
   ChevronLeft,
@@ -115,13 +114,6 @@ interface Report {
     googleLimit: number;
     googleRemaining: number;
   };
-}
-
-interface CreditPack {
-  id: string;
-  credits: number;
-  price: number;
-  price_formatted: string;
 }
 
 interface ConfirmState {
@@ -271,12 +263,6 @@ export default function IndexingPage() {
   const [copied, setCopied] = useState<string | null>(null);
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
 
-  // Credits state
-  const [credits, setCredits] = useState<number | null>(null);
-  const [creditPacks, setCreditPacks] = useState<CreditPack[]>([]);
-  const [showCreditModal, setShowCreditModal] = useState(false);
-  const [buyingPack, setBuyingPack] = useState<string | null>(null);
-
   // Submit confirmation state
   const [confirmState, setConfirmState] = useState<ConfirmState | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -306,23 +292,6 @@ export default function IndexingPage() {
     }
   }, []);
 
-  // ── Load credits ──────────────────────────────────────────────────────────
-
-  const loadCredits = useCallback(async () => {
-    const res = await fetch("/api/indexing/credits");
-    if (res.ok) {
-      const data = await res.json();
-      setCredits(data.credits ?? 0);
-    }
-  }, []);
-
-  // ── Load credit packs ─────────────────────────────────────────────────────
-
-  const loadCreditPacks = useCallback(async () => {
-    const res = await fetch("/api/indexing/credits/packs");
-    if (res.ok) setCreditPacks(await res.json());
-  }, []);
-
   // ── Load sites ────────────────────────────────────────────────────────────
 
   const loadSites = useCallback(async () => {
@@ -336,9 +305,7 @@ export default function IndexingPage() {
   useEffect(() => {
     loadStatus();
     loadSites();
-    loadCredits();
-    loadCreditPacks();
-  }, [loadStatus, loadSites, loadCredits, loadCreditPacks]);
+  }, [loadStatus, loadSites]);
 
   // ── Reconnect / Disconnect ────────────────────────────────────────────────
 
@@ -438,7 +405,6 @@ export default function IndexingPage() {
   useEffect(() => {
     pollIntervalRef.current = setInterval(() => {
       void loadSites();
-      void loadCredits();
       const siteId = expandedSiteRef.current;
       if (siteId) {
         void loadSiteStats(siteId);
@@ -449,7 +415,7 @@ export default function IndexingPage() {
     return () => {
       if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
     };
-  }, [loadSites, loadCredits, loadSiteStats, loadSiteQuota]);
+  }, [loadSites, loadSiteStats, loadSiteQuota]);
 
   // ── Sync URLs for a site ──────────────────────────────────────────────────
 
@@ -497,19 +463,6 @@ export default function IndexingPage() {
         body: JSON.stringify(body),
       });
 
-      if (res.status === 402) {
-        const data = await res.json();
-        showToast(
-          t("notEnoughCredits", {
-            required: data.required,
-            available: data.available,
-          }),
-          false
-        );
-        setConfirmState(null);
-        return;
-      }
-
       if (res.ok) {
         const data = await res.json();
         showToast(
@@ -519,8 +472,6 @@ export default function IndexingPage() {
             skipped: data.skipped_404 ?? 0,
           })
         );
-        if (data.credits_remaining !== undefined)
-          setCredits(data.credits_remaining);
         await loadSiteStats(siteId);
         await loadSiteQuota(siteId);
       } else {
@@ -588,7 +539,6 @@ export default function IndexingPage() {
         }));
         await loadSiteStats(siteId);
         await loadSiteQuota(siteId);
-        await loadCredits();
       } else {
         const data = await res.json().catch(() => ({}));
         setRunStatuses((prev) => ({
@@ -636,28 +586,6 @@ export default function IndexingPage() {
     setTimeout(() => setCopied(null), 2000);
   };
 
-  // ── Buy credits ───────────────────────────────────────────────────────────
-
-  const buyCredits = async (packId: string) => {
-    setBuyingPack(packId);
-    try {
-      const res = await fetch("/api/indexing/credits/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pack: packId }),
-      });
-      if (res.ok) {
-        const { checkout_url } = await res.json();
-        window.open(checkout_url, "_blank");
-        setShowCreditModal(false);
-      } else {
-        showToast(t("checkoutFailed"), false);
-      }
-    } finally {
-      setBuyingPack(null);
-    }
-  };
-
   // ── Render ────────────────────────────────────────────────────────────────
 
   if (loadingStatus) {
@@ -669,7 +597,6 @@ export default function IndexingPage() {
   }
 
   const isConnected = gscStatus?.connected && gscStatus.hasRequiredScopes;
-  const creditsLow = credits !== null && credits < 10;
 
   return (
     <div className="space-y-6">
@@ -696,25 +623,6 @@ export default function IndexingPage() {
         <div className="flex items-center justify-between flex-wrap gap-3">
         <h1 className="text-2xl font-bold text-white">{t("title")}</h1>
 
-        {/* Credits indicator */}
-        {credits !== null && (
-          <button
-            onClick={() => setShowCreditModal(true)}
-            className={cn(
-              "flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-medium transition-opacity hover:opacity-80",
-              credits === 0
-                ? "border-red-800 bg-red-900/35 text-red-400"
-                : creditsLow
-                  ? "border-orange-800 bg-orange-900/35 text-orange-400"
-                  : "border-gray-700 bg-black text-gray-300"
-            )}
-          >
-            <CreditCard className="h-4 w-4" />
-            {credits === 0
-              ? t("noCredits")
-              : t("creditsRemaining", { count: credits })}
-          </button>
-        )}
         </div>
       </div>
 
@@ -833,7 +741,6 @@ export default function IndexingPage() {
                 running={running[site.id] ?? false}
                 runStatus={runStatuses[site.id]}
                 copied={copied}
-                credits={credits}
                 t={t}
                 onToggle={() => toggleSite(site.id)}
                 onSyncUrls={() => syncUrls(site.id)}
@@ -848,72 +755,6 @@ export default function IndexingPage() {
               />
             ))
           )}
-        </div>
-      )}
-
-      {/* Credit packs modal */}
-      {showCreditModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setShowCreditModal(false)}
-          />
-          <div className="relative z-10 w-full max-w-md max-h-[90vh] overflow-y-auto rounded-xl border border-gray-800 bg-black p-6 shadow-xl">
-            {/* Close button */}
-            <button
-              onClick={() => setShowCreditModal(false)}
-              className="absolute right-4 top-4 rounded-md p-2 text-gray-400 hover:bg-gray-900 hover:text-gray-200 transition-colors"
-            >
-              <X className="h-4 w-4" />
-            </button>
-            {/* Icon */}
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-copper/10">
-              <CreditCard className="h-6 w-6 text-copper" />
-            </div>
-            {/* Title */}
-            <h3 className="mb-2 text-lg font-semibold text-white">
-              {t("creditPacks")}
-            </h3>
-            <p className="text-sm text-gray-400 mb-5">{t("creditPacksDesc")}</p>
-            {credits !== null && (
-              <p className="text-sm text-gray-300 mb-4">
-                {t("creditsRemaining", { count: credits })}
-              </p>
-            )}
-            <div className="space-y-3">
-              {creditPacks.map((pack) => (
-                <div
-                  key={pack.id}
-                  className="flex items-center justify-between rounded-lg border border-gray-800 bg-gray-950 p-4"
-                >
-                  <div>
-                    <p className="font-medium text-white capitalize">
-                      {pack.id}
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      {t("creditsCount", { count: pack.credits })}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-white font-semibold">
-                      {pack.price_formatted}
-                    </span>
-                    <button
-                      onClick={() => buyCredits(pack.id)}
-                      disabled={buyingPack !== null}
-                      className="flex items-center gap-1.5 rounded-md bg-gradient-to-r from-copper to-copper-light px-3 py-1.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-                    >
-                      {buyingPack === pack.id ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      ) : (
-                        t("buyCredits")
-                      )}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       )}
 
@@ -946,7 +787,6 @@ export default function IndexingPage() {
               !confirmState.engines.includes("bing")
                 ? t("confirmSubmitGoogle", {
                     count: confirmState.count,
-                    remaining: credits ?? 0,
                   })
                 : confirmState.engines.includes("bing") &&
                     !confirmState.engines.includes("google")
@@ -1046,7 +886,6 @@ function SiteCard({
   running,
   runStatus,
   copied,
-  credits,
   t,
   onToggle,
   onSyncUrls,
@@ -1068,7 +907,6 @@ function SiteCard({
   running: boolean;
   runStatus?: RunStatus;
   copied: string | null;
-  credits: number | null;
   t: ReturnType<typeof useTranslations<"indexing">>;
   onToggle: () => void;
   onSyncUrls: () => void;

@@ -14,7 +14,6 @@ import {
   submitUrlsBatchToGoogle,
   submitUrlsToIndexNow,
 } from "./indexing-api";
-import { deductCredits, refundCredits, CREDIT_LOW_THRESHOLD } from "./credits";
 
 export interface AutoIndexResult {
   siteId: string;
@@ -28,9 +27,6 @@ export interface AutoIndexResult {
   failedGoogle: number;
   failedBing: number;
   googleQuotaExhausted: boolean;
-  insufficientCredits: boolean;
-  creditsUsed: number;
-  creditsRemaining: number;
   tokenError: string | null;
   errors: string[];
 }
@@ -62,9 +58,6 @@ export async function runAutoIndexForSite(
     failedGoogle: 0,
     failedBing: 0,
     googleQuotaExhausted: false,
-    insufficientCredits: false,
-    creditsUsed: 0,
-    creditsRemaining: 0,
     tokenError: null,
     errors: [],
   };
@@ -91,7 +84,6 @@ export async function runAutoIndexForSite(
   for (const existing of existingUrls) {
     if (!sitemapLocSet.has(existing.url)) {
       result.removedUrls++;
-      // Mark as removed — keep record but clear pending flags
       await prisma.indexedUrl.update({
         where: { id: existing.id },
         data: { isChanged: false, isNew: false },
@@ -112,7 +104,6 @@ export async function runAutoIndexForSite(
   const newOrChangedUrls: string[] = [];
 
   for (const { loc, lastmod } of sitemapUrls) {
-    // Skip URLs that exceed the DB column limit
     if (loc.length > 500) continue;
 
     const existing = existingUrlMap.get(loc);
@@ -154,12 +145,6 @@ export async function runAutoIndexForSite(
   });
 
   if (newOrChangedUrls.length === 0) {
-    // Still read current credit balance for reporting
-    const user = await prisma.user.findUnique({
-      where: { id: site.userId },
-      select: { indexingCredits: true },
-    });
-    result.creditsRemaining = user?.indexingCredits ?? 0;
     return result;
   }
 
@@ -205,11 +190,10 @@ export async function runAutoIndexForSite(
     }
   }
 
-  // 5. Google Indexing API
+  // 5. Google Indexing API (quota-gated, no credits)
   const googleSubmittedUrls = new Set<string>();
   if (site.autoIndexGoogle && aliveUrls.length > 0) {
     try {
-      // Atomically reserve quota (prevents concurrent runs from exceeding limit)
       const reserved = await reserveGoogleQuota(site.userId, aliveUrls.length);
 
       if (reserved <= 0) {
@@ -217,136 +201,77 @@ export async function runAutoIndexForSite(
       } else {
         const toSubmit = aliveUrls.slice(0, reserved);
 
-        // Deduct credits upfront before submitting (deduct-before-submit pattern)
-        let creditsDeducted = 0;
-        try {
-          const remaining = await deductCredits(
-            site.userId,
-            toSubmit.length,
-            `Auto-index: pre-deduct ${toSubmit.length} URL(s) for ${site.domain}`
-          );
-          creditsDeducted = toSubmit.length;
-          result.creditsRemaining = remaining;
-        } catch {
-          // Insufficient credits — release the reserved quota and bail
-          await releaseGoogleQuota(site.userId, reserved);
-          result.insufficientCredits = true;
-          result.creditsRemaining = 0;
-          // Skip to IndexNow
-          creditsDeducted = 0;
+        const { submitted, rateLimited, failed } = await submitUrlsBatchToGoogle(
+          site.userId,
+          toSubmit
+        );
+
+        result.submittedGoogle = submitted.length;
+        result.failedGoogle = failed.length;
+        result.googleQuotaExhausted = rateLimited.length > 0;
+
+        // Release unused quota for failed + rate-limited URLs
+        const quotaRelease = failed.length + rateLimited.length;
+        if (quotaRelease > 0) {
+          await releaseGoogleQuota(site.userId, quotaRelease);
         }
 
-        if (creditsDeducted > 0) {
-          const { submitted, rateLimited, failed } = await submitUrlsBatchToGoogle(
-            site.userId,
-            toSubmit
-          );
-
-          result.submittedGoogle = submitted.length;
-          result.failedGoogle = failed.length;
-          result.creditsUsed = submitted.length;
-          result.googleQuotaExhausted = rateLimited.length > 0;
-
-          // Refund credits for failed + rate-limited URLs
-          const refundCount = failed.length + rateLimited.length;
-          if (refundCount > 0) {
-            try {
-              const remaining = await refundCredits(
-                site.userId,
-                refundCount,
-                `Auto-index refund: ${refundCount} URL(s) failed/rate-limited for ${site.domain}`
-              );
-              result.creditsRemaining = remaining;
-            } catch {
-              result.errors.push("Credit refund failed for failed/rate-limited URLs");
-            }
-          }
-
-          // Release unused quota for failed + rate-limited URLs
-          const quotaRelease = failed.length + rateLimited.length;
-          if (quotaRelease > 0) {
-            await releaseGoogleQuota(site.userId, quotaRelease);
-          }
-
-          if (submitted.length > 0) {
-            // Check low-credit threshold
-            if (result.creditsRemaining < CREDIT_LOW_THRESHOLD) {
-              const userData = await prisma.user.findUnique({
-                where: { id: site.userId },
-                select: { creditLowWarningSent: true },
-              });
-              if (!userData?.creditLowWarningSent) {
-                await prisma.user.update({
-                  where: { id: site.userId },
-                  data: { creditLowWarningSent: true },
-                });
-              }
-            }
-
-            const now = new Date();
-            for (const s of submitted) {
-              googleSubmittedUrls.add(s.url);
-              const record = await prisma.indexedUrl.findUnique({
-                where: { siteId_url: { siteId: site.id, url: s.url } },
-              });
-              if (record) {
-                await prisma.indexedUrl.update({
-                  where: { id: record.id },
-                  data: {
-                    indexingStatus: "submitted",
-                    submissionMethod: "google_api",
-                    submittedAt: now,
-                    isNew: false,
-                    isChanged: false,
-                    retryCount: 0,
-                  },
-                });
-                await prisma.indexingLog.create({
-                  data: {
-                    siteId: site.id,
-                    userId: site.userId,
-                    indexedUrlId: record.id,
-                    action: "submitted_google",
-                    details: JSON.stringify({ url: s.url }),
-                  },
-                });
-              }
-            }
-          } else {
-            // No successful submissions — read current balance
-            const updatedUser = await prisma.user.findUnique({
-              where: { id: site.userId },
-              select: { indexingCredits: true },
-            });
-            result.creditsRemaining = updatedUser?.indexingCredits ?? 0;
-          }
-
-          for (const f of failed) {
+        if (submitted.length > 0) {
+          const now = new Date();
+          for (const s of submitted) {
+            googleSubmittedUrls.add(s.url);
             const record = await prisma.indexedUrl.findUnique({
-              where: { siteId_url: { siteId: site.id, url: f.url } },
+              where: { siteId_url: { siteId: site.id, url: s.url } },
             });
             if (record) {
               await prisma.indexedUrl.update({
                 where: { id: record.id },
-                data: { indexingStatus: "failed", errorMessage: f.error },
+                data: {
+                  indexingStatus: "submitted",
+                  submissionMethod: "google_api",
+                  submittedAt: now,
+                  isNew: false,
+                  isChanged: false,
+                  retryCount: 0,
+                },
               });
               await prisma.indexingLog.create({
                 data: {
                   siteId: site.id,
                   userId: site.userId,
                   indexedUrlId: record.id,
-                  action: "failed",
-                  details: JSON.stringify({ url: f.url, error: f.error }),
+                  action: "submitted_google",
+                  details: JSON.stringify({ url: s.url }),
                 },
               });
             }
+          }
+        }
+
+        for (const f of failed) {
+          const record = await prisma.indexedUrl.findUnique({
+            where: { siteId_url: { siteId: site.id, url: f.url } },
+          });
+          if (record) {
+            await prisma.indexedUrl.update({
+              where: { id: record.id },
+              data: { indexingStatus: "failed", errorMessage: f.error },
+            });
+            await prisma.indexingLog.create({
+              data: {
+                siteId: site.id,
+                userId: site.userId,
+                indexedUrlId: record.id,
+                action: "failed",
+                details: JSON.stringify({ url: f.url, error: f.error }),
+              },
+            });
           }
         }
       }
     } catch (e) {
       const errMsg = e instanceof Error ? e.message : "Google indexing error";
       result.errors.push(errMsg);
-      // Detect token expiry errors specifically
       if (
         errMsg.includes("No refresh token") ||
         errMsg.includes("Google account not connected") ||
@@ -359,7 +284,6 @@ export async function runAutoIndexForSite(
 
   // 6. IndexNow (Bing/Yandex/DuckDuckGo)
   if (site.autoIndexBing && aliveUrls.length > 0 && site.indexnowKey) {
-    // Pre-check: verify the IndexNow key file is still accessible
     const baseDomain = site.domain.startsWith("sc-domain:")
       ? `https://${site.domain.replace("sc-domain:", "")}`
       : site.domain.replace(/\/$/, "");
@@ -380,7 +304,6 @@ export async function runAutoIndexForSite(
     }
 
     if (!keyValid) {
-      // Mark as not verified in DB and log the failure
       await prisma.site.update({
         where: { id: site.id },
         data: { indexnowKeyVerified: false },
@@ -428,7 +351,6 @@ export async function runAutoIndexForSite(
           where: { siteId_url: { siteId: site.id, url } },
         });
         if (record) {
-          // Preserve Google submission method if already submitted in this cycle
           const method = googleSubmittedUrls.has(url)
             ? "google_api,indexnow"
             : "indexnow";
@@ -456,15 +378,6 @@ export async function runAutoIndexForSite(
     }
     } // end else (!host)
     } // end else (keyValid)
-  }
-
-  // Ensure creditsRemaining is populated if not already set
-  if (result.creditsRemaining === 0 && result.creditsUsed === 0) {
-    const user = await prisma.user.findUnique({
-      where: { id: site.userId },
-      select: { indexingCredits: true },
-    });
-    result.creditsRemaining = user?.indexingCredits ?? 0;
   }
 
   return result;

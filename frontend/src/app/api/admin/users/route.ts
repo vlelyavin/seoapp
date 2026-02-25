@@ -31,10 +31,7 @@ export async function GET(req: Request) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let orderBy: any = { createdAt: sortOrder };
-  if (sortBy === "credits") {
-    orderBy = { indexingCredits: sortOrder };
-  }
+  const orderBy: any = { createdAt: sortOrder };
 
   const [users, total] = await Promise.all([
     prisma.user.findMany({
@@ -45,7 +42,6 @@ export async function GET(req: Request) {
         email: true,
         role: true,
         planId: true,
-        indexingCredits: true,
         gscConnected: true,
         createdAt: true,
         _count: { select: { audits: true } },
@@ -71,7 +67,6 @@ export async function GET(req: Request) {
     email: u.email,
     role: u.role,
     planId: u.planId,
-    indexingCredits: u.indexingCredits,
     gscConnected: u.gscConnected,
     createdAt: u.createdAt,
     auditsCount: u._count.audits,

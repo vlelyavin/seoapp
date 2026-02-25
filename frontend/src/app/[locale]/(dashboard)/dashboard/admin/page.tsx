@@ -6,18 +6,15 @@ import { useLocale, useTranslations } from "next-intl";
 import {
   Shield,
   Users,
-  CreditCard,
   Activity,
   BarChart3,
   Search,
   ChevronUp,
   ChevronDown,
   MoreHorizontal,
-  Pencil,
   Trash2,
   Unlink,
   X,
-  Check,
 } from "lucide-react";
 import { cn, formatDate } from "@/lib/utils";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -29,7 +26,6 @@ interface AdminUser {
   email: string;
   role: string;
   planId: string;
-  indexingCredits: number;
   gscConnected: boolean;
   createdAt: string;
   auditsCount: number;
@@ -44,7 +40,7 @@ interface Stats {
   activeThisWeek: number;
 }
 
-type SortField = "createdAt" | "lastAudit" | "credits";
+type SortField = "createdAt" | "lastAudit";
 type SortOrder = "asc" | "desc";
 
 export default function AdminDashboardPage() {
@@ -71,8 +67,6 @@ export default function AdminDashboardPage() {
   // Action state
   const [actionMenu, setActionMenu] = useState<string | null>(null);
   const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
-  const [editingCredits, setEditingCredits] = useState<string | null>(null);
-  const [creditsValue, setCreditsValue] = useState("");
   const [confirmAction, setConfirmAction] = useState<{
     type: "delete" | "revokeGsc" | "revokeGoogle";
     userId: string;
@@ -94,7 +88,6 @@ export default function AdminDashboardPage() {
       const params = new URLSearchParams();
       if (search) params.set("search", search);
       if (planFilter) params.set("plan", planFilter);
-      if (sortBy === "credits") params.set("sortBy", "credits");
       params.set("sortOrder", sortOrder);
       params.set("page", String(page));
       params.set("pageSize", String(pageSize));
@@ -158,29 +151,6 @@ export default function AdminDashboardPage() {
           prev.map((u) => (u.id === userId ? { ...u, planId } : u))
         );
         loadStats();
-      }
-    } catch {
-      /* ignore */
-    }
-  }
-
-  async function handleCreditsSave(userId: string) {
-    const credits = parseInt(creditsValue);
-    if (isNaN(credits) || credits < 0) return;
-
-    try {
-      const res = await fetch(`/api/admin/users/${userId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ indexingCredits: credits }),
-      });
-      if (res.ok) {
-        setUsers((prev) =>
-          prev.map((u) =>
-            u.id === userId ? { ...u, indexingCredits: credits } : u
-          )
-        );
-        setEditingCredits(null);
       }
     } catch {
       /* ignore */
@@ -304,7 +274,7 @@ export default function AdminDashboardPage() {
             color="gray"
           />
           <StatCard
-            icon={CreditCard}
+            icon={Activity}
             label={t("paidUsers")}
             value={stats.paidUsers}
             color="green"
@@ -373,14 +343,6 @@ export default function AdminDashboardPage() {
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">
                   {t("plan")}
                 </th>
-                <th className="hidden px-4 py-3 text-left text-xs font-medium text-gray-500 sm:table-cell">
-                  <button
-                    onClick={() => toggleSort("credits")}
-                    className="flex items-center gap-1 hover:text-gray-300"
-                  >
-                    {t("credits")} <SortIcon field="credits" />
-                  </button>
-                </th>
                 <th className="hidden px-4 py-3 text-left text-xs font-medium text-gray-500 lg:table-cell">
                   {t("audits")}
                 </th>
@@ -444,51 +406,6 @@ export default function AdminDashboardPage() {
                         <option value="pro">{tPlans("pro")}</option>
                         <option value="agency">{tPlans("agency")}</option>
                       </select>
-                    </td>
-
-                    {/* Credits */}
-                    <td className="hidden px-4 py-2 sm:table-cell">
-                      {editingCredits === user.id ? (
-                        <div className="flex items-center gap-1">
-                          <input
-                            type="number"
-                            min="0"
-                            value={creditsValue}
-                            onChange={(e) => setCreditsValue(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter")
-                                handleCreditsSave(user.id);
-                              if (e.key === "Escape")
-                                setEditingCredits(null);
-                            }}
-                            className="w-20 rounded border border-gray-600 bg-gray-900 px-2 py-0.5 text-base md:text-xs text-white"
-                            autoFocus
-                          />
-                          <button
-                            onClick={() => handleCreditsSave(user.id)}
-                            className="rounded p-0.5 text-green-400 hover:bg-green-900/20"
-                          >
-                            <Check className="h-3.5 w-3.5" />
-                          </button>
-                          <button
-                            onClick={() => setEditingCredits(null)}
-                            className="rounded p-0.5 text-gray-400 hover:bg-gray-900"
-                          >
-                            <X className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => {
-                            setEditingCredits(user.id);
-                            setCreditsValue(String(user.indexingCredits));
-                          }}
-                          className="group/credits flex items-center gap-1 text-gray-400"
-                        >
-                          <span>{user.indexingCredits}</span>
-                          <Pencil className="h-3 w-3 opacity-100 lg:opacity-0 lg:group-hover/credits:opacity-100" />
-                        </button>
-                      )}
                     </td>
 
                     {/* Audits */}
@@ -594,24 +511,6 @@ export default function AdminDashboardPage() {
                                   </button>
                                 </div>
                               )}
-
-                              <button
-                                onClick={() => {
-                                  setEditingCredits(user.id);
-                                  setCreditsValue(
-                                    String(user.indexingCredits)
-                                  );
-                                  setActionMenu(null);
-                                  setMenuPosition(null);
-                                }}
-                                className={cn(
-                                  "flex w-full items-center gap-2 text-left text-gray-300 hover:bg-gray-700",
-                                  menuPosition ? "px-3 py-2 text-xs" : "px-3 py-3 text-sm"
-                                )}
-                              >
-                                <Pencil className={cn(menuPosition ? "h-3.5 w-3.5" : "h-4 w-4")} />
-                                {t("editCredits")}
-                              </button>
 
                               {user.gscConnected && (
                                 <button

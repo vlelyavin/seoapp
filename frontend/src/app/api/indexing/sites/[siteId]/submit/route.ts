@@ -12,18 +12,11 @@ import {
   submitUrlsToIndexNow,
 } from "@/lib/indexing-api";
 import { checkUrls } from "@/lib/url-checker";
-import {
-  deductCredits,
-  refundCredits,
-  CREDIT_LOW_THRESHOLD,
-} from "@/lib/credits";
 
 /**
  * POST /api/indexing/sites/[siteId]/submit
  * Manual URL submission to Google and/or Bing (IndexNow).
  * Body: { url_ids?: string[], all_not_indexed?: boolean, engines: ("google"|"bing")[] }
- *
- * Google submissions cost 1 credit per URL. IndexNow is free.
  */
 export async function POST(
   req: Request,
@@ -77,43 +70,7 @@ export async function POST(
       submitted_bing: 0,
       skipped_404: 0,
       skipped_quota_full: 0,
-      credits_remaining: await getUserCredits(session.user.id),
     });
-  }
-
-  // ── Credit pre-check (Google only costs credits) ──────────────────────────
-  const wantsGoogle = engines.includes("google");
-  if (wantsGoogle) {
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { indexingCredits: true },
-    });
-    const available = user?.indexingCredits ?? 0;
-    const required = urlRecords.length;
-
-    if (available === 0) {
-      return NextResponse.json(
-        {
-          error: "not_enough_credits",
-          required,
-          available,
-          buy_url: "/dashboard/plans#credits",
-        },
-        { status: 402 }
-      );
-    }
-
-    if (available < required) {
-      return NextResponse.json(
-        {
-          error: "not_enough_credits",
-          required,
-          available,
-          buy_url: "/dashboard/plans#credits",
-        },
-        { status: 402 }
-      );
-    }
   }
 
   // URL liveness detection (404, network errors, etc.)
@@ -157,8 +114,8 @@ export async function POST(
   const googleSubmittedUrls = new Set<string>();
 
   // ── Google submission ─────────────────────────────────────────────────────
+  const wantsGoogle = engines.includes("google");
   if (wantsGoogle && aliveUrls.length > 0) {
-    // Atomically reserve quota (prevents concurrent requests from exceeding limit)
     const reserved = await reserveGoogleQuota(session.user.id, aliveUrls.length);
 
     if (reserved <= 0) {
@@ -167,37 +124,11 @@ export async function POST(
       const toSubmit = aliveUrls.slice(0, reserved);
       skippedQuotaFull = aliveUrls.length - reserved;
 
-      // Deduct credits upfront (before API call)
-      const creditsToDeduct = toSubmit.length;
-      await deductCredits(
-        session.user.id,
-        creditsToDeduct,
-        `Submitted ${creditsToDeduct} URL${creditsToDeduct === 1 ? "" : "s"} to Google`
-      );
-
       const { submitted, rateLimited, failed } =
         await submitUrlsBatchToGoogle(session.user.id, toSubmit);
 
       submittedGoogle = submitted.length;
       skippedQuotaFull += rateLimited.length;
-
-      // Refund for failed URLs
-      if (failed.length > 0) {
-        await refundCredits(
-          session.user.id,
-          failed.length,
-          `Refund: ${failed.length} URL${failed.length === 1 ? "" : "s"} failed to submit to Google`
-        );
-      }
-
-      // Also refund for rate-limited URLs
-      if (rateLimited.length > 0) {
-        await refundCredits(
-          session.user.id,
-          rateLimited.length,
-          `Refund: ${rateLimited.length} URL${rateLimited.length === 1 ? "" : "s"} skipped (quota full)`
-        );
-      }
 
       // Release unused quota for failed + rate-limited URLs
       const quotaRelease = failed.length + rateLimited.length;
@@ -252,7 +183,7 @@ export async function POST(
     }
   }
 
-  // ── Bing / IndexNow submission (free, no credits) ─────────────────────────
+  // ── Bing / IndexNow submission ────────────────────────────────────────────
   if (engines.includes("bing") && site.indexnowKey && aliveUrls.length > 0) {
     const host = site.domain.startsWith("sc-domain:")
       ? site.domain.replace("sc-domain:", "")
@@ -275,7 +206,6 @@ export async function POST(
       for (const url of aliveUrls.slice(0, submittedBing)) {
         const record = urlRecords.find((r) => r.url === url);
         if (record) {
-          // Preserve Google submission method if already submitted in this cycle
           const method = googleSubmittedUrls.has(url)
             ? "google_api,indexnow"
             : "indexnow";
@@ -302,26 +232,6 @@ export async function POST(
     }
   }
 
-  // ── Post-submission: check low credit threshold ────────────────────────────
-  const updatedUser = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { indexingCredits: true, creditLowWarningSent: true },
-  });
-  const creditsRemaining = updatedUser?.indexingCredits ?? 0;
-
-  if (
-    creditsRemaining < CREDIT_LOW_THRESHOLD &&
-    creditsRemaining >= 0 &&
-    updatedUser &&
-    !updatedUser.creditLowWarningSent
-  ) {
-    await prisma.user.update({
-      where: { id: session.user.id },
-      data: { creditLowWarningSent: true },
-    });
-    // Task 2.4 will send the email notification
-  }
-
   const updatedQuota = await getDailyQuota(session.user.id);
 
   return NextResponse.json({
@@ -331,14 +241,5 @@ export async function POST(
     skipped_quota_full: skippedQuotaFull,
     google_quota_remaining:
       GOOGLE_DAILY_SUBMISSION_LIMIT - updatedQuota.googleSubmissions,
-    credits_remaining: creditsRemaining,
   });
-}
-
-async function getUserCredits(userId: string): Promise<number> {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { indexingCredits: true },
-  });
-  return user?.indexingCredits ?? 0;
 }

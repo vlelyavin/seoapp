@@ -8,7 +8,6 @@ export default function TermsPage() {
     "serviceDescription",
     "accounts",
     "billing",
-    "indexingCredits",
     "freeTier",
     "noWarranty",
     "liability",

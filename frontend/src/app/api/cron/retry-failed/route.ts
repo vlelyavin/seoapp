@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { submitUrlToGoogle } from "@/lib/indexing-api";
 import { submitUrlsToIndexNow } from "@/lib/indexing-api";
 import { reserveGoogleQuota, releaseGoogleQuota } from "@/lib/google-auth";
-import { deductCredits, refundCredits } from "@/lib/credits";
 import { sendCronErrorAlert } from "@/lib/email";
 import { verifyCronAuth } from "@/lib/cron-auth";
 
@@ -16,7 +15,6 @@ const MAX_RETRIES = 3;
 function isRetryableError(errorMessage: string | null): boolean {
   if (!errorMessage) return false;
   const msg = errorMessage.toLowerCase();
-  // Permanent failures — don't retry
   if (
     msg.includes("403") ||
     msg.includes("404/410 detected") ||
@@ -27,7 +25,6 @@ function isRetryableError(errorMessage: string | null): boolean {
   ) {
     return false;
   }
-  // Retryable: server errors, network issues, rate limits
   return (
     msg.includes("500") ||
     msg.includes("503") ||
@@ -47,18 +44,10 @@ function isRetryableError(errorMessage: string | null): boolean {
  *
  * Retries failed URL submissions. Run daily at 12:00 PM UTC (6h after main job).
  * Auth: Authorization: Bearer <CRON_SECRET>
- *
- * Logic:
- * - Finds all URLs with indexingStatus = "failed" and retryCount < MAX_RETRIES
- * - Skips permanent failures (403, 404, auth errors)
- * - Retries Google or IndexNow submission depending on original method
- * - Deducts credits only for successful Google retries
- * - Increments retryCount (capped at MAX_RETRIES)
  */
 export async function POST(req: Request) {
   const startTime = Date.now();
 
-  // ── Auth ──────────────────────────────────────────────────────────────────
   const authError = verifyCronAuth(req);
   if (authError) return authError;
 
@@ -70,7 +59,6 @@ export async function POST(req: Request) {
   const errors: string[] = [];
 
   try {
-    // Find all failed URLs that are eligible for retry
     const failedUrls = await prisma.indexedUrl.findMany({
       where: {
         indexingStatus: "failed",
@@ -91,18 +79,14 @@ export async function POST(req: Request) {
       orderBy: { updatedAt: "asc" },
     });
 
-    // Group by site for IndexNow batch submission
     const indexNowBatches: Record<
       string,
       { site: (typeof failedUrls)[0]["site"]; urls: (typeof failedUrls)[0][] }
     > = {};
 
-    // Process Google retries individually, collect IndexNow retries for batching
     for (const urlRecord of failedUrls) {
-      // Skip non-retryable errors
       if (!isRetryableError(urlRecord.errorMessage)) {
         permanentlyFailed++;
-        // Cap retryCount so we don't keep checking
         if (urlRecord.retryCount < MAX_RETRIES) {
           await prisma.indexedUrl.update({
             where: { id: urlRecord.id },
@@ -118,30 +102,9 @@ export async function POST(req: Request) {
       // ── Retry Google ────────────────────────────────────────────────────
       if (submissionMethod === "google_api" && site.autoIndexGoogle) {
         try {
-          // Atomically reserve 1 quota slot
           const reserved = await reserveGoogleQuota(site.userId, 1);
           if (reserved <= 0) {
             errors.push(`${site.domain}: Google quota exhausted, skipping retry`);
-            continue;
-          }
-
-          // Deduct 1 credit upfront (deduct-before-submit)
-          let creditDeducted = false;
-          try {
-            await deductCredits(
-              site.userId,
-              1,
-              `Retry: pre-deduct for ${urlRecord.url} on ${site.domain}`
-            );
-            creditDeducted = true;
-          } catch {
-            // Insufficient credits — release the reserved quota
-            await releaseGoogleQuota(site.userId, 1);
-            errors.push(`${site.domain}: insufficient credits for retry`);
-            await prisma.indexedUrl.update({
-              where: { id: urlRecord.id },
-              data: { retryCount: { increment: 1 } },
-            });
             continue;
           }
 
@@ -172,18 +135,6 @@ export async function POST(req: Request) {
 
             succeededGoogle++;
           } else {
-            // Submission failed — refund the credit and release quota
-            if (creditDeducted) {
-              try {
-                await refundCredits(
-                  site.userId,
-                  1,
-                  `Retry refund: ${urlRecord.url} failed for ${site.domain}`
-                );
-              } catch {
-                errors.push(`${site.domain}: credit refund failed for retry of ${urlRecord.url}`);
-              }
-            }
             await releaseGoogleQuota(site.userId, 1);
 
             await prisma.indexedUrl.update({
@@ -274,7 +225,6 @@ export async function POST(req: Request) {
 
     const durationSeconds = Math.round((Date.now() - startTime) / 1000);
 
-    // Update CronJobLog
     await prisma.cronJobLog.upsert({
       where: { jobName: "retry-failed" },
       create: {
