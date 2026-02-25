@@ -9,11 +9,11 @@ import { IndexingCtaSection } from "@/components/landing/indexing-cta-section";
 export const metadata: Metadata = {
   title: "Get Your Pages Indexed by Google in Hours — SEO Audit Online",
   description:
-    "Submit your URLs to Google, Bing, and Yandex for faster indexing. Monitor your index coverage with Google Search Console integration. Credit-based pricing, no subscription required.",
+    "Submit your URLs to Google, Bing, and Yandex for faster indexing. Monitor your index coverage with Google Search Console integration. Free plan available.",
   openGraph: {
     title: "Get Your Pages Indexed by Google in Hours — SEO Audit Online",
     description:
-      "Submit your URLs to Google, Bing, and Yandex for faster indexing. Monitor your index coverage with Google Search Console integration. Credit-based pricing, no subscription required.",
+      "Submit your URLs to Google, Bing, and Yandex for faster indexing. Monitor your index coverage with Google Search Console integration. Free plan available.",
     type: "website",
   },
 };
