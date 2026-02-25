@@ -9,16 +9,7 @@ export function IndexingHeroSection() {
   const t = useTranslations("marketing.indexingLanding.hero");
 
   return (
-    <section className="relative overflow-hidden bg-black pt-24 pb-20">
-      {/* Gradient mesh background */}
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-        <div className="absolute top-0 left-1/2 h-[700px] w-[1000px] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(184,115,51,0.22)_0%,transparent_55%)] blur-3xl" />
-        <div className="absolute -top-32 -left-40 h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,rgba(184,115,51,0.14)_0%,transparent_70%)] blur-3xl" />
-        <div className="absolute top-20 -right-32 h-[400px] w-[400px] rounded-full bg-[radial-gradient(circle,rgba(184,115,51,0.1)_0%,transparent_70%)] blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 h-[300px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(184,115,51,0.08)_0%,transparent_70%)] blur-2xl" />
-        <div className="absolute bottom-0 left-1/2 h-[200px] w-full -translate-x-1/2 bg-gradient-to-t from-black to-transparent" />
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJuIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC44IiBudW1PY3RhdmVzPSI0IiBzdGl0Y2hUaWxlcz0ic3RpdGNoIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsdGVyPSJ1cmwoI24pIiBvcGFjaXR5PSIwLjAzIi8+PC9zdmc+')] opacity-50" />
-      </div>
+    <section className="relative overflow-hidden bg-[linear-gradient(0deg,#1a1a1a,black)] pt-24 pb-20">
 
       <div className="relative mx-auto max-w-5xl px-4 lg:px-6">
         <div className="flex flex-col items-center text-center">

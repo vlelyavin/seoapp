@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
 import { Link } from "@/i18n/navigation";
-import { Check, Zap, Rocket, Building2, ArrowRight } from "lucide-react";
+import { Check, X, Zap, Rocket, Building2, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const PLANS = [
@@ -33,7 +33,7 @@ export function PricingSection({ showIntro = true }: { showIntro?: boolean }) {
             <p className="mb-4 text-center text-sm font-medium text-copper">
               {t("sectionLabel")}
             </p>
-            <h2 className="text-center text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
+            <h2 className="text-center text-4xl font-bold bg-gradient-to-b from-white to-gray-400 bg-clip-text text-transparent sm:text-5xl lg:text-6xl">
               {t("title")}
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-center text-lg text-gray-400">
@@ -47,27 +47,36 @@ export function PricingSection({ showIntro = true }: { showIntro?: boolean }) {
             const isPro = plan.id === "pro";
             const isAgency = plan.id === "agency";
 
-            const auditorFeatures = [
-              isPro || isAgency
-                ? pt("unlimitedAudits")
-                : pt("auditsPerMonth", { count: plan.auditsPerMonth }),
-              pt("maxPages", { count: plan.maxPages }),
-              isAgency
-                ? pt("allExports")
-                : isPro
-                  ? pt("pdfDocxExports")
-                  : pt("pdfOnly"),
-              plan.id === "free" ? pt("watermarkIncluded") : pt("noWatermark"),
-              ...(isAgency ? [pt("whiteLabel")] : []),
+            const auditorFeatures: { text: string; present: boolean }[] = [
+              {
+                text: isPro || isAgency
+                  ? pt("unlimitedAudits")
+                  : pt("auditsPerMonth", { count: plan.auditsPerMonth }),
+                present: true,
+              },
+              { text: pt("maxPages", { count: plan.maxPages }), present: true },
+              {
+                text: isAgency
+                  ? pt("allExports")
+                  : isPro
+                    ? pt("pdfDocxExports")
+                    : pt("pdfOnly"),
+                present: true,
+              },
+              { text: pt("noWatermark"), present: plan.id !== "free" },
+              { text: pt("whiteLabel"), present: isAgency },
             ];
 
-            const indexatorFeatures = [
-              pt("maxSites", { count: plan.maxSites }),
-              plan.autoIndexing ? pt("autoIndexing") : pt("manualOnly"),
-              plan.reportFrequency !== "none"
-                ? pt("reportFrequency", { frequency: pt(plan.reportFrequency) })
-                : null,
-            ].filter(Boolean) as string[];
+            const indexatorFeatures: { text: string; present: boolean }[] = [
+              { text: pt("maxSites", { count: plan.maxSites }), present: true },
+              { text: pt("autoIndexing"), present: plan.autoIndexing },
+              {
+                text: plan.reportFrequency !== "none"
+                  ? pt("reportFrequency", { frequency: pt(plan.reportFrequency) })
+                  : pt("reportFrequency", { frequency: "—" }),
+                present: plan.reportFrequency !== "none",
+              },
+            ];
 
             const PlanIcon = PLAN_ICONS[plan.id];
 
@@ -113,9 +122,13 @@ export function PricingSection({ showIntro = true }: { showIntro?: boolean }) {
                   </p>
                   <ul className="space-y-3">
                     {auditorFeatures.map((feat) => (
-                      <li key={feat} className="flex items-start gap-3">
-                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-copper" />
-                        <span className="text-sm text-gray-300">{feat}</span>
+                      <li key={feat.text} className="flex items-start gap-3">
+                        {feat.present ? (
+                          <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+                        ) : (
+                          <X className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
+                        )}
+                        <span className={cn("text-sm", feat.present ? "text-gray-300" : "text-gray-500")}>{feat.text}</span>
                       </li>
                     ))}
                   </ul>
@@ -128,9 +141,13 @@ export function PricingSection({ showIntro = true }: { showIntro?: boolean }) {
                   </p>
                   <ul className="space-y-3">
                     {indexatorFeatures.map((feat) => (
-                      <li key={feat} className="flex items-start gap-3">
-                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-copper" />
-                        <span className="text-sm text-gray-300">{feat}</span>
+                      <li key={feat.text} className="flex items-start gap-3">
+                        {feat.present ? (
+                          <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+                        ) : (
+                          <X className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
+                        )}
+                        <span className={cn("text-sm", feat.present ? "text-gray-300" : "text-gray-500")}>{feat.text}</span>
                       </li>
                     ))}
                   </ul>
@@ -139,7 +156,7 @@ export function PricingSection({ showIntro = true }: { showIntro?: boolean }) {
                 <Link
                   href={ctaHref}
                   className={cn(
-                    "mt-auto flex items-center justify-center gap-2 rounded-md px-4 py-3.5 text-center text-sm font-semibold transition-opacity",
+                    "mt-8 flex items-center justify-center gap-2 rounded-md px-4 py-3.5 text-center text-sm font-semibold transition-opacity",
                     isPro
                       ? "bg-gradient-to-r from-copper to-copper-light text-white hover:opacity-90"
                       : "border border-gray-700 text-white hover:bg-black"

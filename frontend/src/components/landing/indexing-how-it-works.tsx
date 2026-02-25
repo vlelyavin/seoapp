@@ -1,18 +1,15 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Link2, Search, Send } from "lucide-react";
 import { motion } from "framer-motion";
-
-const STEP_ICONS = [Link2, Search, Send] as const;
 
 export function IndexingHowItWorks() {
   const t = useTranslations("marketing.indexingLanding.howItWorks");
 
   const steps = [
-    { num: "01", icon: STEP_ICONS[0], title: t("step1Title"), desc: t("step1Desc") },
-    { num: "02", icon: STEP_ICONS[1], title: t("step2Title"), desc: t("step2Desc") },
-    { num: "03", icon: STEP_ICONS[2], title: t("step3Title"), desc: t("step3Desc") },
+    { num: "01", title: t("step1Title"), desc: t("step1Desc") },
+    { num: "02", title: t("step2Title"), desc: t("step2Desc") },
+    { num: "03", title: t("step3Title"), desc: t("step3Desc") },
   ];
 
   return (
@@ -21,47 +18,57 @@ export function IndexingHowItWorks() {
         <p className="mb-4 text-center text-sm font-medium not-italic text-copper">
           {t("sectionLabel")}
         </p>
-        <h2 className="text-center text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
+        <h2 className="text-center text-4xl font-bold bg-gradient-to-b from-white to-gray-400 bg-clip-text text-transparent sm:text-5xl lg:text-6xl">
           {t("title")}
         </h2>
 
-        <div className="relative mt-16">
-          {/* Vertical timeline line */}
-          <div
-            className="absolute top-0 bottom-0 left-6 w-px bg-gradient-to-b from-copper/40 via-copper/20 to-transparent sm:left-8"
-            aria-hidden="true"
-          />
+        <div className="mt-16 flex flex-col">
+          {steps.map((step, i) => (
+            <motion.div
+              key={step.num}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5, delay: i * 0.15 }}
+            >
+              {/* Divider line with dot accents */}
+              <div className="relative flex items-center">
+                <div className="h-px flex-1 bg-gradient-to-r from-copper/40 via-copper/20 to-transparent" />
+                <div className="mx-1 h-1.5 w-1.5 rounded-full bg-copper/40" />
+                <div className="h-px w-16 bg-gradient-to-r from-copper/20 to-transparent" />
+                <div className="flex-1" />
+                <div className="mx-1 h-1.5 w-1.5 rounded-full bg-copper/30" />
+                <div className="h-px flex-1 bg-gradient-to-l from-copper/40 via-copper/20 to-transparent" />
+              </div>
 
-          <div className="flex flex-col gap-12">
-            {steps.map((step, i) => (
-              <motion.div
-                key={step.num}
-                initial={{ opacity: 0, x: -24 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.5, delay: i * 0.15 }}
-                className="relative flex gap-6 sm:gap-8"
-              >
-                {/* Node */}
-                <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-copper/30 bg-gray-950 sm:h-16 sm:w-16">
-                  <step.icon className="h-5 w-5 text-copper sm:h-6 sm:w-6" />
-                </div>
-
-                {/* Card */}
-                <div className="flex-1 rounded-xl border border-gray-800 bg-gray-950 p-6">
-                  <span className="text-sm font-semibold text-copper/50">
-                    {step.num}
-                  </span>
-                  <h3 className="mt-1 text-lg font-semibold text-white">
+              {/* Step content */}
+              <div className="flex gap-6 py-10 sm:gap-10">
+                <span className="shrink-0 text-5xl font-bold leading-none bg-gradient-to-b from-copper to-copper-light bg-clip-text text-transparent sm:text-6xl lg:text-7xl">
+                  {step.num}
+                </span>
+                <div className="pt-1">
+                  <h3 className="text-xl font-semibold text-white sm:text-2xl">
                     {step.title}
                   </h3>
                   <p className="mt-2 leading-relaxed text-gray-400">
                     {step.desc}
                   </p>
                 </div>
-              </motion.div>
-            ))}
-          </div>
+              </div>
+
+              {/* Bottom divider for last item */}
+              {i === steps.length - 1 && (
+                <div className="relative flex items-center">
+                  <div className="h-px flex-1 bg-gradient-to-r from-copper/40 via-copper/20 to-transparent" />
+                  <div className="mx-1 h-1.5 w-1.5 rounded-full bg-copper/40" />
+                  <div className="h-px w-16 bg-gradient-to-r from-copper/20 to-transparent" />
+                  <div className="flex-1" />
+                  <div className="mx-1 h-1.5 w-1.5 rounded-full bg-copper/30" />
+                  <div className="h-px flex-1 bg-gradient-to-l from-copper/40 via-copper/20 to-transparent" />
+                </div>
+              )}
+            </motion.div>
+          ))}
         </div>
       </div>
     </section>

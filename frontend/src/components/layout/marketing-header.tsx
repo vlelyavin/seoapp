@@ -35,7 +35,7 @@ export function MarketingHeader() {
     : emailLocal?.[0]?.toUpperCase() || "?";
 
   return (
-    <header className="sticky top-0 z-50 border-b border-gray-800 bg-black/80 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 bg-gradient-to-b from-black to-transparent">
       <div className="relative mx-auto flex h-14 max-w-6xl items-center px-4 lg:px-6">
         <div className="flex flex-1 items-center">
           <Link href="/" className="flex items-center gap-2">

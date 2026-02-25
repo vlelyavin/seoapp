@@ -18,7 +18,7 @@ export function IndexingFaqSection() {
         <p className="mb-4 text-center text-sm font-medium not-italic text-copper">
           {t("sectionLabel")}
         </p>
-        <h2 className="text-center text-3xl font-bold text-white sm:text-4xl">
+        <h2 className="text-center text-4xl font-bold bg-gradient-to-b from-white to-gray-400 bg-clip-text text-transparent sm:text-5xl lg:text-6xl">
           {t("title")}
         </h2>
 
