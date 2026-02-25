@@ -21,8 +21,6 @@ model User {
   updatedAt               DateTime             @updatedAt
   gscConnected            Boolean              @default(false)
   gscConnectedAt          DateTime?
-  indexingCredits         Int                  @default(0)
-  creditLowWarningSent    Boolean              @default(false)
   emailReports            Boolean              @default(true)
   accounts                Account[]
   audits                  Audit[]
@@ -30,23 +28,7 @@ model User {
   sites                   Site[]
   indexingLogs            IndexingLog[]
   dailyQuotas             UserDailyQuota[]
-  creditTransactions      CreditTransaction[]
   dailyReports            DailyReport[]
-}
-
-model CreditTransaction {
-  id           String   @id @default(cuid()) @db.VarChar(191)
-  userId       String   @db.VarChar(191)
-  amount       Int
-  balanceAfter Int
-  type         String   @db.VarChar(50)
-  description  String   @db.Text
-  lsOrderId    String?  @db.VarChar(191)
-  createdAt    DateTime @default(now())
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, createdAt])
-  @@index([lsOrderId])
 }
 
 model Account {
@@ -206,8 +188,6 @@ model DailyReport {
   pages404              Int      @default(0)
   totalIndexed          Int      @default(0)
   totalUrls             Int      @default(0)
-  creditsUsed           Int      @default(0)
-  creditsRemaining      Int      @default(0)
   details               String?  @db.Text
   createdAt             DateTime @default(now())
   site                  Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
