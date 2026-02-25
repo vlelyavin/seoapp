@@ -2,10 +2,15 @@
 export type ExportFormat = "pdf" | "html" | "docx" | "json" | "csv";
 
 export interface PlanCapabilities {
+  // Audit caps
   allowedExportFormats: ExportFormat[];
   canUseBranding: boolean;
   showWatermark: boolean;
   unlimitedAudits: boolean;
+  // Indexator caps
+  maxSites: number;
+  autoIndexEnabled: boolean;
+  emailReportFreq: "none" | "weekly" | "daily";
 }
 
 export function getPlanCapabilities(planId?: string | null): PlanCapabilities {
@@ -22,6 +27,9 @@ export function getPlanCapabilities(planId?: string | null): PlanCapabilities {
     canUseBranding: isAgency,
     showWatermark: isFree,
     unlimitedAudits: isAgency || isPro,
+    maxSites: isAgency ? 10 : isPro ? 5 : 1,
+    autoIndexEnabled: isAgency || isPro,
+    emailReportFreq: isAgency ? "daily" : isPro ? "weekly" : "none",
   };
 }
 
