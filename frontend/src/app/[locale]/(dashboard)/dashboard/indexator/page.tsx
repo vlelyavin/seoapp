@@ -25,6 +25,7 @@ import {
   Download,
   ArrowUpDown,
   Plus,
+  Globe,
 } from "lucide-react";
 import { cn, formatTimestamp } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -1461,10 +1462,10 @@ function SiteCard({
                 ];
 
                 const pills = [
-                  { label: t("total"), value: stats.total, dot: "bg-gray-400" },
-                  { label: t("submitted"), value: submitted, dot: "bg-blue-400" },
-                  { label: t("failed"), value: stats.failed, dot: "bg-red-400" },
-                  { label: t("pages404"), value: stats.is404s, dot: "bg-orange-400" },
+                  { label: t("total"), value: stats.total, dot: "bg-gray-400", textColor: "text-white" },
+                  { label: t("submitted"), value: submitted, dot: "bg-blue-400", textColor: "text-copper-light" },
+                  { label: t("failed"), value: stats.failed, dot: "bg-red-400", textColor: "text-red-400" },
+                  { label: t("pages404"), value: stats.is404s, dot: "bg-orange-400", textColor: "text-orange-400" },
                 ];
 
                 return (
@@ -1504,17 +1505,13 @@ function SiteCard({
                       </div>
                     </div>
 
-                    {/* Stat pills */}
-                    <div className="flex flex-wrap gap-2">
+                    {/* Stats — large numbers with labels below */}
+                    <div className="flex flex-wrap gap-x-8 gap-y-3">
                       {pills.map((p) => (
-                        <span
-                          key={p.label}
-                          className="inline-flex items-center gap-1.5 rounded-md border border-gray-800 bg-gray-950 px-3 py-1.5 text-xs"
-                        >
-                          <span className={cn("h-2 w-2 rounded-full", p.dot)} />
-                          <span className="text-gray-400">{p.label}</span>
-                          <span className="font-semibold text-white">{p.value}</span>
-                        </span>
+                        <div key={p.label} className="flex flex-col">
+                          <span className={cn("text-2xl font-bold leading-none", p.textColor)}>{p.value}</span>
+                          <span className="mt-1 text-xs text-gray-500">{p.label}</span>
+                        </div>
                       ))}
                     </div>
                   </div>
@@ -1559,6 +1556,7 @@ function SiteCard({
                   }
                   className="flex items-center gap-1.5 rounded-md border border-gray-700 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-gray-900 disabled:opacity-50"
                 >
+                  <Globe className="h-3.5 w-3.5" />
                   {t("submitAllNotIndexed")} (Google)
                 </button>
 
@@ -1572,6 +1570,7 @@ function SiteCard({
                     disabled={!stats?.notIndexed}
                     className="flex items-center gap-1.5 rounded-md border border-gray-700 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-gray-900 disabled:opacity-50"
                   >
+                    <Send className="h-3.5 w-3.5" />
                     {t("submitAllNotIndexed")} (Bing)
                   </button>
                 )}
