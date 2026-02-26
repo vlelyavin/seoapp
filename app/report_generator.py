@@ -916,7 +916,7 @@ class ReportGenerator:
 
         watermark_css = """
                 @bottom-right {
-                    content: "seo-audit.online";
+                    content: "indexator.lvdev.co";
                     font-size: 8pt;
                     color: #D1D5DB;
                     font-family: Inter, sans-serif;
@@ -1307,7 +1307,7 @@ class ReportGenerator:
         if not logo_url:
             return None
         try:
-            req = Request(logo_url, headers={"User-Agent": "seo-audit-docx"})
+            req = Request(logo_url, headers={"User-Agent": "indexator-docx"})
             with urlopen(req, timeout=6) as response:
                 content_type = (response.headers.get("Content-Type") or "").lower()
                 if not content_type.startswith("image/"):
@@ -1943,7 +1943,7 @@ class ReportGenerator:
         run3._element.append(fld_char_end)
 
         if show_watermark:
-            run4 = footer_para.add_run("    |    seo-audit.online")
+            run4 = footer_para.add_run("    |    indexator.lvdev.co")
             self._docx_set_font(run4, size_pt=8, color_rgb=(209, 213, 219))
 
         # Save document

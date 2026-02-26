@@ -32,7 +32,7 @@ npm run lint       # ESLint
 ```bash
 # From project root
 uvicorn app.main:app --reload  # Development (http://localhost:8000)
-# Production uses systemd service (seo-audit.service)
+# Production uses systemd service (indexator.service)
 ```
 
 ### Database (Prisma)
@@ -468,10 +468,10 @@ recommendation=self.t("analyzer_content.robots.issues.no_robots_txt_recommendati
 
 **Production infrastructure:**
 
-- **Nginx** reverse proxy (config: `nginx-seo-audit.conf`)
+- **Nginx** reverse proxy (config: `nginx-indexator.conf`)
 - **systemd services:**
-  - `nextjs-seo-audit.service` - Next.js frontend + API
-  - `seo-audit.service` - FastAPI backend
+  - `nextjs-indexator.service` - Next.js frontend + API
+  - `indexator.service` - FastAPI backend
 - **Deployment script:** `deploy.sh`
 - **Next.js:** Standalone output mode enabled for containerization
 

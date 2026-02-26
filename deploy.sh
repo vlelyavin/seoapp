@@ -2,15 +2,15 @@
 set -euo pipefail
 
 # ===========================================
-# SEO Audit Tool - VPS Update & Deploy Script
+# Indexator - VPS Update & Deploy Script
 # Assumes: system deps, Node.js, Python, Playwright already installed
 # ===========================================
 
-APP_DIR="/var/www/seo-audit"
+APP_DIR="/var/www/indexator"
 FRONTEND_DIR="$APP_DIR/frontend"
-APP_USER="seo-audit"
+APP_USER="indexator"
 
-echo "=== SEO Audit Tool - Deploy ==="
+echo "=== Indexator - Deploy ==="
 
 run_as_app() {
     sudo -u "$APP_USER" -H bash -c "$1"
@@ -79,31 +79,31 @@ ln -sf "$FRONTEND_DIR/.env" "$FRONTEND_DIR/.next/standalone/.env"
 echo "[6/7] Restarting services..."
 sudo chown -R "$APP_USER:$APP_USER" "$APP_DIR"
 
-sudo cp "$APP_DIR/seo-audit.service" /etc/systemd/system/seo-audit.service 2>/dev/null || true
-sudo cp "$APP_DIR/nextjs-seo-audit.service" /etc/systemd/system/nextjs-seo-audit.service 2>/dev/null || true
+sudo cp "$APP_DIR/indexator.service" /etc/systemd/system/indexator.service 2>/dev/null || true
+sudo cp "$APP_DIR/nextjs-indexator.service" /etc/systemd/system/nextjs-indexator.service 2>/dev/null || true
 sudo systemctl daemon-reload
-sudo systemctl restart seo-audit
-sudo systemctl restart nextjs-seo-audit
+sudo systemctl restart indexator
+sudo systemctl restart nextjs-indexator
 
 # 7. Health checks
 echo "[7/7] Running health checks..."
 
 if ! wait_for_http "http://127.0.0.1:8000/health" 45 2; then
     echo "ERROR: FastAPI health check failed"
-    print_service_debug "seo-audit"
+    print_service_debug "indexator"
     exit 1
 fi
 
 if ! wait_for_http "http://127.0.0.1:3000" 45 2; then
     echo "ERROR: Next.js health check failed"
-    print_service_debug "nextjs-seo-audit"
+    print_service_debug "nextjs-indexator"
     exit 1
 fi
 
 # Nginx
 if command -v nginx &>/dev/null; then
-    sudo cp "$APP_DIR/nginx-seo-audit.conf" /etc/nginx/sites-available/seo-audit.conf 2>/dev/null || true
-    sudo ln -sf /etc/nginx/sites-available/seo-audit.conf /etc/nginx/sites-enabled/seo-audit.conf
+    sudo cp "$APP_DIR/nginx-indexator.conf" /etc/nginx/sites-available/indexator.conf 2>/dev/null || true
+    sudo ln -sf /etc/nginx/sites-available/indexator.conf /etc/nginx/sites-enabled/indexator.conf
     sudo nginx -t && sudo systemctl reload nginx
 fi
 

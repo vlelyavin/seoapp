@@ -1,0 +1,28 @@
+[Unit]
+Description=Indexator - Next.js Frontend
+After=network-online.target indexator.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=indexator
+Group=indexator
+WorkingDirectory=/var/www/indexator/frontend/.next/standalone
+Environment="NODE_ENV=production"
+Environment="PORT=3000"
+Environment="HOSTNAME=127.0.0.1"
+Environment="FRONTEND_ROOT=/var/www/indexator/frontend"
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+RestartSec=5
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Limits
+LimitNOFILE=65536
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target
