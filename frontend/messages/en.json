@@ -266,7 +266,7 @@
     "inspectionQuota": "URL inspections today",
     "indexnowKey": "IndexNow Key",
     "indexnowKeyDesc": "Host this key file at your domain root so Bing can verify your site.",
-    "runNow": "Run Now",
+    "runNow": "Run Auto-Index",
     "report": "Report",
     "lastSynced": "Last synced",
     "never": "Never",

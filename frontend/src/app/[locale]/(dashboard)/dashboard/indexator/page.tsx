@@ -1445,50 +1445,27 @@ function SiteCard({
           {/* ── Overview Tab ─────────────────────────────────────────────── */}
           {activeTab === "overview" && (
             <div className="px-4 sm:px-6 py-4 sm:py-5 space-y-5">
-              {/* Stats row */}
+              {/* Stats strip */}
               {stats ? (
-                <div className="flex flex-wrap gap-3 [&>*]:min-w-[100px] [&>*]:flex-1">
-                  <StatBox label={t("total")} value={stats.total} />
-                  <StatBox
-                    label={t("indexed")}
-                    value={stats.indexed}
-                    color="green"
-                  />
-                  <StatBox
-                    label={t("notIndexed")}
-                    value={stats.notIndexed}
-                    color="red"
-                  />
-                  <StatBox
-                    label={t("pending")}
-                    value={stats.pending}
-                    color="yellow"
-                  />
-                  <StatBox
-                    label={t("submitted")}
-                    value={stats.submittedGoogle + stats.submittedBing}
-                    color="blue"
-                  />
-                  <StatBox
-                    label={t("failed")}
-                    value={stats.failed}
-                    color="red"
-                  />
-                  <StatBox
-                    label={t("pages404")}
-                    value={stats.is404s}
-                    color="orange"
-                  />
-                </div>
-              ) : (
-                <div className="flex flex-wrap gap-3 [&>*]:min-w-[100px] [&>*]:flex-1">
-                  {Array.from({ length: 7 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="h-16 rounded-lg border border-gray-800 bg-gray-950 animate-pulse"
-                    />
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+                  {[
+                    { label: t("total"), value: stats.total, color: "text-gray-200" },
+                    { label: t("indexed"), value: stats.indexed, color: "text-green-400" },
+                    { label: t("notIndexed"), value: stats.notIndexed, color: "text-red-400" },
+                    { label: t("pending"), value: stats.pending, color: "text-yellow-400" },
+                    { label: t("submitted"), value: stats.submittedGoogle + stats.submittedBing, color: "text-blue-400" },
+                    { label: t("failed"), value: stats.failed, color: "text-red-400" },
+                    { label: t("pages404"), value: stats.is404s, color: "text-orange-400" },
+                  ].map((s, i, arr) => (
+                    <span key={s.label} className="flex items-center gap-1.5">
+                      <span className="text-gray-400">{s.label}</span>
+                      <span className={cn("font-semibold", s.color)}>{s.value}</span>
+                      {i < arr.length - 1 && <span className="text-gray-700 ml-2">&middot;</span>}
+                    </span>
                   ))}
                 </div>
+              ) : (
+                <div className="h-5 w-96 rounded bg-gray-800 animate-pulse" />
               )}
 
               {/* Actions */}
@@ -1520,7 +1497,7 @@ function SiteCard({
                     !stats?.notIndexed ||
                     quota?.googleSubmissions.remaining === 0
                   }
-                  className="flex items-center gap-1.5 rounded-md bg-gradient-to-r from-copper to-copper-light px-3 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                  className="flex items-center gap-1.5 rounded-md border border-gray-700 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-gray-900 disabled:opacity-50"
                 >
                   {t("submitAllNotIndexed")} (Google)
                 </button>
