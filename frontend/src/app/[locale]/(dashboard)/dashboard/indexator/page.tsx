@@ -688,9 +688,25 @@ export default function IndexingPage() {
             </span>
           </div>
           {isConnected && (
-            <span className="shrink-0 text-xs font-medium text-green-400">
-              {t("connected")}
-            </span>
+            <div className="flex items-center gap-3 shrink-0">
+              {globalQuota && (
+                <>
+                  <span className="flex items-center gap-1.5 text-xs text-gray-400">
+                    <Send className="h-3 w-3" />
+                    {t("googleQuota")}
+                    <span className="text-gray-200">{globalQuota.googleSubmissions.used}/{globalQuota.googleSubmissions.limit}</span>
+                  </span>
+                  <span className="flex items-center gap-1.5 text-xs text-gray-400">
+                    <Search className="h-3 w-3" />
+                    {t("inspectionQuota")}
+                    <span className="text-gray-200">{globalQuota.inspections.used}/{globalQuota.inspections.limit}</span>
+                  </span>
+                </>
+              )}
+              <span className="text-xs font-medium text-green-400">
+                {t("connected")}
+              </span>
+            </div>
           )}
         </div>
 
@@ -729,21 +745,6 @@ export default function IndexingPage() {
                 {t("disconnect")}
               </button>
 
-              {/* Inline quota pills */}
-              {globalQuota && (
-                <>
-                  <span className="flex items-center gap-1.5 rounded-full border border-gray-800 px-3 py-1.5 text-xs text-gray-400">
-                    <Send className="h-3 w-3" />
-                    {t("googleQuota")}
-                    <span className="text-gray-200">{globalQuota.googleSubmissions.used}/{globalQuota.googleSubmissions.limit}</span>
-                  </span>
-                  <span className="flex items-center gap-1.5 rounded-full border border-gray-800 px-3 py-1.5 text-xs text-gray-400">
-                    <Search className="h-3 w-3" />
-                    {t("inspectionQuota")}
-                    <span className="text-gray-200">{globalQuota.inspections.used}/{globalQuota.inspections.limit}</span>
-                  </span>
-                </>
-              )}
             </>
           )}
         </div>
