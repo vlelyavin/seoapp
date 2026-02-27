@@ -705,7 +705,7 @@ export default function IndexingPage() {
           </p>
         )}
 
-        <div className="mt-4 flex flex-wrap items-center gap-3">
+        <div className="mt-4 flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3">
           {!isConnected ? (
             <button
               onClick={handleReconnect}
@@ -716,25 +716,27 @@ export default function IndexingPage() {
             </button>
           ) : (
             <>
-              <button
-                onClick={openAddSiteModal}
-                disabled={sites.length >= maxSites}
-                title={sites.length >= maxSites ? t("upgradePlanToAddSites") : undefined}
-                className="flex items-center gap-2 rounded-md bg-gradient-to-r from-copper to-copper-light px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-              >
-                <Plus className="h-4 w-4" />
-                {t("addWebsite")}
-              </button>
-              <button
-                onClick={handleDisconnect}
-                className="flex items-center gap-2 rounded-md border border-gray-700 px-4 py-2 text-sm font-semibold text-white transition-colors hover:border-red-700 hover:text-red-400"
-              >
-                <Link2Off className="h-4 w-4" />
-                {t("disconnect")}
-              </button>
+              <div className="grid grid-cols-2 sm:flex sm:w-auto w-full gap-2">
+                <button
+                  onClick={openAddSiteModal}
+                  disabled={sites.length >= maxSites}
+                  title={sites.length >= maxSites ? t("upgradePlanToAddSites") : undefined}
+                  className="flex w-full items-center justify-center gap-2 rounded-md bg-gradient-to-r from-copper to-copper-light px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50 sm:w-auto sm:justify-start"
+                >
+                  <Plus className="h-4 w-4" />
+                  {t("addWebsite")}
+                </button>
+                <button
+                  onClick={handleDisconnect}
+                  className="flex w-full items-center justify-center gap-2 rounded-md border border-gray-700 px-4 py-2 text-sm font-semibold text-white transition-colors hover:border-red-700 hover:text-red-400 sm:w-auto sm:justify-start"
+                >
+                  <Link2Off className="h-4 w-4" />
+                  {t("disconnect")}
+                </button>
+              </div>
 
               {globalQuota && (
-                <div className="flex items-center gap-5 ml-auto">
+                <div className="flex flex-col gap-1 w-full sm:flex-row sm:items-center sm:gap-5 sm:ml-auto sm:w-auto">
                   <QuotaPill
                     icon={<Search className="h-3 w-3" />}
                     label={t("inspectionQuota")}
@@ -2343,9 +2345,11 @@ function QuotaPill({
   const pct = limit > 0 ? Math.min((used / limit) * 100, 100) : 0;
   return (
     <div>
-      <div className="flex items-center gap-1.5 text-xs text-gray-400">
-        {icon}
-        {label}
+      <div className="flex items-center gap-1.5 text-xs text-gray-400 justify-between sm:justify-start">
+        <span className="flex items-center gap-1.5">
+          {icon}
+          {label}
+        </span>
         <span className="text-gray-200">
           {used}/{limit}
         </span>
