@@ -188,11 +188,10 @@ function relativeTime(dateStr: string | null | undefined, t?: ReturnType<typeof 
 
 function gscStatusColor(
   status: string | null | undefined,
-  t?: ReturnType<typeof useTranslations<"indexing">>
+  t?: ReturnType<typeof useTranslations<"indexing">>,
 ): { bg: string; text: string; label: string } {
-  const l = (key: string, fallback: string) => t ? t(key as Parameters<typeof t>[0]) : fallback;
-  if (!status)
-    return { bg: "bg-gray-900", text: "text-gray-400", label: l("statusUnknown", "Unknown") };
+  const l = (key: string, fallback: string) => (t ? t(key as Parameters<typeof t>[0]) : fallback);
+  if (!status) return { bg: "bg-gray-900", text: "text-gray-400", label: l("statusUnknown", "Unknown") };
   const s = status.toLowerCase();
   if (s.includes("submitted and indexed") || s === "indexed")
     return { bg: "bg-green-900/35", text: "text-green-400", label: l("statusIndexed", "Indexed") };
@@ -225,12 +224,15 @@ function gscStatusColor(
   return { bg: "bg-gray-900", text: "text-gray-400", label: l("statusUnknown", "Unknown") };
 }
 
-function ourStatusColor(status: string, t?: ReturnType<typeof useTranslations<"indexing">>): {
+function ourStatusColor(
+  status: string,
+  t?: ReturnType<typeof useTranslations<"indexing">>,
+): {
   bg: string;
   text: string;
   label: string;
 } {
-  const l = (key: string, fallback: string) => t ? t(key as Parameters<typeof t>[0]) : fallback;
+  const l = (key: string, fallback: string) => (t ? t(key as Parameters<typeof t>[0]) : fallback);
   switch (status) {
     case "submitted":
       return {
@@ -498,12 +500,9 @@ export default function IndexingPage() {
 
   // ── Submit (with optional confirmation) ───────────────────────────────────
 
-  const requestSubmit = useCallback(
-    (siteId: string, urlIds: string[], engines: string[], count: number) => {
-      setConfirmState({ siteId, urlIds, engines, count });
-    },
-    []
-  );
+  const requestSubmit = useCallback((siteId: string, urlIds: string[], engines: string[], count: number) => {
+    setConfirmState({ siteId, urlIds, engines, count });
+  }, []);
 
   const executeSubmit = async () => {
     if (!confirmState) return;
@@ -511,10 +510,7 @@ export default function IndexingPage() {
 
     setSubmitting(true);
     try {
-      const body =
-        urlIds.length === 0
-          ? { all_not_indexed: true, engines }
-          : { url_ids: urlIds, engines };
+      const body = urlIds.length === 0 ? { all_not_indexed: true, engines } : { url_ids: urlIds, engines };
 
       const res = await fetch(`/api/indexing/sites/${siteId}/submit`, {
         method: "POST",
@@ -529,7 +525,7 @@ export default function IndexingPage() {
             google: data.submitted_google,
             bing: data.submitted_bing,
             skipped: data.skipped_404 ?? 0,
-          })
+          }),
         );
         await loadSiteStats(siteId);
         await loadSiteQuota(siteId);
@@ -545,11 +541,7 @@ export default function IndexingPage() {
 
   // ── Toggle auto-index ────────────────────────────────────────────────────
 
-  const toggleAutoIndex = async (
-    siteId: string,
-    engine: "google" | "bing",
-    value: boolean
-  ) => {
+  const toggleAutoIndex = async (siteId: string, engine: "google" | "bing", value: boolean) => {
     const res = await fetch(`/api/indexing/sites/${siteId}/auto-index`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -561,12 +553,11 @@ export default function IndexingPage() {
           s.id === siteId
             ? {
                 ...s,
-                autoIndexGoogle:
-                  engine === "google" ? value : s.autoIndexGoogle,
+                autoIndexGoogle: engine === "google" ? value : s.autoIndexGoogle,
                 autoIndexBing: engine === "bing" ? value : s.autoIndexBing,
               }
-            : s
-        )
+            : s,
+        ),
       );
     }
   };
@@ -645,15 +636,11 @@ export default function IndexingPage() {
   // ── Mark site as IndexNow-verified / failed in local state ───────────────
 
   const handleVerifySuccess = useCallback((siteId: string) => {
-    setSites((prev) =>
-      prev.map((s) => (s.id === siteId ? { ...s, indexnowKeyVerified: true } : s))
-    );
+    setSites((prev) => prev.map((s) => (s.id === siteId ? { ...s, indexnowKeyVerified: true } : s)));
   }, []);
 
   const handleVerifyFail = useCallback((siteId: string) => {
-    setSites((prev) =>
-      prev.map((s) => (s.id === siteId ? { ...s, indexnowKeyVerified: false } : s))
-    );
+    setSites((prev) => prev.map((s) => (s.id === siteId ? { ...s, indexnowKeyVerified: false } : s)));
   }, []);
 
   // ── Copy IndexNow key ─────────────────────────────────────────────────────
@@ -693,9 +680,7 @@ export default function IndexingPage() {
       <div className="rounded-xl border border-gray-800 bg-gray-950 p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold text-white">
-              {t("gscTitle")}
-            </h2>
+            <h2 className="text-lg font-semibold text-white">{t("gscTitle")}</h2>
             <p className="mt-1 text-sm text-gray-400">{t("connectDesc")}</p>
           </div>
         </div>
@@ -708,15 +693,9 @@ export default function IndexingPage() {
             ) : (
               <XCircle className="h-4 w-4 text-gray-500 shrink-0" />
             )}
-            <span className="text-sm text-gray-300 truncate">
-              {gscStatus?.email ?? t("notConnected")}
-            </span>
+            <span className="text-sm text-gray-300 truncate">{gscStatus?.email ?? t("notConnected")}</span>
           </div>
-          {isConnected && (
-            <span className="shrink-0 text-xs font-medium text-green-400">
-              {t("connected")}
-            </span>
-          )}
+          {isConnected && <span className="shrink-0 text-xs font-medium text-green-400">{t("connected")}</span>}
         </div>
 
         {gscStatus?.connected && !gscStatus.hasRequiredScopes && (
@@ -784,9 +763,7 @@ export default function IndexingPage() {
             <div className="rounded-xl border border-gray-800 bg-gray-950 p-10 text-center">
               <Search className="mx-auto h-10 w-10 text-gray-600 mb-3" />
               <p className="text-gray-400 text-sm">{t("noSites")}</p>
-              <p className="text-gray-600 text-xs mt-1">
-                {t("noSitesDesc")}
-              </p>
+              <p className="text-gray-600 text-xs mt-1">{t("noSitesDesc")}</p>
             </div>
           ) : (
             <div className="flex flex-col gap-4">
@@ -843,17 +820,13 @@ export default function IndexingPage() {
               <Send className="h-6 w-6 text-copper" />
             </div>
             {/* Title */}
-            <h3 className="mb-2 text-base font-semibold text-white">
-              {t("confirmSubmitTitle")}
-            </h3>
+            <h3 className="mb-2 text-base font-semibold text-white">{t("confirmSubmitTitle")}</h3>
             <p className="mb-5 text-sm text-gray-300">
-              {confirmState.engines.includes("google") &&
-              !confirmState.engines.includes("bing")
+              {confirmState.engines.includes("google") && !confirmState.engines.includes("bing")
                 ? t("confirmSubmitGoogle", {
                     count: confirmState.count,
                   })
-                : confirmState.engines.includes("bing") &&
-                    !confirmState.engines.includes("google")
+                : confirmState.engines.includes("bing") && !confirmState.engines.includes("google")
                   ? t("confirmSubmitBing", { count: confirmState.count })
                   : t("confirmSubmitBoth", { count: confirmState.count })}
             </p>
@@ -864,9 +837,7 @@ export default function IndexingPage() {
                 disabled={submitting}
                 className="flex flex-1 items-center justify-center gap-2 rounded-md bg-gradient-to-r from-copper to-copper-light px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
               >
-                {submitting && (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                )}
+                {submitting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                 {t("confirm")}
               </button>
               <button
@@ -899,21 +870,15 @@ export default function IndexingPage() {
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10">
               <Link2Off className="h-6 w-6 text-red-400" />
             </div>
-            <h3 className="mb-2 text-base font-semibold text-white">
-              {t("disconnectTitle")}
-            </h3>
-            <p className="mb-6 text-sm text-gray-400">
-              {t("disconnectDescriptionNew")}
-            </p>
+            <h3 className="mb-2 text-base font-semibold text-white">{t("disconnectTitle")}</h3>
+            <p className="mb-6 text-sm text-gray-400">{t("disconnectDescriptionNew")}</p>
             <div className="flex gap-3">
               <button
                 onClick={handleDisconnectConfirm}
                 disabled={disconnecting}
                 className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-red-800 bg-red-950/50 px-4 py-2.5 text-sm font-semibold text-red-400 transition-colors hover:bg-red-900/30 disabled:opacity-50"
               >
-                {disconnecting && (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                )}
+                {disconnecting && <Loader2 className="h-4 w-4 animate-spin" />}
                 {t("disconnect")}
               </button>
               <button
@@ -946,20 +911,14 @@ export default function IndexingPage() {
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-copper/10">
               <Plus className="h-6 w-6 text-copper" />
             </div>
-            <h3 className="mb-2 text-base font-semibold text-white">
-              {t("addWebsite")}
-            </h3>
-            <p className="mb-1 text-xs text-gray-500">
-              {t("sitesUsed", { used: sites.length, max: maxSites })}
-            </p>
+            <h3 className="mb-2 text-base font-semibold text-white">{t("addWebsite")}</h3>
+            <p className="mb-1 text-xs text-gray-500">{t("sitesUsed", { used: sites.length, max: maxSites })}</p>
             {loadingAvailable ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
               </div>
             ) : availableGscSites.length === 0 ? (
-              <p className="py-6 text-center text-sm text-gray-400">
-                {t("noAvailableSites")}
-              </p>
+              <p className="py-6 text-center text-sm text-gray-400">{t("noAvailableSites")}</p>
             ) : (
               <>
                 <select
@@ -1006,9 +965,7 @@ export default function IndexingPage() {
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10">
               <Trash2 className="h-6 w-6 text-red-400" />
             </div>
-            <h3 className="mb-2 text-base font-semibold text-white">
-              {t("deleteSiteTitle")}
-            </h3>
+            <h3 className="mb-2 text-base font-semibold text-white">{t("deleteSiteTitle")}</h3>
             <p className="mb-5 text-sm text-gray-400">
               {t("deleteSiteDescription", {
                 domain: sites.find((s) => s.id === deletingSiteId)?.domain ?? "",
@@ -1020,9 +977,7 @@ export default function IndexingPage() {
                 disabled={deletingSiteLoading}
                 className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-red-800 bg-red-950/50 px-4 py-2.5 text-sm font-semibold text-red-400 transition-colors hover:bg-red-900/30 disabled:opacity-50"
               >
-                {deletingSiteLoading && (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                )}
+                {deletingSiteLoading && <Loader2 className="h-4 w-4 animate-spin" />}
                 {t("delete")}
               </button>
               <button
@@ -1078,12 +1033,7 @@ function SiteCard({
   t: ReturnType<typeof useTranslations<"indexing">>;
   onToggle: () => void;
   onSyncUrls: () => void;
-  onRequestSubmit: (
-    siteId: string,
-    urlIds: string[],
-    engines: string[],
-    count: number
-  ) => void;
+  onRequestSubmit: (siteId: string, urlIds: string[], engines: string[], count: number) => void;
   onToggleAutoGoogle: (v: boolean) => void;
   onToggleAutoBing: (v: boolean) => void;
   onRunNow: () => void;
@@ -1094,9 +1044,7 @@ function SiteCard({
   autoIndexEnabled: boolean;
   showToast: (msg: string, ok?: boolean) => void;
 }) {
-  const [activeTab, setActiveTab] = useState<"overview" | "urls" | "report" | "log">(
-    "overview"
-  );
+  const [activeTab, setActiveTab] = useState<"overview" | "urls" | "report" | "log">("overview");
 
   // Last auto-index report
   const [lastAutoIndex, setLastAutoIndex] = useState<LastAutoIndexReport | null | undefined>(undefined);
@@ -1146,10 +1094,19 @@ function SiteCard({
         if (!urlSortCol) return 0;
         let aVal: string | null = null;
         let bVal: string | null = null;
-        if (urlSortCol === "url") { aVal = a.url; bVal = b.url; }
-        else if (urlSortCol === "gscStatus") { aVal = a.gscStatus; bVal = b.gscStatus; }
-        else if (urlSortCol === "ourStatus") { aVal = a.indexingStatus; bVal = b.indexingStatus; }
-        else if (urlSortCol === "lastSynced") { aVal = a.lastSyncedAt; bVal = b.lastSyncedAt; }
+        if (urlSortCol === "url") {
+          aVal = a.url;
+          bVal = b.url;
+        } else if (urlSortCol === "gscStatus") {
+          aVal = a.gscStatus;
+          bVal = b.gscStatus;
+        } else if (urlSortCol === "ourStatus") {
+          aVal = a.indexingStatus;
+          bVal = b.indexingStatus;
+        } else if (urlSortCol === "lastSynced") {
+          aVal = a.lastSyncedAt;
+          bVal = b.lastSyncedAt;
+        }
         if (aVal == null && bVal == null) return 0;
         if (aVal == null) return 1;
         if (bVal == null) return -1;
@@ -1176,9 +1133,7 @@ function SiteCard({
 
   const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const lastSynced = site.lastSyncedAt
-    ? formatTimestamp(site.lastSyncedAt)
-    : t("never");
+  const lastSynced = site.lastSyncedAt ? formatTimestamp(site.lastSyncedAt) : t("never");
 
   // ── Load URLs ────────────────────────────────────────────────────────────
 
@@ -1191,15 +1146,13 @@ function SiteCard({
           page: String(page),
           q: search,
         });
-        const res = await fetch(
-          `/api/indexing/sites/${site.id}/urls?${params}`
-        );
+        const res = await fetch(`/api/indexing/sites/${site.id}/urls?${params}`);
         if (res.ok) setUrlPage(await res.json());
       } finally {
         setLoadingUrls(false);
       }
     },
-    [site.id]
+    [site.id],
   );
 
   // ── Load report ───────────────────────────────────────────────────────────
@@ -1227,7 +1180,7 @@ function SiteCard({
         setLoadingLog(false);
       }
     },
-    [site.id]
+    [site.id],
   );
 
   // Load URLs/report/log when tabs become active
@@ -1291,9 +1244,7 @@ function SiteCard({
   // ── Bulk inspect ─────────────────────────────────────────────────────────
 
   const bulkInspect = async () => {
-    const urlsToInspect = urlPage?.urls
-      .filter((u) => selectedUrls.has(u.id))
-      .map((u) => u.url) ?? [];
+    const urlsToInspect = urlPage?.urls.filter((u) => selectedUrls.has(u.id)).map((u) => u.url) ?? [];
     if (urlsToInspect.length === 0) return;
 
     const res = await fetch(`/api/indexing/sites/${site.id}/inspect`, {
@@ -1359,14 +1310,11 @@ function SiteCard({
   const requestRemoval = async (urlId: string) => {
     setRemovingUrl((prev) => ({ ...prev, [urlId]: true }));
     try {
-      const res = await fetch(
-        `/api/indexing/sites/${site.id}/request-removal`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ urlId }),
-        }
-      );
+      const res = await fetch(`/api/indexing/sites/${site.id}/request-removal`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ urlId }),
+      });
       if (res.ok) {
         showToast(t("removalRequestSent"));
         await loadUrls(urlFilter, urlCurrentPage, urlSearch);
@@ -1382,8 +1330,7 @@ function SiteCard({
   // ── Checkbox helpers ─────────────────────────────────────────────────────
 
   const allOnPageSelected =
-    (urlPage?.urls.length ?? 0) > 0 &&
-    (urlPage?.urls.every((u) => selectedUrls.has(u.id)) ?? false);
+    (urlPage?.urls.length ?? 0) > 0 && (urlPage?.urls.every((u) => selectedUrls.has(u.id)) ?? false);
 
   const toggleSelectAll = () => {
     if (allOnPageSelected) {
@@ -1435,37 +1382,53 @@ function SiteCard({
   return (
     <div className="relative overflow-hidden rounded-xl border border-gray-800 bg-gray-950">
       {/* Header row */}
-      <div className="flex w-full items-center justify-between px-3 sm:px-6 py-4">
-        <div className="flex items-center gap-3">
-          <Search className="h-5 w-5 text-copper shrink-0" />
-          <div>
-            <p className="font-medium text-white">{site.domain}</p>
-            <p className="text-xs text-gray-500">
-              {t("lastSynced")}: {lastSynced}
-            </p>
+      <div className="flex flex-col px-3 sm:px-6 py-4">
+        <div className="flex w-full items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Search className="h-5 w-5 text-copper shrink-0" />
+            <div>
+              <p className="font-medium text-white">{site.domain}</p>
+              <p className="text-xs text-gray-500">
+                {t("lastSynced")}: {lastSynced}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="hidden sm:flex flex-wrap gap-x-4 gap-y-1 text-sm">
+              <StatPill label={t("total")} value={site.totalUrls} color="gray" />
+              <StatPill label={t("indexed")} value={site.indexedCount} color="green" />
+              <StatPill label={t("notIndexed")} value={Math.max(0, site.totalUrls - site.indexedCount)} color="red" />
+              <StatPill label={t("pending")} value={stats?.pending ?? 0} color="yellow" />
+              <StatPill
+                label={t("submitted")}
+                value={(stats?.submittedGoogle ?? 0) + (stats?.submittedBing ?? 0)}
+                color="blue"
+              />
+              {(stats?.failed ?? 0) > 0 && <StatPill label={t("failed")} value={stats!.failed} color="red" />}
+              {(stats?.is404s ?? 0) > 0 && <StatPill label={t("pages404")} value={stats!.is404s} color="orange" />}
+            </div>
+            <button
+              onClick={onDelete}
+              className="rounded-md p-1.5 text-gray-600 transition-colors hover:bg-red-950/50 hover:text-red-400"
+              title={t("deleteSite")}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
           </div>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="hidden sm:flex flex-wrap gap-x-4 gap-y-1 text-sm">
-            <StatPill label={t("total")} value={site.totalUrls} color="gray" />
-            <StatPill label={t("indexed")} value={site.indexedCount} color="green" />
-            <StatPill label={t("notIndexed")} value={Math.max(0, site.totalUrls - site.indexedCount)} color="red" />
-            <StatPill label={t("pending")} value={stats?.pending ?? 0} color="yellow" />
-            <StatPill label={t("submitted")} value={(stats?.submittedGoogle ?? 0) + (stats?.submittedBing ?? 0)} color="blue" />
-            {(stats?.failed ?? 0) > 0 && (
-              <StatPill label={t("failed")} value={stats!.failed} color="red" />
-            )}
-            {(stats?.is404s ?? 0) > 0 && (
-              <StatPill label={t("pages404")} value={stats!.is404s} color="orange" />
-            )}
-          </div>
-          <button
-            onClick={onDelete}
-            className="rounded-md p-1.5 text-gray-600 transition-colors hover:bg-red-950/50 hover:text-red-400"
-            title={t("deleteSite")}
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
+        {/* Mobile-only stats row */}
+        <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs sm:hidden mt-2">
+          <StatPill label={t("total")} value={site.totalUrls} color="gray" />
+          <StatPill label={t("indexed")} value={site.indexedCount} color="green" />
+          <StatPill label={t("notIndexed")} value={Math.max(0, site.totalUrls - site.indexedCount)} color="red" />
+          <StatPill label={t("pending")} value={stats?.pending ?? 0} color="yellow" />
+          <StatPill
+            label={t("submitted")}
+            value={(stats?.submittedGoogle ?? 0) + (stats?.submittedBing ?? 0)}
+            color="blue"
+          />
+          {(stats?.failed ?? 0) > 0 && <StatPill label={t("failed")} value={stats!.failed} color="red" />}
+          {(stats?.is404s ?? 0) > 0 && <StatPill label={t("pages404")} value={stats!.is404s} color="orange" />}
         </div>
       </div>
 
@@ -1482,7 +1445,7 @@ function SiteCard({
                   "shrink-0 whitespace-nowrap px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-px",
                   activeTab === tab.id
                     ? "border-copper text-white"
-                    : "border-transparent text-gray-400 hover:text-gray-200"
+                    : "border-transparent text-gray-400 hover:text-gray-200",
                 )}
               >
                 {tab.label}
@@ -1555,7 +1518,7 @@ function SiteCard({
                       onDisabledClick={autoIndexEnabled ? () => setIndexNowModal({ action: () => {} }) : undefined}
                     />
                     {site.indexnowKey && (
-                      <div className="flex items-center gap-3 ml-1">
+                      <div className="flex items-center gap-3">
                         {site.indexnowKeyVerified ? (
                           <span className="inline-flex items-center gap-1 text-xs font-medium text-green-400">
                             <CheckCircle className="h-3 w-3" />
@@ -1588,11 +1551,7 @@ function SiteCard({
                       disabled={running}
                       className="flex items-center gap-1.5 rounded-md border border-gray-700 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-gray-900 disabled:opacity-50"
                     >
-                      {running ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      ) : (
-                        <Play className="h-3.5 w-3.5" />
-                      )}
+                      {running ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
                       {running ? t("running") : t("runNow")}
                     </button>
                     <span className="text-xs text-gray-500">
@@ -1630,7 +1589,7 @@ function SiteCard({
                           "inline-flex h-9 shrink-0 items-center justify-center rounded-md px-2.5 text-xs font-medium transition-colors",
                           urlFilter === f.id
                             ? "border border-gray-700 bg-gray-900 text-white shadow-sm"
-                            : "border border-transparent text-gray-400 hover:text-gray-200"
+                            : "border border-transparent text-gray-400 hover:text-gray-200",
                         )}
                       >
                         {f.label}
@@ -1661,21 +1620,10 @@ function SiteCard({
               {/* Bulk action bar */}
               {selectedUrls.size > 0 && (
                 <div className="flex flex-wrap items-center gap-2 rounded-lg border border-gray-700 bg-gray-900 px-4 py-2.5">
-                  <span className="text-sm text-gray-300 mr-1">
-                    {t("selectedCount", { count: selectedUrls.size })}
-                  </span>
+                  <span className="text-sm text-gray-300 mr-1">{t("selectedCount", { count: selectedUrls.size })}</span>
                   <button
-                    onClick={() =>
-                      onRequestSubmit(
-                        site.id,
-                        [...selectedUrls],
-                        ["google"],
-                        selectedUrls.size
-                      )
-                    }
-                    disabled={
-                      quota?.googleSubmissions.remaining === 0
-                    }
+                    onClick={() => onRequestSubmit(site.id, [...selectedUrls], ["google"], selectedUrls.size)}
+                    disabled={quota?.googleSubmissions.remaining === 0}
                     className="rounded-md bg-gradient-to-r from-copper to-copper-light px-3 py-1 text-xs font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
                   >
                     {t("submitToGoogle")}
@@ -1683,9 +1631,7 @@ function SiteCard({
                   {site.indexnowKey && (
                     <button
                       onClick={() =>
-                        bingSubmit(() =>
-                          onRequestSubmit(site.id, [...selectedUrls], ["bing"], selectedUrls.size)
-                        )
+                        bingSubmit(() => onRequestSubmit(site.id, [...selectedUrls], ["bing"], selectedUrls.size))
                       }
                       className="rounded-md border border-gray-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-gray-700"
                     >
@@ -1713,19 +1659,14 @@ function SiteCard({
               {loadingUrls ? (
                 <div className="space-y-2">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="h-12 rounded-lg border border-gray-800 bg-gray-950 animate-pulse"
-                    />
+                    <div key={i} className="h-12 rounded-lg border border-gray-800 bg-gray-950 animate-pulse" />
                   ))}
                 </div>
               ) : !urlPage || urlPage.urls.length === 0 ? (
                 <div className="rounded-lg border border-gray-800 bg-gray-950 p-10 text-center">
                   <Search className="mx-auto h-8 w-8 text-gray-600 mb-2" />
                   <p className="text-sm text-gray-400">
-                    {urlPage?.total === 0 && urlFilter === "all" && !urlSearch
-                      ? t("noUrls")
-                      : t("urlTableEmpty")}
+                    {urlPage?.total === 0 && urlFilter === "all" && !urlSearch ? t("noUrls") : t("urlTableEmpty")}
                   </p>
                 </div>
               ) : (
@@ -1764,16 +1705,30 @@ function SiteCard({
                               </div>
                               {/* Status badges */}
                               <div className="flex flex-wrap gap-1.5">
-                                <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-xs", gsc.bg, gsc.text)}>
+                                <span
+                                  className={cn(
+                                    "inline-flex items-center rounded-full px-2 py-0.5 text-xs",
+                                    gsc.bg,
+                                    gsc.text,
+                                  )}
+                                >
                                   {gsc.label}
                                 </span>
-                                <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-xs", our.bg, our.text)}>
+                                <span
+                                  className={cn(
+                                    "inline-flex items-center rounded-full px-2 py-0.5 text-xs",
+                                    our.bg,
+                                    our.text,
+                                  )}
+                                >
                                   {our.label}
                                 </span>
                               </div>
                               {/* Timestamps */}
                               <div className="flex flex-wrap gap-3 text-xs text-gray-600">
-                                {url.lastSyncedAt && <span>{t("syncedTime", { time: formatTimestamp(url.lastSyncedAt) })}</span>}
+                                {url.lastSyncedAt && (
+                                  <span>{t("syncedTime", { time: formatTimestamp(url.lastSyncedAt) })}</span>
+                                )}
                               </div>
                             </div>
                             {/* Action buttons */}
@@ -1784,7 +1739,11 @@ function SiteCard({
                                 title={!gscConnected ? t("reconnectRequired") : t("inspect")}
                                 className="flex h-9 w-9 items-center justify-center rounded-md border border-gray-700 text-gray-400 transition-colors hover:bg-gray-900 hover:text-white disabled:opacity-50"
                               >
-                                {isInspecting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Search className="h-3.5 w-3.5" />}
+                                {isInspecting ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <Search className="h-3.5 w-3.5" />
+                                )}
                               </button>
                               <button
                                 onClick={() => onRequestSubmit(site.id, [url.id], ["google"], 1)}
@@ -1809,7 +1768,11 @@ function SiteCard({
                                 title={t("requestRemoval")}
                                 className="flex h-9 w-9 items-center justify-center rounded-md border border-gray-700 text-gray-400 transition-colors hover:bg-red-900/20 hover:text-red-400 hover:border-red-900/40 disabled:opacity-50"
                               >
-                                {removingUrl[url.id] ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                                {removingUrl[url.id] ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                )}
                               </button>
                             </div>
                           </div>
@@ -1824,34 +1787,43 @@ function SiteCard({
                       <thead className="sticky top-0 z-10">
                         <tr className="border-b border-gray-800 bg-gray-950">
                           <th className="w-10 px-3 py-3 text-left">
-                            <Checkbox
-                              checked={allOnPageSelected}
-                              onChange={toggleSelectAll}
-                            />
+                            <Checkbox checked={allOnPageSelected} onChange={toggleSelectAll} />
                           </th>
                           <th
                             className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-200"
                             onClick={() => handleUrlSort("url")}
                           >
-                            <span className="flex items-center gap-1">{t("urlHeader")}<ArrowUpDown className="h-3 w-3" /></span>
+                            <span className="flex items-center gap-1">
+                              {t("urlHeader")}
+                              <ArrowUpDown className="h-3 w-3" />
+                            </span>
                           </th>
                           <th
                             className="hidden md:table-cell px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-200"
                             onClick={() => handleUrlSort("gscStatus")}
                           >
-                            <span className="flex items-center gap-1">{t("gscStatus")}<ArrowUpDown className="h-3 w-3" /></span>
+                            <span className="flex items-center gap-1">
+                              {t("gscStatus")}
+                              <ArrowUpDown className="h-3 w-3" />
+                            </span>
                           </th>
                           <th
                             className="hidden sm:table-cell px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-200"
                             onClick={() => handleUrlSort("ourStatus")}
                           >
-                            <span className="flex items-center gap-1">{t("ourStatus")}<ArrowUpDown className="h-3 w-3" /></span>
+                            <span className="flex items-center gap-1">
+                              {t("ourStatus")}
+                              <ArrowUpDown className="h-3 w-3" />
+                            </span>
                           </th>
                           <th
                             className="hidden lg:table-cell px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-200"
                             onClick={() => handleUrlSort("lastSynced")}
                           >
-                            <span className="flex items-center gap-1">{t("lastSynced")}<ArrowUpDown className="h-3 w-3" /></span>
+                            <span className="flex items-center gap-1">
+                              {t("lastSynced")}
+                              <ArrowUpDown className="h-3 w-3" />
+                            </span>
                           </th>
                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                             {t("actions")}
@@ -1865,22 +1837,13 @@ function SiteCard({
                           const isInspecting = inspecting[url.url] ?? false;
 
                           return (
-                            <tr
-                              key={url.id}
-                              className="hover:bg-gray-900/50 transition-colors"
-                            >
+                            <tr key={url.id} className="hover:bg-gray-900/50 transition-colors">
                               <td className="px-3 py-3">
-                                <Checkbox
-                                  checked={selectedUrls.has(url.id)}
-                                  onChange={() => toggleUrl(url.id)}
-                                />
+                                <Checkbox checked={selectedUrls.has(url.id)} onChange={() => toggleUrl(url.id)} />
                               </td>
                               <td className="px-4 py-3 max-w-xs">
                                 <div className="flex items-center gap-2">
-                                  <span
-                                    className="truncate text-gray-200 text-xs"
-                                    title={url.url}
-                                  >
+                                  <span className="truncate text-gray-200 text-xs" title={url.url}>
                                     {url.url}
                                   </span>
                                   <a
@@ -1899,7 +1862,7 @@ function SiteCard({
                                     className={cn(
                                       "inline-flex items-center rounded-full px-2 py-0.5 text-xs",
                                       gsc.bg,
-                                      gsc.text
+                                      gsc.text,
                                     )}
                                   >
                                     {gsc.label}
@@ -1908,7 +1871,7 @@ function SiteCard({
                                     className={cn(
                                       "inline-flex items-center rounded-full px-2 py-0.5 text-xs",
                                       our.bg,
-                                      our.text
+                                      our.text,
                                     )}
                                   >
                                     {our.label}
@@ -1916,18 +1879,14 @@ function SiteCard({
                                 </div>
                               </td>
                               <td className="hidden md:table-cell px-4 py-3">
-                                <GscStatusBadge
-                                  status={url.gscStatus}
-                                  gsc={gsc}
-                                  t={t}
-                                />
+                                <GscStatusBadge status={url.gscStatus} gsc={gsc} t={t} />
                               </td>
                               <td className="hidden sm:table-cell px-4 py-3">
                                 <span
                                   className={cn(
                                     "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium",
                                     our.bg,
-                                    our.text
+                                    our.text,
                                   )}
                                 >
                                   {our.label}
@@ -1951,30 +1910,16 @@ function SiteCard({
                                     )}
                                   </button>
                                   <button
-                                    onClick={() =>
-                                      onRequestSubmit(
-                                        site.id,
-                                        [url.id],
-                                        ["google"],
-                                        1
-                                      )
-                                    }
+                                    onClick={() => onRequestSubmit(site.id, [url.id], ["google"], 1)}
                                     title={!gscConnected ? t("reconnectRequired") : t("submitToGoogle")}
-                                    disabled={
-                                      !gscConnected ||
-                                      quota?.googleSubmissions.remaining === 0
-                                    }
+                                    disabled={!gscConnected || quota?.googleSubmissions.remaining === 0}
                                     className="flex h-8 w-8 items-center justify-center rounded-md border border-gray-700 text-xs font-semibold text-gray-400 transition-colors hover:bg-copper/20 hover:text-copper-light hover:border-copper/30 disabled:opacity-50"
                                   >
                                     G
                                   </button>
                                   {site.indexnowKey && (
                                     <button
-                                      onClick={() =>
-                                        bingSubmit(() =>
-                                          onRequestSubmit(site.id, [url.id], ["bing"], 1)
-                                        )
-                                      }
+                                      onClick={() => bingSubmit(() => onRequestSubmit(site.id, [url.id], ["bing"], 1))}
                                       title={t("submitToBing")}
                                       className="flex h-8 w-8 items-center justify-center rounded-md border border-gray-700 text-xs font-semibold text-gray-400 transition-colors hover:bg-gray-900 hover:text-white"
                                     >
@@ -1983,10 +1928,7 @@ function SiteCard({
                                   )}
                                   <button
                                     onClick={() => requestRemoval(url.id)}
-                                    disabled={
-                                      removingUrl[url.id] ||
-                                      url.indexingStatus === "removal_requested"
-                                    }
+                                    disabled={removingUrl[url.id] || url.indexingStatus === "removal_requested"}
                                     title={t("requestRemovalTooltip")}
                                     className="flex h-8 w-8 items-center justify-center rounded-md border border-gray-700 text-gray-400 transition-colors hover:bg-red-900/20 hover:text-red-400 hover:border-red-900/40 disabled:opacity-50"
                                   >
@@ -2029,9 +1971,7 @@ function SiteCard({
                         </button>
                         <button
                           onClick={() => {
-                            setUrlCurrentPage((p) =>
-                              Math.min(urlPage.totalPages, p + 1)
-                            );
+                            setUrlCurrentPage((p) => Math.min(urlPage.totalPages, p + 1));
                           }}
                           disabled={urlCurrentPage >= urlPage.totalPages}
                           className="flex items-center gap-1 rounded-md border border-gray-700 px-4 py-2.5 text-xs font-medium text-white transition-colors hover:bg-gray-900 disabled:opacity-40"
@@ -2066,7 +2006,7 @@ function SiteCard({
                           "inline-flex h-9 shrink-0 items-center justify-center rounded-md px-2.5 text-xs font-medium transition-colors",
                           logFilter === f.id
                             ? "border border-gray-700 bg-gray-900 text-white shadow-sm"
-                            : "border border-transparent text-gray-400 hover:text-gray-200"
+                            : "border border-transparent text-gray-400 hover:text-gray-200",
                         )}
                       >
                         {f.label}
@@ -2089,10 +2029,7 @@ function SiteCard({
               {loadingLog ? (
                 <div className="space-y-2">
                   {Array.from({ length: 6 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="h-10 rounded-lg border border-gray-800 bg-gray-950 animate-pulse"
-                    />
+                    <div key={i} className="h-10 rounded-lg border border-gray-800 bg-gray-950 animate-pulse" />
                   ))}
                 </div>
               ) : !logPage || logPage.logs.length === 0 ? (
@@ -2114,17 +2051,12 @@ function SiteCard({
                           <span className={cn("h-2 w-2 shrink-0 rounded-full", dot)} />
 
                           {/* Label */}
-                          <span className={cn("text-xs font-medium shrink-0 w-24 sm:w-40", text)}>
-                            {entry.label}
-                          </span>
+                          <span className={cn("text-xs font-medium shrink-0 w-24 sm:w-40", text)}>{entry.label}</span>
 
                           {/* URL */}
                           {entry.url ? (
                             <span className="flex-1 flex items-center gap-1.5 min-w-0">
-                              <span
-                                className="truncate text-xs text-gray-300"
-                                title={entry.url}
-                              >
+                              <span className="truncate text-xs text-gray-300" title={entry.url}>
                                 {entry.url}
                               </span>
                               <a
@@ -2142,9 +2074,7 @@ function SiteCard({
                           )}
 
                           {/* Timestamp */}
-                          <span className="shrink-0 text-xs text-gray-500">
-                            {formatTimestamp(entry.createdAt)}
-                          </span>
+                          <span className="shrink-0 text-xs text-gray-500">{formatTimestamp(entry.createdAt)}</span>
                         </div>
                       );
                     })}
@@ -2166,9 +2096,7 @@ function SiteCard({
                           {t("prevPage")}
                         </button>
                         <button
-                          onClick={() =>
-                            setLogCurrentPage((p) => Math.min(logPage.totalPages, p + 1))
-                          }
+                          onClick={() => setLogCurrentPage((p) => Math.min(logPage.totalPages, p + 1))}
                           disabled={logCurrentPage >= logPage.totalPages}
                           className="flex items-center gap-1 rounded-md border border-gray-700 px-4 py-2.5 text-xs font-medium text-white transition-colors hover:bg-gray-900 disabled:opacity-40"
                         >
@@ -2186,17 +2114,12 @@ function SiteCard({
           {/* ── Report Tab ───────────────────────────────────────────────── */}
           {activeTab === "report" && (
             <div className="px-4 sm:px-6 py-4 sm:py-5 space-y-5">
-              <h3 className="text-sm font-semibold text-white">
-                {t("todayReport")}
-              </h3>
+              <h3 className="text-sm font-semibold text-white">{t("todayReport")}</h3>
 
               {loadingReport ? (
                 <div className="space-y-3">
                   {Array.from({ length: 4 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="h-16 rounded-lg border border-gray-800 bg-gray-950 animate-pulse"
-                    />
+                    <div key={i} className="h-16 rounded-lg border border-gray-800 bg-gray-950 animate-pulse" />
                   ))}
                 </div>
               ) : !report ? (
@@ -2226,33 +2149,19 @@ function SiteCard({
                     )}
                     <p className="text-xs text-gray-500 mt-1">
                       {report.overall.total > 0
-                        ? t("percentIndexed", { percent: Math.round((report.overall.indexed / report.overall.total) * 100) })
+                        ? t("percentIndexed", {
+                            percent: Math.round((report.overall.indexed / report.overall.total) * 100),
+                          })
                         : t("noDataYet")}
                     </p>
                   </div>
 
                   {/* Today's stats */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <StatBox
-                      label={t("newPages")}
-                      value={report.today.newPagesDetected}
-                      color="blue"
-                    />
-                    <StatBox
-                      label={t("submittedGoogle")}
-                      value={report.today.submittedGoogle}
-                      color="green"
-                    />
-                    <StatBox
-                      label={t("submittedBing")}
-                      value={report.today.submittedBing}
-                      color="orange"
-                    />
-                    <StatBox
-                      label={t("pages404Found")}
-                      value={report.today.pages404}
-                      color="red"
-                    />
+                    <StatBox label={t("newPages")} value={report.today.newPagesDetected} color="blue" />
+                    <StatBox label={t("submittedGoogle")} value={report.today.submittedGoogle} color="green" />
+                    <StatBox label={t("submittedBing")} value={report.today.submittedBing} color="orange" />
+                    <StatBox label={t("pages404Found")} value={report.today.pages404} color="red" />
                   </div>
 
                   {/* Quota */}
@@ -2330,13 +2239,7 @@ function GscStatusBadge({
 
   return (
     <div className="relative inline-flex items-center gap-1">
-      <span
-        className={cn(
-          "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium",
-          gsc.bg,
-          gsc.text
-        )}
-      >
+      <span className={cn("inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium", gsc.bg, gsc.text)}>
         {gsc.label}
       </span>
       <button
@@ -2415,10 +2318,7 @@ function ExpandableList({
           {title} ({items.length})
         </p>
         {items.length > 5 && (
-          <button
-            onClick={() => setExpanded((v) => !v)}
-            className="text-xs text-gray-500 hover:text-white transition"
-          >
+          <button onClick={() => setExpanded((v) => !v)} className="text-xs text-gray-500 hover:text-white transition">
             {expanded ? showLessLabel : (showAllLabel ?? `Show all ${items.length}`)}
           </button>
         )}
@@ -2426,14 +2326,7 @@ function ExpandableList({
       <div className="space-y-1 max-h-48 overflow-y-auto">
         {shown.map((url) => (
           <div key={url} className="flex items-center gap-2">
-            <span
-              className={cn(
-                "truncate text-xs",
-                danger ? "text-red-400" : "text-gray-300"
-              )}
-            >
-              {url}
-            </span>
+            <span className={cn("truncate text-xs", danger ? "text-red-400" : "text-gray-300")}>{url}</span>
             <a
               href={url}
               target="_blank"
@@ -2466,13 +2359,12 @@ function QuotaPill({
       <div className="flex items-center gap-1.5 text-xs text-gray-400">
         {icon}
         {label}
-        <span className="text-gray-200">{used}/{limit}</span>
+        <span className="text-gray-200">
+          {used}/{limit}
+        </span>
       </div>
       <div className="mt-1 h-[2px] bg-gray-800">
-        <div
-          className="h-full bg-copper transition-all"
-          style={{ width: `${pct}%` }}
-        />
+        <div className="h-full bg-copper transition-all" style={{ width: `${pct}%` }} />
       </div>
     </div>
   );
@@ -2497,8 +2389,7 @@ function StatPill({
   };
   return (
     <span className="text-xs text-gray-500">
-      {label}:{" "}
-      <span className={cn("font-semibold", colors[color])}>{value}</span>
+      {label}: <span className={cn("font-semibold", colors[color])}>{value}</span>
     </span>
   );
 }
@@ -2562,7 +2453,7 @@ function QuotaBar({
         <div
           className={cn(
             "h-1.5 rounded-full transition-all",
-            pct >= 90 ? "bg-red-500" : pct >= 70 ? "bg-yellow-500" : "bg-copper"
+            pct >= 90 ? "bg-red-500" : pct >= 70 ? "bg-yellow-500" : "bg-copper",
           )}
           style={{ width: `${pct}%` }}
         />
@@ -2603,13 +2494,13 @@ function Toggle({
         className={cn(
           "relative h-5 w-9 rounded-full transition-colors",
           disabled ? "opacity-40" : "",
-          checked && !disabled ? "bg-copper" : "bg-gray-700"
+          checked && !disabled ? "bg-copper" : "bg-gray-700",
         )}
       >
         <span
           className={cn(
             "absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform",
-            checked && !disabled ? "translate-x-4" : "translate-x-0"
+            checked && !disabled ? "translate-x-4" : "translate-x-0",
           )}
         />
       </div>
@@ -2679,10 +2570,7 @@ function IndexNowVerifyModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div className="relative z-10 w-full max-w-md max-h-[90vh] overflow-y-auto rounded-xl border border-gray-800 bg-gray-950 p-6 shadow-xl">
         {/* Close button */}
         <button
@@ -2696,20 +2584,14 @@ function IndexNowVerifyModal({
           <Key className="h-6 w-6 text-copper" />
         </div>
         {/* Title */}
-        <h3 className="mb-2 text-base font-semibold text-white">
-          {t("verifyModalTitle")}
-        </h3>
+        <h3 className="mb-2 text-base font-semibold text-white">{t("verifyModalTitle")}</h3>
 
-        <p className="text-sm text-gray-400 mb-5">
-          {t("verifyModalDesc")}
-        </p>
+        <p className="text-sm text-gray-400 mb-5">{t("verifyModalDesc")}</p>
 
         <div className="space-y-4">
           {/* Step 1 */}
           <div>
-            <p className="text-xs font-medium text-gray-300 mb-1.5">
-              {t("verifyStep1")}
-            </p>
+            <p className="text-xs font-medium text-gray-300 mb-1.5">{t("verifyStep1")}</p>
             <a
               href={`/api/indexing/sites/${site.id}/download-key`}
               download
@@ -2722,9 +2604,7 @@ function IndexNowVerifyModal({
 
           {/* Step 2 */}
           <div>
-            <p className="text-xs font-medium text-gray-300 mb-1.5">
-              {t("verifyStep2")}
-            </p>
+            <p className="text-xs font-medium text-gray-300 mb-1.5">{t("verifyStep2")}</p>
             <code className="block text-xs text-gray-300 rounded-md border border-gray-800 bg-gray-950 px-3 py-2 break-all">
               {keyFileUrl}
             </code>
@@ -2732,9 +2612,7 @@ function IndexNowVerifyModal({
 
           {/* Step 3 */}
           <div>
-            <p className="text-xs font-medium text-gray-300 mb-2">
-              {t("verifyStep3")}
-            </p>
+            <p className="text-xs font-medium text-gray-300 mb-2">{t("verifyStep3")}</p>
             <div className="flex flex-wrap items-center gap-3">
               <button
                 onClick={verify}
@@ -2756,9 +2634,7 @@ function IndexNowVerifyModal({
                   {t("keyFileConfirmed")}
                 </span>
               )}
-              {verifyError && (
-                <span className="text-xs text-red-400">{verifyError}</span>
-              )}
+              {verifyError && <span className="text-xs text-red-400">{verifyError}</span>}
             </div>
           </div>
         </div>
