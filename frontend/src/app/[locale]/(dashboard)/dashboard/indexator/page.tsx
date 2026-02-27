@@ -1394,19 +1394,6 @@ function SiteCard({
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <div className="hidden sm:flex flex-wrap gap-x-4 gap-y-1 text-sm">
-              <StatPill label={t("total")} value={site.totalUrls} color="gray" />
-              <StatPill label={t("indexed")} value={site.indexedCount} color="green" />
-              <StatPill label={t("notIndexed")} value={Math.max(0, site.totalUrls - site.indexedCount)} color="red" />
-              <StatPill label={t("pending")} value={stats?.pending ?? 0} color="yellow" />
-              <StatPill
-                label={t("submitted")}
-                value={(stats?.submittedGoogle ?? 0) + (stats?.submittedBing ?? 0)}
-                color="blue"
-              />
-              {(stats?.failed ?? 0) > 0 && <StatPill label={t("failed")} value={stats!.failed} color="red" />}
-              {(stats?.is404s ?? 0) > 0 && <StatPill label={t("pages404")} value={stats!.is404s} color="orange" />}
-            </div>
             <button
               onClick={onDelete}
               className="rounded-md p-1.5 text-gray-600 transition-colors hover:bg-red-950/50 hover:text-red-400"
@@ -1415,20 +1402,6 @@ function SiteCard({
               <Trash2 className="h-3.5 w-3.5" />
             </button>
           </div>
-        </div>
-        {/* Mobile-only stats row */}
-        <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs sm:hidden mt-2">
-          <StatPill label={t("total")} value={site.totalUrls} color="gray" />
-          <StatPill label={t("indexed")} value={site.indexedCount} color="green" />
-          <StatPill label={t("notIndexed")} value={Math.max(0, site.totalUrls - site.indexedCount)} color="red" />
-          <StatPill label={t("pending")} value={stats?.pending ?? 0} color="yellow" />
-          <StatPill
-            label={t("submitted")}
-            value={(stats?.submittedGoogle ?? 0) + (stats?.submittedBing ?? 0)}
-            color="blue"
-          />
-          {(stats?.failed ?? 0) > 0 && <StatPill label={t("failed")} value={stats!.failed} color="red" />}
-          {(stats?.is404s ?? 0) > 0 && <StatPill label={t("pages404")} value={stats!.is404s} color="orange" />}
         </div>
       </div>
 
@@ -1456,6 +1429,20 @@ function SiteCard({
           {/* ── Overview Tab ─────────────────────────────────────────────── */}
           {activeTab === "overview" && (
             <div className="px-4 sm:px-6 py-4 sm:py-5 space-y-5">
+              {/* ── Stats Row ────────────────────────────────────────────── */}
+              <div className="flex flex-wrap gap-x-4 gap-y-1 mb-4">
+                <StatPill label={t("total")} value={site.totalUrls} color="gray" />
+                <StatPill label={t("indexed")} value={site.indexedCount} color="green" />
+                <StatPill label={t("notIndexed")} value={Math.max(0, site.totalUrls - site.indexedCount)} color="red" />
+                <StatPill label={t("pending")} value={stats?.pending ?? 0} color="yellow" />
+                <StatPill
+                  label={t("submitted")}
+                  value={(stats?.submittedGoogle ?? 0) + (stats?.submittedBing ?? 0)}
+                  color="blue"
+                />
+                {(stats?.failed ?? 0) > 0 && <StatPill label={t("failed")} value={stats!.failed} color="red" />}
+                {(stats?.is404s ?? 0) > 0 && <StatPill label={t("pages404")} value={stats!.is404s} color="orange" />}
+              </div>
               {/* ── Manual Actions ───────────────────────────────────────── */}
               <div>
                 <div className="flex flex-wrap gap-2">
@@ -2380,7 +2367,7 @@ function StatPill({
   color?: "gray" | "green" | "red" | "yellow" | "blue" | "orange";
 }) {
   const colors: Record<string, string> = {
-    gray: "text-gray-300",
+    gray: "text-white",
     green: "text-green-400",
     red: "text-red-400",
     yellow: "text-yellow-400",
@@ -2388,7 +2375,7 @@ function StatPill({
     orange: "text-orange-400",
   };
   return (
-    <span className="text-xs text-gray-500">
+    <span className="text-sm text-gray-400">
       {label}: <span className={cn("font-semibold", colors[color])}>{value}</span>
     </span>
   );
