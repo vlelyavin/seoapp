@@ -104,9 +104,10 @@ export function Header() {
                   </div>
                 )}
                 <button
-                  onClick={() =>
-                    signOut({ callbackUrl: localePath(locale, "/") })
-                  }
+                  onClick={async () => {
+                    await signOut({ redirect: false });
+                    window.location.href = localePath(locale, "/");
+                  }}
                   className="rounded-md p-1.5 text-gray-400 transition-colors hover:bg-gray-900 hover:text-white"
                   title={t("logout")}
                 >

@@ -5,8 +5,9 @@ import { Link } from "@/i18n/navigation";
 import { localePath } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useSession, signIn, signOut } from "next-auth/react";
-import { LogOut } from "lucide-react";
-import { LocaleSwitcher } from "./locale-switcher";
+import { LogOut, LayoutDashboard } from "lucide-react";
+// HIDDEN: Language switcher disabled while app is English-only
+// import { LocaleSwitcher } from "./locale-switcher";
 
 export function MarketingHeader() {
   const t = useTranslations("marketing.nav");
@@ -16,9 +17,7 @@ export function MarketingHeader() {
   const user = session?.user;
 
   const rawName = user?.name?.trim();
-  const firstName = rawName ? rawName.split(/\s+/)[0] : undefined;
   const emailLocal = user?.email?.split("@")[0];
-  const displayName = firstName || emailLocal || "";
   const initials = rawName
     ? rawName
         .split(/\s+/)
@@ -37,10 +36,18 @@ export function MarketingHeader() {
           </Link>
         </div>
 
-<div className="flex flex-1 items-center justify-end gap-3">
-          <LocaleSwitcher />
+        <div className="flex flex-1 items-center justify-end gap-3">
+          {/* HIDDEN: Language switcher disabled while app is English-only */}
+          {/* <LocaleSwitcher /> */}
           {user ? (
             <div className="flex items-center gap-2">
+              <Link
+                href="/app"
+                className="flex items-center gap-2 rounded-md border border-gray-700 px-3 py-1.5 text-sm font-medium text-gray-300 transition-colors hover:bg-gray-900"
+              >
+                <LayoutDashboard className="h-4 w-4" />
+                Dashboard
+              </Link>
               {user.image ? (
                 <Image
                   src={user.image}
@@ -54,11 +61,11 @@ export function MarketingHeader() {
                   {initials}
                 </div>
               )}
-              <span className="hidden text-sm text-white sm:inline">
-                {displayName}
-              </span>
               <button
-                onClick={() => signOut({ callbackUrl: localePath(locale, "/") })}
+                onClick={async () => {
+                  await signOut({ redirect: false });
+                  window.location.href = localePath(locale, "/");
+                }}
                 className="rounded-md p-1.5 text-gray-400 transition-colors hover:bg-gray-900 hover:text-white"
                 title={t("logout")}
               >
