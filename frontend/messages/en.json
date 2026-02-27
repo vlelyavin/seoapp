@@ -593,12 +593,13 @@
       }
     },
     "footer": {
-      "copyright": "© {year} SEO Audit. All rights reserved.",
+      "copyright": "© {year} lvdev. All rights reserved.",
       "audit": "SEO Audit",
       "indexing": "Indexing",
       "pricing": "Pricing",
       "login": "Sign In",
-      "terms": "Terms of Service"
+      "terms": "Terms of Service",
+      "privacy": "Privacy Policy"
     },
     "terms": {
       "title": "Terms of Service",
@@ -606,7 +607,7 @@
       "sections": {
         "introduction": {
           "heading": "Introduction",
-          "body": "Welcome to Indexator (indexator.lvdev.co) (\"Service\"). By accessing or using our Service, you agree to be bound by these Terms of Service (\"Terms\"). If you do not agree, do not use the Service."
+          "body": "Welcome to Indexator (indexator.lvdev.co), operated by lvdev (\"Company\", \"we\", \"us\"). By accessing or using our Service, you agree to be bound by these Terms of Service (\"Terms\"). If you do not agree, do not use the Service."
         },
         "serviceDescription": {
           "heading": "Service Description",
@@ -622,7 +623,7 @@
         },
         "indexingCredits": {
           "heading": "Indexing Credits",
-          "body": "Indexing credits are purchased separately as one-time payments. 1 credit = 1 URL submission to search engines. Credits do not expire. Credits are non-refundable once used. We do not guarantee that submitted URLs will be indexed — search engines control their own indexing processes."
+          "body": "Indexing credits are purchased separately as one-time payments. 1 credit = 1 URL submission to search engines. Credits do not expire. Credits are covered by our standard 14-day refund policy. We do not guarantee that submitted URLs will be indexed — search engines control their own indexing processes."
         },
         "freeTier": {
           "heading": "Free Tier Limitations",
@@ -650,7 +651,7 @@
         },
         "refundPolicy": {
           "heading": "Refund Policy",
-          "body": "Refund requests are handled through Paddle within 14 days of purchase. Indexing credits are refundable only if unused. Subscription refunds are issued at our discretion for special circumstances."
+          "body": "All subscription payments are processed by Paddle.com, our Merchant of Record. You may request a full refund within 14 days of any payment — no questions asked, no conditions. To request a refund, contact us at support@lvdev.co or use the Paddle customer portal. Refunds are typically processed within 5-10 business days."
         },
         "changesToTerms": {
           "heading": "Changes to Terms",
@@ -662,11 +663,53 @@
         },
         "governingLaw": {
           "heading": "Governing Law",
-          "body": "These Terms are governed by and construed in accordance with applicable international commercial law. Any disputes shall be resolved through good-faith negotiation first."
+          "body": "These Terms are governed by and construed in accordance with applicable international commercial law. lvdev reserves the right to pursue legal remedies for violations of these Terms. Any disputes shall be resolved through good-faith negotiation first."
         },
         "contact": {
           "heading": "Contact",
-          "body": "For questions about these Terms, contact us at: support@indexator.lvdev.co"
+          "body": "For questions about these Terms, contact lvdev at: support@lvdev.co"
+        }
+      }
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "lastUpdated": "Last updated: February 27, 2026",
+      "sections": {
+        "operator": {
+          "heading": "Operator",
+          "body": "This Privacy Policy applies to Indexator (indexator.lvdev.co), operated by lvdev. This policy explains what data we collect, how we use it, and your rights regarding your personal information."
+        },
+        "dataCollected": {
+          "heading": "Data We Collect",
+          "body": "We collect the following personal data:\n• Email address (via Google OAuth sign-in)\n• Name (via Google OAuth sign-in)\n• Google profile image (via Google OAuth sign-in)\n• Google Search Console site and URL data (when you connect your GSC account)"
+        },
+        "dataUsage": {
+          "heading": "How We Use Your Data",
+          "body": "Your data is used exclusively for:\n• Authentication — verifying your identity and maintaining your session\n• Providing the indexing service — submitting URLs to search engines and monitoring index coverage\n• Displaying dashboard data — showing your sites, URLs, indexing status, and audit results"
+        },
+        "thirdPartyServices": {
+          "heading": "Third-Party Services",
+          "body": "We use the following third-party services to operate Indexator:\n• Google OAuth — for user authentication\n• Google Search Console API — for retrieving indexing data and submitting URLs\n• Paddle.com — for payment processing (Paddle acts as our Merchant of Record and has its own privacy policy at paddle.com/legal/privacy)"
+        },
+        "dataSharing": {
+          "heading": "Data Sharing",
+          "body": "We do NOT sell, share, or distribute your personal data to third parties. Data is shared only with the service providers listed above (Google and Paddle) as strictly necessary to operate the service."
+        },
+        "dataRetention": {
+          "heading": "Data Retention",
+          "body": "URL data and indexing history are retained for 30 days, then automatically deleted. Account data (email, name, profile image) is retained for as long as your account is active. When you delete your account, all associated data is permanently removed."
+        },
+        "userRights": {
+          "heading": "Your Rights",
+          "body": "You may request deletion of your personal data at any time by contacting us at support@lvdev.co. You may also delete your account directly from the settings page, which removes all associated data. We will process data deletion requests within 30 days."
+        },
+        "cookies": {
+          "heading": "Cookies",
+          "body": "We use session cookies for authentication purposes only. These cookies are required for the service to function. We do not use tracking cookies, analytics cookies, or any third-party cookies."
+        },
+        "contact": {
+          "heading": "Contact",
+          "body": "For questions about this Privacy Policy or your personal data, contact us at: support@lvdev.co"
         }
       }
     }

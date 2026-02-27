@@ -13,9 +13,14 @@ export function Footer() {
         <p className="text-sm text-gray-500">
           {t("copyright", { year })}
         </p>
-        <Link href="/terms" className="text-sm text-gray-400 transition-colors hover:text-white">
-          {t("terms")}
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link href="/terms" className="text-sm text-gray-400 transition-colors hover:text-white">
+            {t("terms")}
+          </Link>
+          <Link href="/privacy" className="text-sm text-gray-400 transition-colors hover:text-white">
+            {t("privacy")}
+          </Link>
+        </div>
       </div>
     </footer>
   );
