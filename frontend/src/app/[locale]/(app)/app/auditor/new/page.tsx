@@ -117,7 +117,7 @@ export default function NewAuditPage() {
       </h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="rounded-xl border border-gray-800 bg-black p-6">
+        <div className="rounded-xl border border-gray-800 bg-gray-950 p-6">
           {error && (
             <div className="mb-4 rounded-lg bg-red-900/20 p-3 text-sm text-red-400">
               {error}

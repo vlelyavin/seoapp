@@ -60,13 +60,13 @@ export default function AuditorListPage() {
   const statusIcon = (status: string) => {
     switch (status) {
       case "completed":
-        return <CheckCircle2 className="h-4 w-4 text-emerald-400" />;
+        return <CheckCircle2 className="h-8 w-8 text-emerald-400" />;
       case "failed":
-        return <XCircle className="h-4 w-4 text-red-400" />;
+        return <XCircle className="h-8 w-8 text-red-400" />;
       case "pending":
-        return <Clock className="h-4 w-4 text-gray-400" />;
+        return <Clock className="h-8 w-8 text-gray-400" />;
       default:
-        return <Loader2 className="h-4 w-4 animate-spin text-copper" />;
+        return <Loader2 className="h-8 w-8 animate-spin text-copper" />;
     }
   };
 
@@ -119,7 +119,7 @@ export default function AuditorListPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[50rem] space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <Breadcrumbs
@@ -140,7 +140,7 @@ export default function AuditorListPage() {
       </div>
 
       {audits.length === 0 ? (
-        <div className="rounded-xl border border-gray-800 bg-black p-12 text-center">
+        <div className="rounded-xl border border-gray-800 bg-gray-950 p-12 text-center">
           <FileSearch className="mx-auto mb-4 h-12 w-12 text-gray-600" />
           <p className="text-sm text-gray-400">{t("noAudits")}</p>
           <Link
@@ -156,7 +156,7 @@ export default function AuditorListPage() {
           {audits.map((audit) => (
             <div
               key={audit.id}
-              className="group rounded-xl border border-gray-800 bg-black p-4 transition-colors hover:border-gray-700"
+              className="group rounded-xl border border-gray-800 bg-gray-950 p-4 transition-colors hover:border-gray-700"
             >
               <div className="flex items-center justify-between gap-4">
                 <Link

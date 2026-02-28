@@ -30,8 +30,7 @@ import {
 } from "lucide-react";
 import { cn, formatTimestamp } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
-// {/* HIDDEN: Breadcrumbs hidden for now */}
-// import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -267,7 +266,7 @@ function ourStatusColor(
 
 export default function IndexingPage() {
   const t = useTranslations("indexing");
-  // const tBreadcrumbs = useTranslations("breadcrumbs");
+  const tBreadcrumbs = useTranslations("breadcrumbs");
   // GSC + sites state
   const [gscStatus, setGscStatus] = useState<GscStatus | null>(null);
   const [sites, setSites] = useState<Site[]>([]);
@@ -665,16 +664,10 @@ export default function IndexingPage() {
 
   return (
     <div className="space-y-6">
-      {/* HIDDEN: Breadcrumbs and page title hidden — indexator is the main dashboard home */}
-      {/* <Breadcrumbs items={[
+      <Breadcrumbs items={[
         { label: tBreadcrumbs("dashboard"), href: "/app" },
         { label: tBreadcrumbs("indexing") },
-      ]} /> */}
-      {/* <div>
-        <div className="flex items-center justify-between flex-wrap gap-3">
-        <h1 className="text-2xl font-bold text-white">{t("title")}</h1>
-        </div>
-      </div> */}
+      ]} />
 
       {/* GSC Connection Card */}
       <div className="rounded-xl border border-gray-800 bg-gray-950 p-6">

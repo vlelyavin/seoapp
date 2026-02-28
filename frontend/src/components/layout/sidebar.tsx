@@ -73,7 +73,8 @@ export function Sidebar({ open, onClose }: SidebarProps) {
     <aside
       id="dashboard-sidebar"
       className={cn(
-        "fixed inset-y-0 left-0 top-14 z-50 flex w-56 flex-col overflow-hidden border-r border-gray-800 bg-black transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+        "fixed inset-y-0 left-0 top-14 z-50 flex w-64 flex-col overflow-hidden border-r border-gray-800 bg-gray-950 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+        "lg:translate-x-0",
         open
           ? "translate-x-0"
           : "-translate-x-full"
@@ -115,7 +116,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
               <item.icon
                 className={cn(
                   "h-4 w-4",
-                  "accentIcon" in item && item.accentIcon && "text-copper"
+                  "accentIcon" in item && item.accentIcon && isActive && "text-copper"
                 )}
               />
               {item.label}
@@ -125,10 +126,6 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
         {adminItems.length > 0 && (
           <>
-            <div className="my-3 border-t border-gray-800" />
-            <p className="px-3 text-xs font-medium uppercase text-gray-500">
-              {t("admin")}
-            </p>
             {adminItems.map((item) => {
               const isActive = pathname === item.href;
               return (

@@ -52,7 +52,7 @@ export function AuditProgressView({ progress }: AuditProgressViewProps) {
 
   return (
     <div className="mx-auto max-w-xl py-6 sm:py-16">
-      <div className="rounded-xl border border-gray-800 bg-black p-4 sm:p-8">
+      <div className="rounded-xl border border-gray-800 bg-gray-950 p-4 sm:p-8">
         <div className="mb-6 flex items-center justify-center">
           <Loader2 className="h-10 w-10 animate-spin text-copper" />
         </div>

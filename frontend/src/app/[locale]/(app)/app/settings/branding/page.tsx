@@ -186,19 +186,20 @@ export default function BrandingPage() {
   return (
     <div className="space-y-6">
       {message && (
-        <div className="rounded-lg border border-gray-800 bg-black px-4 py-2 text-sm text-gray-300">
+        <div className="rounded-lg border border-gray-800 bg-gray-950 px-4 py-2 text-sm text-gray-300">
           {message}
         </div>
       )}
 
-      <form onSubmit={handleSave} className="rounded-xl border border-gray-800 bg-black p-6 space-y-5">
+      <form onSubmit={handleSave} className="rounded-xl border border-gray-800 bg-gray-950 p-6 space-y-5">
         <h2 className="mb-4 text-lg font-semibold text-white">{t("title")}</h2>
 
+        <div className="max-w-[50rem] space-y-5">
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-gray-300">
+          <label className="block text-sm font-medium text-gray-300">
             {t("companyName")}
           </label>
-          <p className="mb-2 text-xs text-gray-500">{t("companyNameDescription")}</p>
+          <p className="mb-0.5 text-xs text-gray-500">{t("companyNameDescription")}</p>
           <input
             type="text"
             value={companyName}
@@ -209,14 +210,14 @@ export default function BrandingPage() {
         </div>
 
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-gray-300">
+          <label className="block text-sm font-medium text-gray-300">
             {t("logo")}
           </label>
-          <p className="mb-2 text-xs text-gray-500">{t("logoDescription")}</p>
+          <p className="mb-0.5 text-xs text-gray-500">{t("logoDescription")}</p>
 
           {/* Drop zone */}
           <label
-            className={`group relative flex h-[180px] w-[250px] cursor-pointer flex-col items-center justify-center rounded-xl border bg-black transition-colors ${
+            className={`group relative flex h-[180px] w-[250px] cursor-pointer flex-col items-center justify-center rounded-xl border bg-gray-950 transition-colors ${
               isDragOver
                 ? "border-copper ring-2 ring-copper/20"
                 : "border-gray-700 hover:border-copper hover:ring-2 hover:ring-copper/20"
@@ -286,6 +287,7 @@ export default function BrandingPage() {
           {uploadError && (
             <p className="mt-2 text-sm text-red-400">{uploadError}</p>
           )}
+        </div>
         </div>
 
         <button

@@ -62,9 +62,10 @@ export function PlanBlock({
 
         {/* Contextual metrics */}
         {context === "auditor" && auditorUsage && (
-          <p className="text-xs text-gray-400 mb-3">
-            {tNav("auditsToday", { count: auditorUsage.auditsToday })} · {tNav("pagesPerAudit", { count: maxPages })}
-          </p>
+          <div className="text-xs text-gray-400 mb-3 space-y-0.5">
+            <p>{tNav("auditsCount", { count: auditorUsage.auditsToday })}</p>
+            <p>{tNav("pagesPerAudit", { count: maxPages })}</p>
+          </div>
         )}
 
         {context === "indexator" && indexatorUsage && (
@@ -88,7 +89,7 @@ export function PlanBlock({
               <div className="flex items-center justify-between text-xs mb-1">
                 <span className="text-gray-400">{tNav("googleQuota")}</span>
                 <span className="text-gray-300">
-                  {indexatorUsage.googleSubmissions.used}/{indexatorUsage.googleSubmissions.limit} {tNav("today")}
+                  {indexatorUsage.googleSubmissions.used}/{indexatorUsage.googleSubmissions.limit}
                 </span>
               </div>
               <ProgressBar
@@ -102,7 +103,7 @@ export function PlanBlock({
               <div className="flex items-center justify-between text-xs mb-1">
                 <span className="text-gray-400">{tNav("inspections")}</span>
                 <span className="text-gray-300">
-                  {indexatorUsage.inspections.used}/{indexatorUsage.inspections.limit} {tNav("today")}
+                  {indexatorUsage.inspections.used}/{indexatorUsage.inspections.limit}
                 </span>
               </div>
               <ProgressBar

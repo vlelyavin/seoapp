@@ -22,7 +22,7 @@ export default function SettingsLayout({
   ];
 
   return (
-    <div className="mx-auto max-w-[50rem] space-y-6 overflow-hidden">
+    <div className="space-y-6 overflow-hidden">
       <div>
         <Breadcrumbs items={[
           { label: tBreadcrumbs("dashboard"), href: "/app" },

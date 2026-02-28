@@ -76,7 +76,7 @@ export function AnalyzerSection({ result }: AnalyzerSectionProps) {
 
       {/* Content */}
       {expanded && (
-        <div className="border-t border-gray-700 bg-black p-4">
+        <div className="border-t border-gray-700 bg-gray-950 p-4">
           {/* Description */}
           {result.description && (
             <p className="mb-3 text-sm text-gray-400">

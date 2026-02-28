@@ -1,13 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
-import { cn } from "@/lib/utils";
-
-const SIDEBAR_KEY = "sidebar-open";
 
 export default function DashboardLayout({
   children,
@@ -15,15 +12,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const { data: session, status } = useSession();
-  const [sidebarOpen, setSidebarOpen] = useState(() => {
-    if (typeof window === "undefined") return true;
-    const stored = localStorage.getItem(SIDEBAR_KEY);
-    return stored === null ? true : stored === "true";
-  });
-
-  useEffect(() => {
-    localStorage.setItem(SIDEBAR_KEY, String(sidebarOpen));
-  }, [sidebarOpen]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const toggleSidebar = useCallback(() => {
     setSidebarOpen((prev) => !prev);
@@ -47,12 +36,7 @@ export default function DashboardLayout({
 
       <Header onToggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
 
-      <main
-        className={cn(
-          "mx-auto max-w-6xl p-4 pt-2 lg:px-6 transition-[margin] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-          sidebarOpen && "lg:ml-56"
-        )}
-      >
+      <main className="p-4 lg:p-6 lg:ml-64">
         {children}
       </main>
     </div>

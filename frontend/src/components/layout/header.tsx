@@ -78,8 +78,8 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-gradient-to-b from-black to-transparent">
-        <div className="mx-auto flex h-14 max-w-6xl items-center px-4 lg:px-6">
+      <header className="sticky top-0 z-50 border-b border-gray-800 bg-gray-950">
+        <div className="flex h-14 items-center px-4 lg:px-6">
           {/* Logo */}
           <Link
             href={isApp ? "/app" : "/"}
@@ -95,11 +95,11 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
             />
           </Link>
 
-          {/* App context: sidebar toggle (right of logo) */}
+          {/* App context: sidebar toggle (mobile only) */}
           {isApp && onToggleSidebar && (
             <button
               onClick={onToggleSidebar}
-              className="ml-2 flex items-center justify-center rounded-md px-2 py-2 text-white transition-colors hover:bg-gray-900"
+              className="ml-2 flex items-center justify-center rounded-md px-2 py-2 text-white transition-colors hover:bg-gray-900 lg:hidden"
               aria-label={sidebarOpen ? t("closeSidebar") : t("openSidebar")}
               type="button"
             >
