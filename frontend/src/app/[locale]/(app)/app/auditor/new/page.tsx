@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useSession } from "next-auth/react";
-import { Globe, Play, ChevronDown, ChevronUp, Loader2, Image } from "lucide-react";
+import { Play, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { ANALYZER_NAMES, ANALYZER_LABELS } from "@/types/audit";
 import { cn } from "@/lib/utils";
@@ -38,7 +38,7 @@ export default function NewAuditPage() {
   useEffect(() => {
     const prefillUrl = searchParams.get("url");
     if (prefillUrl) {
-      setUrl(prefillUrl);
+      setUrl(prefillUrl.replace(/^https?:\/\//i, ""));
     }
   }, [searchParams]);
 
@@ -72,6 +72,12 @@ export default function NewAuditPage() {
   );
   const includeScreenshots = selectedAnalyzers.includes("speed_screenshots");
 
+  function normalizeUrl(raw: string): string {
+    const trimmed = raw.trim();
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    return `https://${trimmed}`;
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
@@ -81,7 +87,7 @@ export default function NewAuditPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          url,
+          url: normalizeUrl(url),
           language: "en",
           progressLanguage: locale,
           analyzers: realSelected.length === REAL_ANALYZER_NAMES.length ? null : realSelected,
@@ -126,15 +132,17 @@ export default function NewAuditPage() {
               <label className="mb-1.5 block text-sm font-medium text-gray-300">
                 {t("enterUrl")}
               </label>
-              <div className="relative">
-                <Globe className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+              <div className="relative flex">
+                <span className="inline-flex items-center rounded-l-lg border border-r-0 border-gray-700 bg-gray-800 px-3 text-sm text-gray-500 select-none">
+                  https://
+                </span>
                 <input
-                  type="url"
+                  type="text"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   required
-                  placeholder={t("urlPlaceholder")}
-                  className="w-full rounded-lg border border-gray-700 bg-gray-900 py-2.5 pl-10 pr-3 text-base md:text-sm text-white outline-none placeholder-gray-500 transition-colors focus:border-copper focus:ring-2 focus:ring-copper/20"
+                  placeholder="example.com"
+                  className="w-full rounded-r-lg border border-gray-700 bg-gray-900 py-2.5 px-3 text-base md:text-sm text-white outline-none placeholder-gray-500 transition-colors focus:border-copper focus:ring-2 focus:ring-copper/20"
                 />
               </div>
             </div>
@@ -167,7 +175,7 @@ export default function NewAuditPage() {
             <button
               type="button"
               onClick={() => setShowAnalyzers(!showAnalyzers)}
-              className="flex w-full items-center justify-between px-3 py-2.5 text-sm text-gray-300 hover:bg-gray-900 transition-colors"
+              className="flex w-full items-center justify-between bg-gray-900 px-3 py-2.5 text-sm text-gray-300 transition-colors"
             >
               <span>
                 {t("analyzers")} ({realSelected.length}/{REAL_ANALYZER_NAMES.length})

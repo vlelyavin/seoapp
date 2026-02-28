@@ -51,9 +51,6 @@ sudo rsync -a --delete --exclude='node_modules' --exclude='.next' --exclude='ven
     --exclude='frontend/public/uploads' --exclude='reports' --exclude='screenshots' \
     ./ "$APP_DIR/"
 sudo rm -rf "$APP_DIR/.git"
-if [ ! -f "$APP_DIR/frontend/.env" ]; then
-    sudo cp "$APP_DIR/frontend/.env.example" "$APP_DIR/frontend/.env" 2>/dev/null || true
-fi
 sudo chown -R "$APP_USER:$APP_USER" "$APP_DIR"
 
 # 2. Python dependencies
