@@ -114,23 +114,13 @@ export function PlanBlock({
         )}
 
         {/* CTA */}
-        {isFree ? (
-          <Link
-            href="/app/plans"
-            onClick={onNavigate}
-            className="mt-1 block rounded-md bg-gradient-to-r from-copper to-copper-light px-3 py-1.5 text-center text-xs font-medium text-white transition-opacity hover:opacity-90"
-          >
-            {tNav("upgradeToPro")}
-          </Link>
-        ) : (
-          <Link
-            href="/app/plans"
-            onClick={onNavigate}
-            className="mt-1 block text-xs text-gray-500 transition-colors hover:text-white"
-          >
-            {tNav("managePlan")}
-          </Link>
-        )}
+        <Link
+          href="/app/plans"
+          onClick={onNavigate}
+          className="mt-1 block text-xs text-gray-500 transition-colors hover:text-white"
+        >
+          {tNav("managePlan")}
+        </Link>
       </div>
     </div>
   );
