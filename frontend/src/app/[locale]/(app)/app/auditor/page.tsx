@@ -239,22 +239,13 @@ export default function AuditorListPage() {
                       <div className="mt-1 flex items-center gap-x-3 text-xs text-gray-500 whitespace-nowrap">
                         <span>{formatDate(audit.startedAt)}</span>
                         {audit.status === "completed" && (
-                          <>
-                            <span>·</span>
-                            <span>{audit.pagesCrawled} pages total</span>
-                          </>
+                          <span>{audit.pagesCrawled} pages total</span>
                         )}
                         {audit.status === "failed" && (
-                          <>
-                            <span>·</span>
-                            <span className="text-red-400">{statusLabel("failed")}</span>
-                          </>
+                          <span className="text-red-400">{statusLabel("failed")}</span>
                         )}
                         {!["completed", "failed", "pending"].includes(audit.status) && (
-                          <>
-                            <span>·</span>
-                            <span className="text-copper">{statusLabel(audit.status)}</span>
-                          </>
+                          <span className="text-copper">{statusLabel(audit.status)}</span>
                         )}
                       </div>
                       {audit.status === "completed" && (audit.criticalIssues > 0 || audit.warnings > 0) && (
