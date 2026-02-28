@@ -50,13 +50,7 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
   };
 
   const avatar = user?.image ? (
-    <Image
-      src={user.image}
-      width={28}
-      height={28}
-      alt=""
-      className="rounded-full"
-    />
+    <Image src={user.image} width={28} height={28} alt="" className="rounded-full" />
   ) : (
     <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-700 text-xs font-medium text-white">
       {initials}
@@ -78,7 +72,12 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
 
   return (
     <>
-      <header className={cn("sticky top-0 z-50", isApp ? "border-b border-gray-800 bg-gray-950" : "bg-gradient-to-b from-black to-transparent")}>
+      <header
+        className={cn(
+          "sticky top-0 z-50",
+          isApp ? "border-b border-gray-800 bg-gray-950" : "bg-gradient-to-b from-black to-transparent",
+        )}
+      >
         <div className="flex h-14 items-center px-4 lg:px-6">
           {/* App context: sidebar toggle (mobile only) */}
           {isApp && onToggleSidebar && (
@@ -88,22 +87,15 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
               aria-label={sidebarOpen ? t("closeSidebar") : t("openSidebar")}
               type="button"
             >
-              {sidebarOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
+              {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           )}
 
           {/* Logo */}
-          <Link
-            href={isApp ? "/app" : "/"}
-            className="flex shrink-0 items-center gap-2 font-semibold"
-          >
+          <Link href={isApp ? "/app" : "/"} className="flex shrink-0 items-center gap-2 font-semibold">
             <Image
-              src="/images/Indexator-logo.png"
-              alt="Indexator"
+              src="/images/logo.png"
+              alt="seoapp"
               width={200}
               height={50}
               className="h-4 w-auto md:h-5"
@@ -120,9 +112,7 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
                   href={item.href}
                   className={cn(
                     "rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                    isMarketingActive(item.href)
-                      ? "text-white"
-                      : "text-gray-400 hover:text-white"
+                    isMarketingActive(item.href) ? "text-white" : "text-gray-400 hover:text-white",
                   )}
                 >
                   {item.label}
@@ -143,9 +133,7 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
                   </Link>
                 )}
                 {avatar}
-                {isApp && rawName && (
-                  <span className="text-sm font-medium text-gray-300">{rawName}</span>
-                )}
+                {isApp && rawName && <span className="text-sm font-medium text-gray-300">{rawName}</span>}
                 {logoutButton}
               </div>
             ) : (
@@ -187,14 +175,9 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
                 aria-label={mobileMenuOpen ? t("closeSidebar") : t("openSidebar")}
                 type="button"
               >
-                {mobileMenuOpen ? (
-                  <X className="h-5 w-5" />
-                ) : (
-                  <Menu className="h-5 w-5" />
-                )}
+                {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </button>
             )}
-
           </div>
         </div>
       </header>
@@ -210,9 +193,7 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
                 onClick={() => setMobileMenuOpen(false)}
                 className={cn(
                   "rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
-                  isMarketingActive(item.href)
-                    ? "text-white"
-                    : "text-gray-400 hover:text-white"
+                  isMarketingActive(item.href) ? "text-white" : "text-gray-400 hover:text-white",
                 )}
               >
                 {item.label}

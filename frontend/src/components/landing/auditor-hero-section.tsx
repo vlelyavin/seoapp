@@ -21,12 +21,8 @@ export function AuditorHeroSection() {
     <section className="relative overflow-hidden bg-black pt-24 pb-20">
       <div className="relative mx-auto max-w-6xl px-4 lg:px-6">
         <div className="flex flex-col items-center text-center">
-          <h1 className="mx-auto max-w-3xl text-4xl md:text-6xl font-bold tracking-tight text-white">
-            {t("title")}
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-base text-gray-400">
-            {t("subtitle")}
-          </p>
+          <h1 className="mx-auto max-w-3xl text-4xl md:text-6xl font-bold tracking-tight text-white">{t("title")}</h1>
+          <p className="mx-auto mt-4 max-w-2xl text-base text-gray-400">{t("subtitle")}</p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             {session?.user ? (
               <Link
@@ -60,6 +56,7 @@ export function AuditorHeroSection() {
             alt={t("title")}
             width={1920}
             height={1080}
+            quality={100}
             className="text-transparent"
             style={{ marginLeft: "-32px", marginRight: "-32px", width: "calc(100% + 64px)", maxWidth: "unset" }}
             priority
