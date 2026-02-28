@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useSession } from "next-auth/react";
-import { Play, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import { Rocket, ChevronDown, ChevronUp, Loader2, Globe } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { ANALYZER_NAMES, ANALYZER_LABELS } from "@/types/audit";
 import { cn } from "@/lib/utils";
@@ -38,7 +38,7 @@ export default function NewAuditPage() {
   useEffect(() => {
     const prefillUrl = searchParams.get("url");
     if (prefillUrl) {
-      setUrl(prefillUrl.replace(/^https?:\/\//i, ""));
+      setUrl(prefillUrl);
     }
   }, [searchParams]);
 
@@ -115,7 +115,7 @@ export default function NewAuditPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[50rem]">
+    <div>
       <Breadcrumbs items={[
         { label: tBreadcrumbs("dashboard"), href: "/app" },
         { label: tBreadcrumbs("newAudit") },
@@ -132,17 +132,15 @@ export default function NewAuditPage() {
               <label className="mb-1.5 block text-sm font-medium text-gray-300">
                 {t("enterUrl")}
               </label>
-              <div className="relative flex">
-                <span className="inline-flex items-center rounded-l-lg border border-r-0 border-gray-700 bg-gray-800 px-3 text-sm text-gray-500 select-none">
-                  https://
-                </span>
+              <div className="relative">
+                <Globe className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
                 <input
                   type="text"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   required
-                  placeholder="example.com"
-                  className="w-full rounded-r-lg border border-gray-700 bg-gray-900 py-2.5 px-3 text-base md:text-sm text-white outline-none placeholder-gray-500 transition-colors focus:border-copper focus:ring-2 focus:ring-copper/20"
+                  placeholder="https://example.com"
+                  className="w-full rounded-lg border border-gray-700 bg-gray-900 py-2.5 pl-9 pr-3 text-base md:text-sm text-white outline-none placeholder-gray-500 transition-colors focus:border-copper focus:ring-2 focus:ring-copper/20"
                 />
               </div>
             </div>
@@ -282,16 +280,18 @@ export default function NewAuditPage() {
               </span>
             </label>
           </div>
-        </div>
 
-        <button
-          type="submit"
-          disabled={loading || !url || realSelected.length === 0}
-          className="flex w-full items-center justify-center gap-2 rounded-md bg-gradient-to-r from-copper to-copper-light px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-        >
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
-          {loading ? t("startingAudit") : t("startAudit")}
-        </button>
+          <div className="mt-5">
+            <button
+              type="submit"
+              disabled={loading || !url || realSelected.length === 0}
+              className="flex items-center justify-center gap-2 rounded-md bg-gradient-to-r from-copper to-copper-light py-3 px-6 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4" />}
+              {loading ? t("startingAudit") : t("startAudit")}
+            </button>
+          </div>
+        </div>
       </form>
     </div>
   );
