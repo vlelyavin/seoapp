@@ -33,8 +33,7 @@ export default function SettingsLayout({
         </h1>
       </div>
 
-      {/* HIDDEN: Tabs hidden — only Profile tab active for now */}
-      {/* <div className="flex gap-1 overflow-x-auto overflow-y-hidden border-b border-gray-800">
+      <div className="flex gap-1 overflow-x-auto overflow-y-hidden border-b border-gray-800">
         {tabs.map((tab) => {
           const isActive =
             tab.href === basePath
@@ -55,7 +54,7 @@ export default function SettingsLayout({
             </Link>
           );
         })}
-      </div> */}
+      </div>
 
       {children}
     </div>

@@ -6,16 +6,21 @@ import { Link, usePathname } from "@/i18n/navigation";
 import { localePath } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useSession, signOut, signIn } from "next-auth/react";
-import { LogOut, Menu, X, LayoutDashboard, CreditCard } from "lucide-react";
+import { LogOut, Menu, X, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export function Header() {
+interface HeaderProps {
+  onToggleSidebar?: () => void;
+  sidebarOpen?: boolean;
+}
+
+export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
   const t = useTranslations("nav");
+  const tMarketing = useTranslations("marketing.nav");
   const locale = useLocale();
   const pathname = usePathname();
   const { data: session } = useSession();
   const user = session?.user;
-  const isAdmin = user?.role === "admin";
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isApp = pathname.startsWith("/app");
@@ -31,22 +36,13 @@ export function Header() {
         .toUpperCase()
     : emailLocal?.[0]?.toUpperCase() || "?";
 
-  const navItems = [
-    { href: "/app", label: t("dashboard") },
-    { href: "/app/plans", label: t("plans") },
-    ...(isAdmin ? [{ href: "/app/admin", label: t("admin") }] : []),
+  const marketingNavItems = [
+    { href: "/indexator", label: tMarketing("indexator") },
+    { href: "/auditor", label: tMarketing("auditor") },
+    { href: "/pricing", label: tMarketing("pricing") },
   ];
 
-  const isActive = (href: string) => {
-    if (!pathname.startsWith(href)) return false;
-    const allMatching = navItems.filter((i) => pathname.startsWith(i.href));
-    const longestMatch = allMatching.reduce(
-      (longest, current) =>
-        current.href.length > longest.href.length ? current : longest,
-      allMatching[0]
-    );
-    return longestMatch.href === href;
-  };
+  const isMarketingActive = (href: string) => pathname === href;
 
   const handleLogout = async () => {
     await signOut({ redirect: false });
@@ -99,16 +95,32 @@ export function Header() {
             />
           </Link>
 
-          {/* Centered nav — app context only, desktop */}
-          {isApp && (
+          {/* App context: sidebar toggle (right of logo) */}
+          {isApp && onToggleSidebar && (
+            <button
+              onClick={onToggleSidebar}
+              className="ml-2 flex items-center justify-center rounded-md px-2 py-2 text-white transition-colors hover:bg-gray-900"
+              aria-label={sidebarOpen ? t("closeSidebar") : t("openSidebar")}
+              type="button"
+            >
+              {sidebarOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
+            </button>
+          )}
+
+          {/* Centered nav — marketing pages only, desktop */}
+          {!isApp && (
             <nav className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-1 md:flex">
-              {navItems.map((item) => (
+              {marketingNavItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
                   className={cn(
                     "rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                    isActive(item.href)
+                    isMarketingActive(item.href)
                       ? "text-white"
                       : "text-gray-400 hover:text-white"
                   )}
@@ -123,18 +135,12 @@ export function Header() {
           <div className="ml-auto flex items-center gap-3">
             {user ? (
               <div className="flex items-center gap-2">
-                {/* Marketing context: Dashboard + Plans buttons */}
+                {/* Marketing context: Dashboard button only */}
                 {!isApp && (
-                  <>
-                    <Link href="/app" className={outlinedBtnClass}>
-                      <LayoutDashboard className="h-4 w-4" />
-                      {t("dashboard")}
-                    </Link>
-                    <Link href="/app/plans" className={outlinedBtnClass}>
-                      <CreditCard className="h-4 w-4" />
-                      {t("plans")}
-                    </Link>
-                  </>
+                  <Link href="/app" className={outlinedBtnClass}>
+                    <LayoutDashboard className="h-4 w-4" />
+                    {t("dashboard")}
+                  </Link>
                 )}
                 {avatar}
                 {logoutButton}
@@ -170,14 +176,12 @@ export function Header() {
               </button>
             )}
 
-            {/* Mobile hamburger — app context only */}
-            {isApp && (
+            {/* Mobile hamburger — marketing: toggle nav, app: toggle sidebar */}
+            {!isApp && (
               <button
                 onClick={() => setMobileMenuOpen((prev) => !prev)}
                 className="flex items-center justify-center rounded-md px-2 py-2 text-white transition-colors hover:bg-gray-900 md:hidden"
-                aria-label={
-                  mobileMenuOpen ? t("closeSidebar") : t("openSidebar")
-                }
+                aria-label={mobileMenuOpen ? t("closeSidebar") : t("openSidebar")}
                 type="button"
               >
                 {mobileMenuOpen ? (
@@ -187,22 +191,23 @@ export function Header() {
                 )}
               </button>
             )}
+
           </div>
         </div>
       </header>
 
-      {/* Mobile dropdown nav — app context only */}
-      {isApp && mobileMenuOpen && (
+      {/* Mobile dropdown nav — marketing pages only */}
+      {!isApp && mobileMenuOpen && (
         <div className="fixed inset-x-0 top-14 z-50 border-b border-gray-800 bg-black/95 backdrop-blur-sm md:hidden">
           <nav className="mx-auto flex max-w-6xl flex-col px-4 py-2">
-            {navItems.map((item) => (
+            {marketingNavItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
                 className={cn(
                   "rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
-                  isActive(item.href)
+                  isMarketingActive(item.href)
                     ? "text-white"
                     : "text-gray-400 hover:text-white"
                 )}

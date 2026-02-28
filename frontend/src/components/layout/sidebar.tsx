@@ -4,8 +4,7 @@ import { Link, usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
 import {
-  LayoutDashboard,
-  Plus,
+  FileSearch,
   Search,
   Settings,
   Users,
@@ -27,10 +26,11 @@ export function Sidebar({ open, onClose }: SidebarProps) {
   const isAdmin = session?.user?.role === "admin";
 
   const navItems = [
-    // HIDDEN: Dashboard (auditor list) — /app now redirects to /app/indexator
-    // { href: "/app", label: t("dashboard"), icon: LayoutDashboard },
-    // HIDDEN: Auditor feature hidden from nav (route still works)
-    // { href: "/app/auditor/new", label: t("newAudit"), icon: Plus },
+    {
+      href: "/app/auditor",
+      label: t("auditor"),
+      icon: FileSearch,
+    },
     {
       href: "/app/indexator",
       label: t("indexing"),

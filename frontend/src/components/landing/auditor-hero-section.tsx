@@ -6,20 +6,19 @@ import { useSession, signIn } from "next-auth/react";
 import { ArrowRight, Zap } from "lucide-react";
 import Image from "next/image";
 
-export function IndexingHeroSection() {
-  const t = useTranslations("marketing.indexingLanding.hero");
+export function AuditorHeroSection() {
+  const t = useTranslations("marketing.auditorLanding.hero");
   const locale = useLocale();
   const { data: session } = useSession();
 
   const handleCta = () => {
     signIn("google", {
-      callbackUrl: localePath(locale, "/app/indexator"),
+      callbackUrl: localePath(locale, "/app/auditor/new"),
     });
   };
 
   return (
     <section className="relative overflow-hidden bg-black pt-24 pb-20">
-
       <div className="relative mx-auto max-w-6xl px-4 lg:px-6">
         <div className="flex flex-col items-center text-center">
           <h1 className="mx-auto max-w-3xl text-4xl md:text-5xl font-bold tracking-tight text-white">
@@ -31,7 +30,7 @@ export function IndexingHeroSection() {
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             {session?.user ? (
               <Link
-                href="/app/indexator"
+                href="/app/auditor/new"
                 className="landing-btn inline-flex items-center justify-center gap-2 rounded-md bg-gradient-to-r from-copper to-copper-light px-8 py-3.5 text-center text-sm font-semibold text-white"
               >
                 <Zap className="h-4 w-4" />
@@ -57,7 +56,7 @@ export function IndexingHeroSection() {
 
         <div className="mt-16 hidden sm:block">
           <Image
-            src="/images/indexing-dashboard-screenshot.png"
+            src="/images/audit-dashboard-screenshot.png"
             alt={t("title")}
             width={1920}
             height={1080}

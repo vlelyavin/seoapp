@@ -1,10 +1,13 @@
 "use client";
 
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import { Header } from "@/components/layout/header";
-// HIDDEN: Sidebar hidden from dashboard (component preserved)
-// import { Sidebar } from "@/components/layout/sidebar";
+import { Sidebar } from "@/components/layout/sidebar";
+import { cn } from "@/lib/utils";
+
+const SIDEBAR_KEY = "sidebar-open";
 
 export default function DashboardLayout({
   children,
@@ -12,6 +15,19 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const { data: session, status } = useSession();
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    if (typeof window === "undefined") return true;
+    const stored = localStorage.getItem(SIDEBAR_KEY);
+    return stored === null ? true : stored === "true";
+  });
+
+  useEffect(() => {
+    localStorage.setItem(SIDEBAR_KEY, String(sidebarOpen));
+  }, [sidebarOpen]);
+
+  const toggleSidebar = useCallback(() => {
+    setSidebarOpen((prev) => !prev);
+  }, []);
 
   if (status === "loading") {
     return (
@@ -27,12 +43,16 @@ export default function DashboardLayout({
 
   return (
     <div className="relative min-h-dvh">
-      {/* HIDDEN: Sidebar and overlay removed from render */}
-      {/* <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} /> */}
+      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <Header />
+      <Header onToggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
 
-      <main className="mx-auto max-w-6xl p-4 pt-2 lg:px-6">
+      <main
+        className={cn(
+          "mx-auto max-w-6xl p-4 pt-2 lg:px-6 transition-[margin] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+          sidebarOpen && "lg:ml-56"
+        )}
+      >
         {children}
       </main>
     </div>

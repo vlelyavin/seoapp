@@ -111,8 +111,8 @@ export function PricingSection() {
                   <span className="ml-2 text-gray-500">{pt("perMonth")}</span>
                 </div>
 
-                {/* HIDDEN: Auditor features section hidden (component preserved) */}
-                {/* <div className="mt-8">
+                {/* Auditor features */}
+                <div className="mt-8">
                   <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-copper">
                     {t("auditorLabel")}
                   </p>
@@ -128,7 +128,7 @@ export function PricingSection() {
                       </li>
                     ))}
                   </ul>
-                </div> */}
+                </div>
 
                 {/* Indexator features */}
                 <div className="mt-8">

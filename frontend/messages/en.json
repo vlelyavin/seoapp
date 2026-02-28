@@ -14,6 +14,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "newAudit": "New Audit",
+    "auditor": "Auditor",
     "plans": "Plans",
     "settings": "Settings",
     "indexing": "Indexing",
@@ -529,6 +530,57 @@
     "pricing": {
       "title": "Pricing",
       "subtitle": "Choose the plan that fits your needs."
+    },
+    "auditorLanding": {
+      "hero": {
+        "title": "Professional SEO Audits, Ready to Send",
+        "subtitle": "Get a client-ready SEO report in one click. 21 analyzers, beautiful PDF export, white-label branding.",
+        "ctaPrimary": "Run Free Audit",
+        "ctaSecondary": "View Pricing"
+      },
+      "howItWorks": {
+        "sectionLabel": "How It Works",
+        "title": "Audit Any Website in 3 Steps",
+        "step1Title": "Enter Your URL",
+        "step1Desc": "Paste any website URL and hit start. Our crawler begins scanning immediately — no setup, no configuration needed.",
+        "step2Title": "Get Analyzed",
+        "step2Desc": "We run 21 SEO checks in parallel — meta tags, headings, images, links, structured data, security, performance, and more.",
+        "step3Title": "Download Your Report",
+        "step3Desc": "Get a detailed PDF report with executive summary, scores, and actionable recommendations. White-label it with your own logo."
+      },
+      "features": {
+        "sectionLabel": "Features",
+        "title": "Everything You Need for SEO Audits",
+        "subtitle": "Comprehensive analysis, beautiful reports, and white-label branding for agencies.",
+        "feature1Title": "21 SEO Analyzers",
+        "feature1Desc": "Meta tags, headings, images, links, structured data, security, performance, and more. Every page gets a thorough analysis.",
+        "feature2Title": "Client-Ready PDF Reports",
+        "feature2Desc": "Professional reports with executive summary, overall score, and detailed breakdowns. Send directly to clients — no editing needed.",
+        "feature3Title": "White-Label Branding",
+        "feature3Desc": "Upload your logo, set your company name, and remove our branding. Your clients see your brand, not ours. Agency plan feature.",
+        "feature4Title": "Batch Audits",
+        "feature4Desc": "Run audits on multiple sites from one dashboard. Perfect for agencies managing many client websites at once.",
+        "feature5Title": "Export Everything",
+        "feature5Desc": "Download results as PDF, HTML, or DOCX. Export raw data for your own analysis or integrate into your workflow.",
+        "feature6Title": "Security & Performance Checks",
+        "feature6Desc": "HTTPS, mixed content, page speed, Core Web Vitals hints, and more. Cover all the bases your clients care about."
+      },
+      "faq": {
+        "sectionLabel": "FAQ",
+        "title": "Frequently Asked Questions",
+        "q1": "What does the SEO audit check?",
+        "a1": "Our audit runs 21 analyzers covering meta tags, headings, images, links, structured data (Schema.org), Open Graph tags, Twitter cards, robots.txt, sitemap, security headers, page speed, and more.",
+        "q2": "How long does an audit take?",
+        "a2": "Most single-page audits complete in under 30 seconds. Multi-page audits depend on the number of pages — typically 1-3 minutes for up to 50 pages.",
+        "q3": "Can I white-label the reports?",
+        "a3": "Yes. On the Agency plan, you can upload your own logo, set your company name, and remove all our branding from reports. Your clients will only see your brand.",
+        "q4": "What format are the reports?",
+        "a4": "Reports are available as PDF, HTML, and DOCX. The PDF includes an executive summary with overall score, detailed findings per analyzer, and actionable recommendations.",
+        "q5": "Is there a free plan?",
+        "a5": "Yes. The free plan includes 3 audits per month with up to 10 pages per audit. No credit card required.",
+        "q6": "Can I audit competitors' websites?",
+        "a6": "Yes. You can audit any publicly accessible website. Enter the URL and we'll crawl and analyze it. This is great for competitive analysis or prospecting new clients."
+      }
     },
     "indexingLanding": {
       "hero": {
