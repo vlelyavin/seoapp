@@ -19,6 +19,7 @@ import {
 import { cn, formatDate } from "@/lib/utils";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { toast } from "sonner";
 
 interface AdminUser {
   id: string;
@@ -151,9 +152,12 @@ export default function AdminDashboardPage() {
           prev.map((u) => (u.id === userId ? { ...u, planId } : u))
         );
         loadStats();
+        toast.success(t("planUpdated"));
+      } else {
+        toast.error(t("actionFailed"));
       }
     } catch {
-      /* ignore */
+      toast.error(t("actionFailed"));
     }
   }
 
@@ -186,6 +190,7 @@ export default function AdminDashboardPage() {
           );
           setTotal((t) => t - 1);
           loadStats();
+          toast.success(t("userDeleted"));
         } else if (confirmAction.type === "revokeGsc") {
           setUsers((prev) =>
             prev.map((u) =>
@@ -194,6 +199,7 @@ export default function AdminDashboardPage() {
                 : u
             )
           );
+          toast.success(t("gscRevoked"));
         } else if (confirmAction.type === "revokeGoogle") {
           setUsers((prev) =>
             prev.map((u) =>
@@ -202,11 +208,14 @@ export default function AdminDashboardPage() {
                 : u
             )
           );
+          toast.success(t("googleRevoked"));
         }
         setConfirmAction(null);
+      } else {
+        toast.error(t("actionFailed"));
       }
     } catch {
-      /* ignore */
+      toast.error(t("actionFailed"));
     } finally {
       setActionLoading(false);
     }

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { Save, Lock, ImageOff, ImageIcon } from "lucide-react";
+import { toast } from "sonner";
 
 function normalizeLogoUrl(url: string): string {
   if (!url) return "";
@@ -28,9 +29,7 @@ export default function BrandingPage() {
   const [companyName, setCompanyName] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState("");
   const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [imageError, setImageError] = useState(false);
   const [logoVersion, setLogoVersion] = useState<number>(0);
@@ -71,7 +70,6 @@ export default function BrandingPage() {
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-    setMessage("");
 
     try {
       const res = await fetch("/api/settings/branding", {
@@ -81,13 +79,13 @@ export default function BrandingPage() {
       });
 
       if (res.ok) {
-        setMessage(t("brandingSaved"));
+        toast.success(t("brandingSaved"));
       } else {
         const data = await res.json();
-        setMessage(data.error || t("errorSaving"));
+        toast.error(data.error || t("errorSaving"));
       }
     } catch {
-      setMessage(t("errorSaving"));
+      toast.error(t("errorSaving"));
     }
     setSaving(false);
   }
@@ -98,7 +96,6 @@ export default function BrandingPage() {
       return URL.createObjectURL(file);
     });
 
-    setUploadError("");
     setImageError(false);
     setUploading(true);
 
@@ -119,17 +116,17 @@ export default function BrandingPage() {
           return null;
         });
         setLogoVersion(Date.now());
-        setMessage(t("logoUploaded"));
+        toast.success(t("logoUploaded"));
       } else {
         const data = await res.json();
-        setUploadError(data.error || t("uploadFailed"));
+        toast.error(data.error || t("uploadFailed"));
         setPreviewUrl((prev) => {
           if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
           return null;
         });
       }
     } catch {
-      setUploadError(t("networkError"));
+      toast.error(t("networkError"));
       setPreviewUrl((prev) => {
         if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
         return null;
@@ -166,6 +163,7 @@ export default function BrandingPage() {
           return null;
         });
         setImageError(false);
+        toast.success(t("logoRemoved"));
       }
     } catch { /* ignore */ }
   }
@@ -185,12 +183,6 @@ export default function BrandingPage() {
 
   return (
     <div className="space-y-6">
-      {message && (
-        <div className="rounded-lg border border-gray-800 bg-gray-950 px-4 py-2 text-sm text-gray-300">
-          {message}
-        </div>
-      )}
-
       <form onSubmit={handleSave} className="rounded-xl border border-gray-800 bg-gray-950 p-6 space-y-5">
         <h2 className="mb-4 text-lg font-semibold text-white">{t("title")}</h2>
 
@@ -284,9 +276,6 @@ export default function BrandingPage() {
             </button>
           )}
 
-          {uploadError && (
-            <p className="mt-2 text-sm text-red-400">{uploadError}</p>
-          )}
         </div>
         </div>
 

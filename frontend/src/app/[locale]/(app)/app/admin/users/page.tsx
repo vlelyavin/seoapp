@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Shield, ChevronDown } from "lucide-react";
 import { cn, formatDate } from "@/lib/utils";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { toast } from "sonner";
 
 interface UserRow {
   id: string;
@@ -55,8 +56,13 @@ export default function AdminUsersPage() {
         setUsers((prev) =>
           prev.map((u) => (u.id === userId ? { ...u, ...data } : u))
         );
+        toast.success(t("userUpdated"));
+      } else {
+        toast.error(t("actionFailed"));
       }
-    } catch { /* ignore */ }
+    } catch {
+      toast.error(t("actionFailed"));
+    }
   }
 
   if (!isAdmin) {

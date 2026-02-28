@@ -57,7 +57,8 @@
     "confirmDeleteMessage": "This action cannot be undone. All audit data and results will be permanently deleted.",
     "deleting": "Deleting...",
     "criticalLabel": "critical",
-    "warningsLabel": "warnings"
+    "warningsLabel": "warnings",
+    "deleteFailed": "Failed to delete audit"
   },
   "breadcrumbs": {
     "dashboard": "Dashboard",
@@ -81,7 +82,7 @@
     "screenshotsHint": "(slower)",
     "maxPages": "Maximum pages to crawl",
     "maxPagesHint": "Set how many pages to crawl (your plan allows up to {limit} pages)",
-    "includeCompanyLogo": "Include company logo (you can set it <link>here</link>)",
+    "includeCompanyLogo": "Include company logo <hint>(you can set it <link>here</link>)</hint>",
     "startAudit": "Start Audit",
     "startingAudit": "Starting...",
     "showPagesCrawled": "Show scanned pages count in report",
@@ -181,6 +182,7 @@
     "uploadFailed": "Upload failed",
     "logoAlt": "Logo",
     "removeLogo": "Remove logo",
+    "logoRemoved": "Logo removed",
     "saveSettings": "Save Settings"
   },
   "admin": {
@@ -216,7 +218,13 @@
     "role": "Role",
     "joined": "Joined",
     "roleAdmin": "Admin",
-    "roleUser": "User"
+    "roleUser": "User",
+    "planUpdated": "Plan updated",
+    "userUpdated": "User updated",
+    "userDeleted": "User deleted",
+    "gscRevoked": "GSC access revoked",
+    "googleRevoked": "Google auth revoked",
+    "actionFailed": "Action failed"
   },
   "plans": {
     "free": "Free",

@@ -11,6 +11,7 @@ import { ANALYZER_NAMES, ANALYZER_LABELS } from "@/types/audit";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { toast } from "sonner";
 
 const REAL_ANALYZER_NAMES = ANALYZER_NAMES.filter((n) => n !== "speed_screenshots");
 
@@ -26,7 +27,6 @@ export default function NewAuditPage() {
   const [selectedAnalyzers, setSelectedAnalyzers] = useState<string[]>([...REAL_ANALYZER_NAMES]);
   const [showAnalyzers, setShowAnalyzers] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [showPagesCrawled, setShowPagesCrawled] = useState(false);
   const [includeCompanyLogo, setIncludeCompanyLogo] = useState(false);
 
@@ -74,7 +74,6 @@ export default function NewAuditPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
     setLoading(true);
 
     try {
@@ -96,14 +95,14 @@ export default function NewAuditPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || t("failedToStart"));
+        toast.error(data.error || t("failedToStart"));
         return;
       }
 
       // Navigate to progress page
       router.push(`/app/auditor/${data.id}?fastApiId=${data.fastApiId}`);
     } catch {
-      setError(t("connectionError"));
+      toast.error(t("connectionError"));
     } finally {
       setLoading(false);
     }
@@ -121,12 +120,6 @@ export default function NewAuditPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="rounded-xl border border-gray-800 bg-gray-950 p-6">
-          {error && (
-            <div className="mb-4 rounded-lg bg-red-900/20 p-3 text-sm text-red-400">
-              {error}
-            </div>
-          )}
-
           {/* URL + Max Pages — same line on desktop, stacked on mobile */}
           <div className="mb-5 flex flex-col md:flex-row gap-4">
             <div className="w-full md:w-[70%]">
@@ -170,11 +163,11 @@ export default function NewAuditPage() {
           </div>
 
           {/* Analyzers */}
-          <div>
+          <div className="rounded-lg border border-gray-700 overflow-hidden">
             <button
               type="button"
               onClick={() => setShowAnalyzers(!showAnalyzers)}
-              className="flex w-full items-center justify-between rounded-lg border border-gray-700 px-3 py-2.5 text-sm text-gray-300 hover:bg-gray-900 transition-colors"
+              className="flex w-full items-center justify-between px-3 py-2.5 text-sm text-gray-300 hover:bg-gray-900 transition-colors"
             >
               <span>
                 {t("analyzers")} ({realSelected.length}/{REAL_ANALYZER_NAMES.length})
@@ -187,7 +180,7 @@ export default function NewAuditPage() {
             </button>
 
             {showAnalyzers && (
-              <div className="mt-2 rounded-lg border border-gray-700 p-3">
+              <div className="border-t border-gray-700 bg-gray-900 p-3">
                 <div className="mb-2 flex gap-2">
                   <button
                     type="button"
@@ -226,7 +219,6 @@ export default function NewAuditPage() {
                     </label>
                   ))}
                 </div>
-
               </div>
             )}
           </div>
@@ -266,10 +258,13 @@ export default function NewAuditPage() {
               />
               <span className="text-gray-300">
                 {t.rich("includeCompanyLogo", {
+                  hint: (chunks) => (
+                    <span className="text-xs text-gray-500">{chunks}</span>
+                  ),
                   link: (chunks) => (
                     <Link
                       href="/app/settings?tab=branding"
-                      className="text-copper hover:underline"
+                      className="text-gray-500 hover:text-copper transition-colors"
                       onClick={(e) => e.stopPropagation()}
                     >
                       {chunks}

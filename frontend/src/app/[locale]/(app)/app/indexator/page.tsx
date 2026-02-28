@@ -2352,7 +2352,6 @@ function IndexNowVerifyModal({
 }) {
   const [verifying, setVerifying] = useState(false);
   const [verified, setVerified] = useState(false);
-  const [verifyError, setVerifyError] = useState<string | null>(null);
   const baseDomain = site.domain.startsWith("sc-domain:")
     ? `https://${site.domain.replace("sc-domain:", "")}`
     : site.domain.replace(/\/$/, "");
@@ -2360,7 +2359,6 @@ function IndexNowVerifyModal({
 
   const verify = async () => {
     setVerifying(true);
-    setVerifyError(null);
     try {
       const res = await fetch(`/api/indexing/sites/${site.id}/verify-key`);
       const data = await res.json();
@@ -2368,10 +2366,10 @@ function IndexNowVerifyModal({
         setVerified(true);
         onVerifySuccess();
       } else {
-        setVerifyError(t("keyFileNotFound"));
+        toast.error(t("keyFileNotFound"));
       }
     } catch {
-      setVerifyError(t("networkError"));
+      toast.error(t("networkError"));
     } finally {
       setVerifying(false);
     }
@@ -2443,7 +2441,6 @@ function IndexNowVerifyModal({
                   {t("keyFileConfirmed")}
                 </span>
               )}
-              {verifyError && <span className="text-xs text-red-400">{verifyError}</span>}
             </div>
           </div>
         </div>

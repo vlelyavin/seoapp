@@ -21,6 +21,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import type { AuditSummary } from "@/types/audit";
+import { toast } from "sonner";
 
 export default function AuditorListPage() {
   const t = useTranslations("dashboard");
@@ -53,9 +54,11 @@ export default function AuditorListPage() {
       const res = await fetch(`/api/audit/${id}`, { method: "DELETE" });
       if (res.ok) {
         setAudits((prev) => prev.filter((a) => a.id !== id));
+      } else {
+        toast.error(t("deleteFailed"));
       }
     } catch {
-      /* ignore */
+      toast.error(t("deleteFailed"));
     } finally {
       setDeletingId(null);
     }
