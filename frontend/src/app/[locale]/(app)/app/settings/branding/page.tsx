@@ -194,7 +194,7 @@ export default function BrandingPage() {
       <form onSubmit={handleSave} className="rounded-xl border border-gray-800 bg-gray-950 p-6 space-y-5">
         <h2 className="mb-4 text-lg font-semibold text-white">{t("title")}</h2>
 
-        <div className="max-w-[30rem] space-y-5">
+        <div className="max-w-[40rem] space-y-5">
         <div>
           <label className="mb-0.5 block text-sm font-medium text-gray-300">
             {t("companyName")}

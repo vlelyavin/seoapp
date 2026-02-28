@@ -90,26 +90,31 @@ export default function PlansPage() {
           };
           const PlanIcon = icons[plan.id];
 
-          // {/* HIDDEN: Auditor features section hidden (component preserved) */}
-          // const auditorFeatures: { text: string; present: boolean }[] = [
-          //   {
-          //     text: isPro || isAgency
-          //       ? t("unlimitedAudits")
-          //       : t("auditsPerMonth", { count: plan.auditsPerMonth }),
-          //     present: true,
-          //   },
-          //   { text: t("maxPages", { count: plan.maxPages }), present: true },
-          //   {
-          //     text: isAgency
-          //       ? t("allExports")
-          //       : isPro
-          //       ? t("pdfDocxExports")
-          //       : t("pdfOnly"),
-          //     present: true,
-          //   },
-          //   { text: t("noWatermark"), present: plan.id !== "free" },
-          //   { text: t("whiteLabel"), present: isAgency },
-          // ];
+          const auditorFeatures: { text: string; present: boolean }[] = [
+            {
+              text: isPro || isAgency
+                ? t("unlimitedAudits")
+                : t("auditsPerMonth", { count: plan.auditsPerMonth }),
+              present: true,
+            },
+            { text: t("maxPages", { count: plan.maxPages }), present: true },
+            {
+              text: isAgency
+                ? t("allExports")
+                : isPro
+                  ? t("pdfDocxExports")
+                  : t("pdfOnly"),
+              present: true,
+            },
+            {
+              text: plan.id === "free" ? t("watermarkIncluded") : t("noWatermark"),
+              present: plan.id !== "free",
+            },
+            {
+              text: plan.id === "free" ? t("noBrandedReports") : t("brandedReports"),
+              present: isAgency,
+            },
+          ];
 
           const indexatorFeatures: { text: string; present: boolean }[] = [
             { text: t("maxSites", { count: plan.maxSites }), present: true },
@@ -159,8 +164,8 @@ export default function PlansPage() {
                 <span className="ml-2 text-gray-500">{t("perMonth")}</span>
               </div>
 
-              {/* HIDDEN: Auditor features section hidden (component preserved) */}
-              {/* <div className="mt-8">
+              {/* Auditor features */}
+              <div className="mt-8">
                 <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-copper">
                   {ut("auditorLabel")}
                 </p>
@@ -176,7 +181,7 @@ export default function PlansPage() {
                     </li>
                   ))}
                 </ul>
-              </div> */}
+              </div>
 
               {/* Indexator features */}
               <div className="mt-8 flex-1">

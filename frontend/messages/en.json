@@ -256,7 +256,8 @@
     "allAnalyzers": "20+ SEO analyzers",
     "pageSpeedScreenshots": "PageSpeed screenshots",
     "pageSpeedScreenshotsDisabled": "No PageSpeed screenshots",
-    "brandedReports": "Custom branded reports"
+    "brandedReports": "Custom branded reports",
+    "noBrandedReports": "No custom branded reports"
   },
   "indexing": {
     "title": "Indexator",
