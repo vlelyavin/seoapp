@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
 import { Link } from "@/i18n/navigation";
-import { Check, X, Zap, Rocket, Building2, ArrowRight } from "lucide-react";
+import { Check, X, Zap, Rocket, Building2, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const PLANS = [
@@ -51,6 +51,13 @@ export function PricingSection() {
                 present: true,
               },
               { text: pt("maxPages", { count: plan.maxPages }), present: true },
+              { text: pt("allAnalyzers"), present: true },
+              {
+                text: isPro || isAgency
+                  ? pt("pageSpeedScreenshots")
+                  : pt("pageSpeedScreenshotsDisabled"),
+                present: isPro || isAgency,
+              },
               {
                 text: isAgency
                   ? pt("allExports")
@@ -60,7 +67,7 @@ export function PricingSection() {
                 present: true,
               },
               { text: pt("noWatermark"), present: plan.id !== "free" },
-              { text: pt("whiteLabel"), present: isAgency },
+              { text: pt("brandedReports"), present: isAgency },
             ];
 
             const indexatorFeatures: { text: string; present: boolean }[] = [
@@ -158,7 +165,7 @@ export function PricingSection() {
                       : "landing-btn-outline border border-gray-700 text-white transition-colors hover:border-copper-light"
                   )}
                 >
-                  <ArrowRight className="h-4 w-4" />
+                  <Sparkles className="h-4 w-4" />
                   {plan.price === 0 ? t("ctaFree") : t("ctaPaid")}
                 </Link>
               </div>

@@ -250,7 +250,11 @@
     "reportFrequency": "{frequency} email reports",
     "noEmailReports": "No email reports",
     "weekly": "Weekly",
-    "daily": "Daily"
+    "daily": "Daily",
+    "allAnalyzers": "20+ SEO analyzers",
+    "pageSpeedScreenshots": "PageSpeed screenshots",
+    "pageSpeedScreenshotsDisabled": "No PageSpeed screenshots",
+    "brandedReports": "Custom branded reports"
   },
   "indexing": {
     "title": "Indexator",
