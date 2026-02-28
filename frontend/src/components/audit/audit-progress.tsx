@@ -23,7 +23,7 @@ function CircularArc({ pct }: { pct: number }) {
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#374151"
+          stroke="#4b5563"
           strokeWidth={stroke}
         />
         {/* Progress arc */}
@@ -57,9 +57,6 @@ function CircularArc({ pct }: { pct: number }) {
 export function AuditProgressView({ progress }: AuditProgressViewProps) {
   const t = useTranslations("audit");
   const pct = progress?.progress || 0;
-  const stage = progress?.stage || "crawling";
-  const uiStage = stage === "generating_report" ? "report" : stage;
-  const pagesCrawled = progress?.pages_crawled || 0;
 
   function getProgressMessage(): string {
     if (!progress) return t("progressConnecting");
@@ -90,14 +87,8 @@ export function AuditProgressView({ progress }: AuditProgressViewProps) {
     }
   }
 
-  const stages = [
-    { key: "crawling", label: t("stageCrawling") },
-    { key: "analyzing", label: t("stageAnalyzing") },
-    { key: "report", label: t("stageGeneratingReport") },
-  ];
-
   return (
-    <div className="mx-auto max-w-xl py-6 sm:py-16">
+    <div>
       <div className="rounded-xl border border-gray-800 bg-gray-950 p-4 sm:p-8">
         {/* Circular arc */}
         <div className="mb-6 flex items-center justify-center">
@@ -112,37 +103,7 @@ export function AuditProgressView({ progress }: AuditProgressViewProps) {
           {getProgressMessage()}
         </p>
 
-        {/* Stage indicators */}
-        <div className="flex items-center justify-between">
-          {stages.map((s, i) => {
-            const isActive = s.key === uiStage;
-            const isPast = stages.findIndex((x) => x.key === uiStage) > i;
-            return (
-              <div key={s.key} className="flex flex-1 flex-col items-center gap-1">
-                <div
-                  className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium ${
-                    isPast
-                      ? "bg-green-900/30 text-green-400"
-                      : isActive
-                        ? "bg-gray-900 text-white"
-                        : "bg-gray-900 text-gray-400"
-                  }`}
-                >
-                  {isPast ? "\u2713" : i + 1}
-                </div>
-                <span
-                  className={`text-center text-[10px] sm:text-xs ${
-                    isActive
-                      ? "font-medium text-white"
-                      : "text-gray-400"
-                  }`}
-                >
-                  {s.label}
-                </span>
-              </div>
-            );
-          })}
-        </div>
+        {/* Stage indicators — hidden */}
 
         {/* Current URL */}
         {progress?.current_url && (
