@@ -39,6 +39,11 @@ export async function PATCH(
     return NextResponse.json({ error: "No fields to update" }, { status: 400 });
   }
 
+  const existing = await prisma.user.findUnique({ where: { id: userId } });
+  if (!existing) {
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  }
+
   const user = await prisma.user.update({
     where: { id: userId },
     data: updateData,

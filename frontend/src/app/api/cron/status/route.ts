@@ -34,7 +34,7 @@ export async function GET() {
       schedule,
       last_run_at: log?.lastRunAt ?? null,
       last_result: log?.lastResult ?? "never_run",
-      last_summary: log?.lastSummary ? JSON.parse(log.lastSummary) : null,
+      last_summary: log?.lastSummary ? (() => { try { return JSON.parse(log.lastSummary); } catch { return null; } })() : null,
     };
   });
 

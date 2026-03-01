@@ -11,10 +11,8 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const search = searchParams.get("search") || "";
   const plan = searchParams.get("plan") || "";
-  const sortBy = searchParams.get("sortBy") || "createdAt";
-  const sortOrder = (searchParams.get("sortOrder") || "desc") as
-    | "asc"
-    | "desc";
+  const sortBy = searchParams.get("sortBy") === "lastAudit" ? "lastAudit" : "createdAt";
+  const sortOrder = searchParams.get("sortOrder") === "asc" ? "asc" : "desc";
   const page = Math.max(1, parseInt(searchParams.get("page") || "1"));
   const pageSize = Math.min(
     100,
@@ -31,7 +29,9 @@ export async function GET(req: Request) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const orderBy: any = { createdAt: sortOrder };
+  const orderBy: any = sortBy === "lastAudit"
+    ? { audits: { _count: sortOrder } }
+    : { createdAt: sortOrder };
 
   const [users, total] = await Promise.all([
     prisma.user.findMany({
