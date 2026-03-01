@@ -26,6 +26,7 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
   const isApp = pathname.startsWith("/app");
 
   const rawName = user?.name?.trim();
+  const firstName = rawName?.split(" ")[0];
   const emailLocal = user?.email?.split("@")[0];
   const initials = rawName
     ? rawName
@@ -133,7 +134,7 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
                   </Link>
                 )}
                 {avatar}
-                {isApp && rawName && <span className="text-sm font-medium text-gray-300">{rawName}</span>}
+                {isApp && firstName && <span className="text-sm font-medium text-gray-300">{firstName}</span>}
                 {logoutButton}
               </div>
             ) : (
