@@ -101,18 +101,26 @@ export async function POST(req: Request) {
   );
 
   // Start audit on FastAPI
-  const fastapiRes = await fastapiFetch("/api/audit", {
-    method: "POST",
-    body: JSON.stringify({
-      url,
-      language,
-      progress_language: progressLanguage || language,
-      analyzers,
-      max_pages: effectiveMaxPages,
-      include_screenshots: includeScreenshots,
-      show_pages_crawled: showPagesCrawled,
-    }),
-  });
+  let fastapiRes: Response;
+  try {
+    fastapiRes = await fastapiFetch("/api/audit", {
+      method: "POST",
+      body: JSON.stringify({
+        url,
+        language,
+        progress_language: progressLanguage || language,
+        analyzers,
+        max_pages: effectiveMaxPages,
+        include_screenshots: includeScreenshots,
+        show_pages_crawled: showPagesCrawled,
+      }),
+    });
+  } catch {
+    return NextResponse.json(
+      { error: "Audit service is unavailable. Please try again later." },
+      { status: 503 }
+    );
+  }
 
   if (!fastapiRes.ok) {
     const err = await fastapiRes.text();

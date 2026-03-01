@@ -200,23 +200,39 @@ export async function GET(
     if (brand.logo_url) queryParams.set("logo_url", brand.logo_url);
   }
 
-  const fastapiRes = await fastapiFetch(
-    `/api/audit/${audit.fastApiId}/download?${queryParams.toString()}`
-  );
+  let fastapiRes: Response;
+  try {
+    fastapiRes = await fastapiFetch(
+      `/api/audit/${audit.fastApiId}/download?${queryParams.toString()}`
+    );
+  } catch {
+    return NextResponse.json(
+      { error: "Audit service is unavailable" },
+      { status: 503 }
+    );
+  }
 
   // If FastAPI doesn't have the audit in memory anymore, regenerate from cached data
   if (fastapiRes.status === 404 && audit.resultJson) {
-    const regenerateRes = await fastapiFetch("/api/report/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        format,
-        audit: JSON.parse(audit.resultJson),
-        language: lang || audit.language || "en",
-        show_watermark: capabilities.showWatermark,
-        brand,
-      }),
-    });
+    let regenerateRes: Response;
+    try {
+      regenerateRes = await fastapiFetch("/api/report/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          format,
+          audit: JSON.parse(audit.resultJson),
+          language: lang || audit.language || "en",
+          show_watermark: capabilities.showWatermark,
+          brand,
+        }),
+      });
+    } catch {
+      return NextResponse.json(
+        { error: "Audit service is unavailable" },
+        { status: 503 }
+      );
+    }
 
     if (!regenerateRes.ok) {
       return NextResponse.json(

@@ -25,9 +25,21 @@ export async function GET(
   }
 
   // Always try FastAPI first (it has original data in memory and can translate on-the-fly)
-  const fastapiRes = await fastapiFetch(
-    `/api/audit/${audit.fastApiId}/results?lang=${lang}`
-  );
+  let fastapiRes: Response;
+  try {
+    fastapiRes = await fastapiFetch(
+      `/api/audit/${audit.fastApiId}/results?lang=${lang}`
+    );
+  } catch {
+    // FastAPI unreachable — fall back to DB cache
+    if (audit.resultJson) {
+      return NextResponse.json(JSON.parse(audit.resultJson));
+    }
+    return NextResponse.json(
+      { error: "Audit service is unavailable" },
+      { status: 503 }
+    );
+  }
 
   if (fastapiRes.ok) {
     const data = await fastapiRes.json();
