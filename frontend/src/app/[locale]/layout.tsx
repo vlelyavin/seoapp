@@ -63,7 +63,7 @@ export default async function LocaleLayout({
               toastOptions={{
                 style: {
                   background: "#030712",
-                  border: "1px solid #1f2937",
+                  border: "1px solid #374151",
                   color: "#f9fafb",
                 },
               }}

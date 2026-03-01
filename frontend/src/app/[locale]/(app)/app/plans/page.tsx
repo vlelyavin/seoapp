@@ -23,6 +23,13 @@ export default function PlansPage() {
     session?.user?.planId ?? null
   );
 
+  // Set initial planId from session once it loads (session is async)
+  useEffect(() => {
+    if (currentPlanId === null && session?.user?.planId) {
+      setCurrentPlanId(session.user.planId);
+    }
+  }, [session?.user?.planId, currentPlanId]);
+
   useEffect(() => {
     async function loadPlans() {
       try {
