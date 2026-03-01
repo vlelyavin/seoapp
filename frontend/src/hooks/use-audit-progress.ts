@@ -41,7 +41,6 @@ export function useAuditProgress(fastApiId: string | null, auditId: string | nul
   const startPolling = useCallback(() => {
     if (!auditId || isPolling) return;
 
-    console.log('[SSE] Falling back to polling');
     setIsPolling(true);
 
     const poll = async () => {
@@ -62,12 +61,10 @@ export function useAuditProgress(fastApiId: string | null, auditId: string | nul
             }
           }
         } else {
-          console.error('[Polling] Failed to fetch progress:', res.status);
           setConnected(false);
           toast.error(`Polling failed with status ${res.status}`);
         }
-      } catch (error) {
-        console.error('[Polling] Error:', error);
+      } catch {
         setConnected(false);
         toast.error("Failed to fetch progress");
       }
@@ -81,19 +78,16 @@ export function useAuditProgress(fastApiId: string | null, auditId: string | nul
     if (!fastApiId || isPolling) return;
 
     if (connectionAttemptsRef.current >= MAX_SSE_RETRIES) {
-      console.log('[SSE] Max retries reached, falling back to polling');
       dismissConnectingToast();
       startPolling();
       return;
     }
 
     const fastapiUrl = process.env.NEXT_PUBLIC_FASTAPI_URL || "http://127.0.0.1:8000";
-    console.log('[SSE] Attempting connection to:', `${fastapiUrl}/api/audit/${fastApiId}/status`);
     const es = new EventSource(`${fastapiUrl}/api/audit/${fastApiId}/status`);
     esRef.current = es;
 
     es.onopen = () => {
-      console.log('[SSE] Connection established');
       setConnected(true);
       dismissConnectingToast();
       connectionAttemptsRef.current = 0;
@@ -122,13 +116,11 @@ export function useAuditProgress(fastApiId: string | null, auditId: string | nul
 
     es.onerror = () => {
       connectionAttemptsRef.current += 1;
-      console.error('[SSE] Connection error, attempt:', connectionAttemptsRef.current);
       setConnected(false);
       es.close();
       esRef.current = null;
 
       if (connectionAttemptsRef.current >= MAX_SSE_RETRIES) {
-        console.log('[SSE] Max retries reached, falling back to polling');
         dismissConnectingToast();
         startPolling();
       } else {

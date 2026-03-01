@@ -52,7 +52,6 @@ export default function AuditPage({
         if (!res.ok || !isMounted) return;
 
         const audit = await res.json();
-        console.log('[Audit] Status check:', { status: audit.status, fastApiId: audit.fastApiId, startedAt: audit.startedAt });
         if (audit.url) setAuditUrl(audit.url);
 
         // Determine if audit is in progress
@@ -67,19 +66,17 @@ export default function AuditPage({
               const fastapiStatus = await progressRes.json();
 
               if (fastapiStatus.status === "completed" || fastapiStatus.status === "failed") {
-                console.log('[Audit] Status synced to', fastapiStatus.status);
                 window.location.reload();
                 return;
               }
             }
-          } catch (error) {
-            console.error('[Audit] Failed to verify audit status:', error);
+          } catch {
+            // FastAPI may be unreachable — continue with DB status
           }
         }
 
         if (audit.fastApiId && isInProgress) {
           // Audit is in progress - add fastApiId to URL
-          console.log('[Audit] Redirecting to progress view');
           router.push(`/app/auditor/${auditId}?fastApiId=${audit.fastApiId}`);
         } else if (audit.status === 'completed') {
           // Audit completed - load cached results (handled by loadCached effect)
@@ -92,8 +89,7 @@ export default function AuditPage({
           setPageError(tAudit("failed"));
           setLoading(false);
         }
-      } catch (err) {
-        console.error('[Audit] Status check failed:', err);
+      } catch {
         setPageError(tAudit("error"));
         setLoading(false);
       }
@@ -149,8 +145,8 @@ export default function AuditPage({
             if (data.url) setAuditUrl(data.url);
           }
         }
-      } catch (err) {
-        console.error('[Audit] Failed to fetch results:', err);
+      } catch {
+        // Results may not be ready yet
       }
       if (!cancelled) {
         setLoading(false);
@@ -191,8 +187,8 @@ export default function AuditPage({
           setAuditMeta(data);
           if (data.url) setAuditUrl(data.url);
         }
-      } catch (err) {
-        console.error('[Audit] Failed to load cached results:', err);
+      } catch {
+        // Failed to load cached results
       }
       setLoading(false);
     }

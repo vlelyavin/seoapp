@@ -53,8 +53,8 @@ export default function NewAuditPage() {
           setPlanLimit(limit);
           setMaxPages(limit); // Set default to plan max
         }
-      } catch (err) {
-        console.error("Failed to fetch user plan:", err);
+      } catch {
+        // Failed to fetch plan — use defaults
       }
     }
     fetchUserPlan();

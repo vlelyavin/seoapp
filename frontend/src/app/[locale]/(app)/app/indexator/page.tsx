@@ -1335,8 +1335,6 @@ function SiteCard({
   const TABS = [
     { id: "overview" as const, label: t("tabOverview") },
     { id: "urls" as const, label: t("tabUrls") },
-    // HIDDEN: Report tab hidden from UI (component and route preserved)
-    // { id: "report" as const, label: t("tabReport") },
     { id: "log" as const, label: t("tabLog") },
   ];
 
