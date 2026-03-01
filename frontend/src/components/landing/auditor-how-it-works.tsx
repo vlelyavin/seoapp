@@ -31,7 +31,7 @@ export function AuditorHowItWorks() {
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.5, delay: i * 0.15 }}
             >
-              <div className="border-t border-[#282828]" />
+              <div className="border-t border-gray-800" />
 
               <div className="flex gap-6 py-10 sm:gap-10">
                 <span className="shrink-0 text-5xl font-bold leading-none bg-gradient-to-b from-copper to-copper-light bg-clip-text text-transparent sm:text-6xl lg:text-7xl">
@@ -48,7 +48,7 @@ export function AuditorHowItWorks() {
               </div>
 
               {i === steps.length - 1 && (
-                <div className="border-t border-[#282828]" />
+                <div className="border-t border-gray-800" />
               )}
             </motion.div>
           ))}

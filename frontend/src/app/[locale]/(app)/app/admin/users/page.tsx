@@ -114,7 +114,7 @@ export default function AdminUsersPage() {
                   <select
                     value={user.role}
                     onChange={(e) => updateUser(user.id, { role: e.target.value })}
-                    className="rounded border border-gray-600 bg-gray-900 px-1.5 py-1.5 text-base md:text-xs text-gray-300"
+                    className="rounded border border-gray-700 bg-gray-900 px-1.5 py-1.5 text-base md:text-xs text-gray-300"
                   >
                     <option value="user">{t("roleUser")}</option>
                     <option value="admin">{t("roleAdmin")}</option>
@@ -124,7 +124,7 @@ export default function AdminUsersPage() {
                   <select
                     value={user.planId}
                     onChange={(e) => updateUser(user.id, { planId: e.target.value })}
-                    className="rounded border border-gray-600 bg-gray-900 px-1.5 py-1.5 text-base md:text-xs text-gray-300"
+                    className="rounded border border-gray-700 bg-gray-900 px-1.5 py-1.5 text-base md:text-xs text-gray-300"
                   >
                     <option value="free">{tPlans("free")}</option>
                     <option value="pro">{tPlans("pro")}</option>

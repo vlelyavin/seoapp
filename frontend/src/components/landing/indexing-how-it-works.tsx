@@ -31,7 +31,7 @@ export function IndexingHowItWorks() {
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.5, delay: i * 0.15 }}
             >
-              <div className="border-t border-[#282828]" />
+              <div className="border-t border-gray-800" />
 
               {/* Step content */}
               <div className="flex gap-6 py-10 sm:gap-10">
@@ -50,7 +50,7 @@ export function IndexingHowItWorks() {
 
               {/* Bottom divider for last item */}
               {i === steps.length - 1 && (
-                <div className="border-t border-[#282828]" />
+                <div className="border-t border-gray-800" />
               )}
             </motion.div>
           ))}

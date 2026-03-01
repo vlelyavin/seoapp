@@ -1599,7 +1599,7 @@ function SiteCard({
                       onClick={() =>
                         bingSubmit(() => onRequestSubmit(site.id, [...selectedUrls], ["bing"], selectedUrls.size))
                       }
-                      className="rounded-md border border-gray-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-gray-700"
+                      className="rounded-md border border-gray-700 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-gray-900"
                     >
                       {t("submitToBing")}
                     </button>
