@@ -149,7 +149,8 @@
     "status": "Статус",
     "critical_count": "Критические",
     "warning_count": "Предупреждения",
-    "pages_analyzed": "{count} страниц проанализировано"
+    "pages_analyzed": "{count} страниц проанализировано",
+    "website_label": "Сайт"
   },
   "analyzers": {
     "cms": {

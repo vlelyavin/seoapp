@@ -7,14 +7,21 @@ import { Link } from "@/i18n/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { ExportFormat } from "@/lib/plan-capabilities";
 
+export interface ExportOptions {
+  includeCompanyName: boolean;
+  includeCompanyLogo: boolean;
+  showPagesCrawled: boolean;
+}
+
 interface ExportDialogProps {
   open: boolean;
   onClose: () => void;
-  onExport: (format: string, lang: string) => void;
+  onExport: (format: string, lang: string, options: ExportOptions) => void;
   loading?: boolean;
   defaultLang?: string;
   formatOptions?: ExportFormat[];
   hasCompanyLogo?: boolean;
+  hasCompanyName?: boolean;
 }
 
 const ALL_FORMAT_OPTIONS: Record<ExportFormat, string> = {
@@ -39,6 +46,7 @@ export function ExportDialog({
   defaultLang = "en",
   formatOptions,
   hasCompanyLogo = false,
+  hasCompanyName = false,
 }: ExportDialogProps) {
   const t = useTranslations("audit");
   const resolvedFormatOptions =
@@ -46,6 +54,7 @@ export function ExportDialog({
   const [format, setFormat] = useState<ExportFormat>(() => resolvedFormatOptions[0]);
   const [lang, setLang] = useState(defaultLang);
   const [showPagesCrawled, setShowPagesCrawled] = useState(false);
+  const [includeCompanyName, setIncludeCompanyName] = useState(hasCompanyName);
   const [includeCompanyLogo, setIncludeCompanyLogo] = useState(false);
   const selectedFormat = resolvedFormatOptions.includes(format)
     ? format
@@ -153,6 +162,35 @@ export function ExportDialog({
               </span>
             </label>
 
+            {/* Include company name */}
+            <label className="flex cursor-pointer items-center gap-2 text-sm">
+              <Checkbox
+                checked={includeCompanyName}
+                onChange={() => setIncludeCompanyName((prev) => !prev)}
+              />
+              <span className="text-gray-300">
+                {t("exportIncludeCompanyName")}
+                {!hasCompanyName && (
+                  <>
+                    {" "}
+                    <span className="text-xs text-gray-500">
+                      {t.rich("exportCompanyNameHint", {
+                        link: (chunks) => (
+                          <Link
+                            href="/app/settings?tab=branding"
+                            className="text-gray-500 hover:text-copper transition-colors"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {chunks}
+                          </Link>
+                        ),
+                      })}
+                    </span>
+                  </>
+                )}
+              </span>
+            </label>
+
             {/* Include company logo */}
             <label className="flex cursor-pointer items-center gap-2 text-sm">
               <Checkbox
@@ -190,7 +228,7 @@ export function ExportDialog({
         {/* Actions */}
         <div className="flex gap-3">
           <button
-            onClick={() => onExport(selectedFormat, lang)}
+            onClick={() => onExport(selectedFormat, lang, { includeCompanyName, includeCompanyLogo, showPagesCrawled })}
             disabled={loading}
             className="flex-1 rounded-md bg-gradient-to-r from-copper to-copper-light px-4 py-2 text-sm font-semibold whitespace-nowrap text-white transition-opacity hover:opacity-90 disabled:opacity-50"
           >

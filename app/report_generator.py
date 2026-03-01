@@ -808,6 +808,7 @@ class ReportGenerator:
             "status_label": t("report.status"),
             "critical_label": t("report.critical_count"),
             "warnings_label": t("report.warning_count"),
+            "website_label": t("report.website_label"),
         }
 
         report_title_display = self._build_report_heading(t, brand)
@@ -883,7 +884,7 @@ class ReportGenerator:
         safe_report_title = escape(report_title_display)
         cover_header = f'''
             <h1 class="pdf-cover-title">{safe_report_title}</h1>
-            <div class="pdf-cover-url">Website: {domain}</div>
+            <div class="pdf-cover-url">{t("report.website_label")}: {domain}</div>
             <div class="pdf-cover-meta">{t("report.pages_analyzed", count=audit.pages_crawled)} · {generated_at}</div>
         '''
         # Replace the original h1 + two p tags header in the summary section
@@ -1608,7 +1609,8 @@ class ReportGenerator:
         site_para = doc.add_paragraph()
         site_para.paragraph_format.space_before = Pt(2)
         site_para.paragraph_format.space_after = Pt(1)
-        run = site_para.add_run(f"Website: {domain}")
+        website_label = t("report.website_label")
+        run = site_para.add_run(f"{website_label}: {domain}")
         self._docx_set_font(run, size_pt=10, color_rgb=(17, 24, 39))
 
         # Meta line (pages · date)

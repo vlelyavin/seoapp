@@ -207,6 +207,8 @@ class ProgressEvent(BaseModel):
     analyzers_total: int = 0
     analyzers_completed: int = 0
     analyzer_phase: Optional[str] = None  # running | completed
+    links_found: int = 0  # Total unique internal links discovered so far
+    estimated_seconds: Optional[int] = None  # Estimated seconds remaining (crawling phase only)
 
 
 class RobotsTxtData(BaseModel):

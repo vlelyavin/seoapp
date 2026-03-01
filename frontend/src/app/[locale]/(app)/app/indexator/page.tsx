@@ -1921,10 +1921,9 @@ function SiteCard({
               <h3 className="text-sm font-semibold text-white">{t("todayReport")}</h3>
 
               {loadingReport ? (
-                <div className="space-y-3">
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="h-16 rounded-lg border border-gray-800 bg-gray-950 animate-pulse" />
-                  ))}
+                <div className="flex flex-col items-center justify-center py-12">
+                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  <p className="mt-3 text-sm text-gray-400">{t("generatingReport")}</p>
                 </div>
               ) : !report ? (
                 <div className="rounded-lg border border-gray-800 bg-gray-950 p-10 text-center">

@@ -555,7 +555,7 @@
             </div>
             {% endif %}
             <h1 style="font-size: 24px; margin-bottom: 6px;">{{ report_title_display if report_title_display else (t.express_title if t else 'Website SEO audit') }}</h1>
-            <p style="color: var(--color-text-light); margin-bottom: 4px; font-size: 13px;">Website: {{ domain }}</p>
+            <p style="color: var(--color-text-light); margin-bottom: 4px; font-size: 13px;">{{ t.website_label if t else 'Website' }}: {{ domain }}</p>
             <p style="color: var(--color-text-light); margin-bottom: 24px; font-size: 13px;">{{ t.pages_analyzed if t else '{} pages analyzed'.format(audit.pages_crawled) }} · {{ generated_at }}</p>
 
             <div class="summary-grid{% if not show_pages_crawled %} summary-grid-3{% endif %}">

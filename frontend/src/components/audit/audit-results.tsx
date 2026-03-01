@@ -14,7 +14,7 @@ import {
 import { useLocale, useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
 import { AnalyzerSection } from "./analyzer-section";
-import { ExportDialog } from "@/components/ui/export-dialog";
+import { ExportDialog, type ExportOptions } from "@/components/ui/export-dialog";
 import { cn } from "@/lib/utils";
 import { getPlanCapabilities } from "@/lib/plan-capabilities";
 import type { AuditResults, SeverityLevel } from "@/types/audit";
@@ -44,6 +44,7 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
   const criticalIssues = (meta.critical_issues as number) || 0;
   const planCapabilities = getPlanCapabilities(session?.user?.planId);
   const [hasCompanyLogo, setHasCompanyLogo] = useState(false);
+  const [hasCompanyName, setHasCompanyName] = useState(false);
 
   useEffect(() => {
     if (!planCapabilities.canUseBranding) return;
@@ -53,6 +54,7 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
         if (res.ok) {
           const data = await res.json();
           if (data?.logoUrl) setHasCompanyLogo(true);
+          if (data?.companyName) setHasCompanyName(true);
         }
       } catch { /* ignore */ }
     }
@@ -91,12 +93,16 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
     sectionRefs.current[name]?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  async function handleExport(format: string, lang: string) {
+  async function handleExport(format: string, lang: string, options: ExportOptions) {
     setExportingFormat(format);
     setExportError(null);
 
     try {
-      const url = `/api/audit/${auditId}/export?format=${format}&lang=${lang}`;
+      const params = new URLSearchParams({ format, lang });
+      if (options.includeCompanyName) params.set("include_company_name", "1");
+      if (options.includeCompanyLogo) params.set("include_company_logo", "1");
+      if (options.showPagesCrawled) params.set("show_pages_crawled", "1");
+      const url = `/api/audit/${auditId}/export?${params.toString()}`;
 
       const response = await fetch(url);
       if (!response.ok) {
@@ -242,6 +248,7 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
             defaultLang={locale}
             formatOptions={planCapabilities.allowedExportFormats}
             hasCompanyLogo={hasCompanyLogo}
+            hasCompanyName={hasCompanyName}
           />
         </div>
 

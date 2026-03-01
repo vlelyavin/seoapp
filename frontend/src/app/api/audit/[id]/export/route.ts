@@ -30,6 +30,9 @@ export async function GET(
   const { searchParams } = new URL(req.url);
   const requestedFormat = (searchParams.get("format") || "pdf").toLowerCase();
   const lang = searchParams.get("lang");
+  const includeCompanyName = searchParams.get("include_company_name") === "1";
+  const includeCompanyLogo = searchParams.get("include_company_logo") === "1";
+  const showPagesCrawled = searchParams.get("show_pages_crawled") === "1";
 
   if (!SUPPORTED_FORMATS.includes(requestedFormat as ExportFormat)) {
     return NextResponse.json(
@@ -188,8 +191,8 @@ export async function GET(
       }
 
       brand = {
-        ...(branding.companyName ? { company_name: branding.companyName } : {}),
-        ...(logoUrl ? { logo_url: logoUrl } : {}),
+        ...(includeCompanyName && branding.companyName ? { company_name: branding.companyName } : {}),
+        ...(includeCompanyLogo && logoUrl ? { logo_url: logoUrl } : {}),
       };
       if (Object.keys(brand).length === 0) {
         brand = undefined;
@@ -212,6 +215,7 @@ export async function GET(
           audit: JSON.parse(audit.resultJson),
           language: lang || audit.language || "en",
           show_watermark: capabilities.showWatermark,
+          show_pages_crawled: showPagesCrawled,
           brand,
         }),
       });
@@ -247,6 +251,7 @@ export async function GET(
   const queryParams = new URLSearchParams({ format });
   if (lang) queryParams.set("lang", lang);
   queryParams.set("show_watermark", String(capabilities.showWatermark));
+  if (showPagesCrawled) queryParams.set("show_pages_crawled", "true");
   if (brand) {
     if (brand.company_name) queryParams.set("company_name", brand.company_name);
     // Only pass logo_url as query param if it's a regular URL (not a data URI)
@@ -279,6 +284,7 @@ export async function GET(
           audit: JSON.parse(audit.resultJson),
           language: lang || audit.language || "en",
           show_watermark: capabilities.showWatermark,
+          show_pages_crawled: showPagesCrawled,
           brand,
         }),
       });

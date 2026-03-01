@@ -149,7 +149,8 @@
     "status": "Статус",
     "critical_count": "Критичні",
     "warning_count": "Попередження",
-    "pages_analyzed": "{count} сторінок проаналізовано"
+    "pages_analyzed": "{count} сторінок проаналізовано",
+    "website_label": "Сайт"
   },
   "analyzers": {
     "cms": {

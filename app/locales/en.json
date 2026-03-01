@@ -149,7 +149,8 @@
     "status": "Status",
     "critical_count": "Critical",
     "warning_count": "Warnings",
-    "pages_analyzed": "{count} pages analyzed"
+    "pages_analyzed": "{count} pages analyzed",
+    "website_label": "Website"
   },
   "analyzers": {
     "cms": {

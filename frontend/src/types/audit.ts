@@ -59,6 +59,8 @@ export interface ProgressEvent {
   analyzers_total?: number;
   analyzers_completed?: number;
   analyzer_phase?: "running" | "completed" | null;
+  links_found?: number;
+  estimated_seconds?: number | null;
 }
 
 /** Mirrors Python SpeedMetrics */

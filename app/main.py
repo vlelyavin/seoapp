@@ -691,6 +691,14 @@ async def run_audit(audit_id: str, request: AuditRequest):
 
             async def progress_callback(page: PageData):
                 progress = min(len(pages) / max_pages * 40, 40)
+                total_links = len({link for p in pages for link in p.internal_links})
+                elapsed = time.time() - crawl_started_ts
+                est_seconds = None
+                if len(pages) > 1 and elapsed > 0:
+                    rate = len(pages) / elapsed
+                    remaining = max_pages - len(pages)
+                    if remaining > 0:
+                        est_seconds = int(remaining / rate)
                 await emit_progress(ProgressEvent(
                     status=AuditStatus.CRAWLING,
                     progress=progress,
@@ -701,6 +709,8 @@ async def run_audit(audit_id: str, request: AuditRequest):
                     current_task_type="crawling",
                     analyzers_total=analyzers_total,
                     analyzers_completed=completed_total(),
+                    links_found=total_links,
+                    estimated_seconds=est_seconds,
                 ))
 
             # Capture homepage screenshot during crawl (reuses crawler's browser)

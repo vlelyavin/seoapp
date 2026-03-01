@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import type { ProgressEvent } from "@/types/audit";
 
@@ -54,9 +55,35 @@ function CircularArc({ pct }: { pct: number }) {
   );
 }
 
+function formatEstimate(seconds: number, t: ReturnType<typeof useTranslations<"audit">>): string {
+  if (seconds < 60) return t("estimateSeconds", { count: seconds });
+  const mins = Math.ceil(seconds / 60);
+  return t("estimateMinutes", { count: mins });
+}
+
 export function AuditProgressView({ progress }: AuditProgressViewProps) {
   const t = useTranslations("audit");
   const pct = progress?.progress || 0;
+  const logRef = useRef<HTMLDivElement>(null);
+  const urlLogRef = useRef<string[]>([]);
+
+  // Accumulate URLs — mutate ref during render (safe: no side effects, deterministic)
+  if (progress?.current_url && urlLogRef.current[urlLogRef.current.length - 1] !== progress.current_url) {
+    const next = [...urlLogRef.current, progress.current_url];
+    urlLogRef.current = next.length > 50 ? next.slice(-50) : next;
+  }
+
+  // Derive display slice from the ref (progress identity change triggers re-render)
+  const displayLog = useMemo(() => urlLogRef.current.slice(-10), [progress]);  // eslint-disable-line react-hooks/exhaustive-deps -- intentionally re-derive when progress changes
+
+  // Auto-scroll to bottom after render
+  const prevLenRef = useRef(0);
+  if (displayLog.length !== prevLenRef.current) {
+    prevLenRef.current = displayLog.length;
+    queueMicrotask(() => {
+      if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
+    });
+  }
 
   function getProgressMessage(): string {
     if (!progress) return t("progressConnecting");
@@ -87,6 +114,7 @@ export function AuditProgressView({ progress }: AuditProgressViewProps) {
     }
   }
 
+
   return (
     <div>
       <div className="rounded-xl border border-gray-800 bg-gray-950 p-4 sm:p-8">
@@ -103,12 +131,45 @@ export function AuditProgressView({ progress }: AuditProgressViewProps) {
           {getProgressMessage()}
         </p>
 
-        {/* Stage indicators — hidden */}
+        {/* Stats row */}
+        {progress && (
+          <div className="mb-6 flex items-center justify-center gap-8 sm:gap-12">
+            <div className="text-center">
+              <div className="text-xl font-bold text-white">{progress.pages_crawled || 0}</div>
+              <div className="text-xs text-gray-500">{t("statPagesCrawled")}</div>
+            </div>
+            <div className="text-center">
+              <div className="text-xl font-bold text-white">{progress.links_found || 0}</div>
+              <div className="text-xs text-gray-500">{t("statLinksFound")}</div>
+            </div>
+            {progress.estimated_seconds != null && progress.estimated_seconds > 0 && (
+              <div className="text-center">
+                <div className="text-xl font-bold text-white">
+                  {formatEstimate(progress.estimated_seconds, t)}
+                </div>
+                <div className="text-xs text-gray-500">{t("statTimeRemaining")}</div>
+              </div>
+            )}
+          </div>
+        )}
 
-        {/* Current URL */}
-        {progress?.current_url && (
-          <div className="mt-4 overflow-hidden text-ellipsis whitespace-nowrap rounded-lg bg-gray-900 px-3 py-2 text-xs text-gray-400">
-            {progress.current_url}
+        {/* Live URL log */}
+        {displayLog.length > 0 && (
+          <div className="relative">
+            <div
+              ref={logRef}
+              className="max-h-56 overflow-y-auto rounded-lg bg-gray-900 px-3 py-2 font-mono text-xs leading-5 text-gray-500"
+            >
+              {displayLog.map((url, i) => (
+                <div key={`${url}-${i}`} className="truncate">
+                  {url}
+                </div>
+              ))}
+            </div>
+            {/* Top fade */}
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-6 rounded-t-lg bg-gradient-to-b from-gray-900 to-transparent" />
+            {/* Bottom fade */}
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 rounded-b-lg bg-gradient-to-t from-gray-900 to-transparent" />
           </div>
         )}
       </div>
