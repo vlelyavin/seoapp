@@ -57,13 +57,14 @@ export default async function LocaleLayout({
           <NextIntlClientProvider messages={messages}>
             {children}
             <Toaster
+              closeButton
               theme="dark"
               position="bottom-right"
               toastOptions={{
                 style: {
-                  background: "#1a1a1a",
-                  border: "1px solid #333",
-                  color: "#fff",
+                  background: "#030712",
+                  border: "1px solid #1f2937",
+                  color: "#f9fafb",
                 },
               }}
             />

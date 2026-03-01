@@ -105,3 +105,17 @@ body {
 .landing-btn-outline:hover {
   box-shadow: 0 0 0 3px #e38748;
 }
+
+/* Sonner toast icon colors */
+[data-sonner-toast][data-type="success"] [data-icon] {
+  color: #10b981;
+}
+[data-sonner-toast][data-type="error"] [data-icon] {
+  color: #ef4444;
+}
+[data-sonner-toast][data-type="info"] [data-icon] {
+  color: #3b82f6;
+}
+[data-sonner-toast][data-type="loading"] [data-icon] {
+  color: #9ca3af;
+}
