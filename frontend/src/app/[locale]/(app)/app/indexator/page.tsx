@@ -1516,13 +1516,13 @@ function SiteCard({
               {/* Filter tabs + search row */}
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-4">
                 <div className="w-full overflow-x-auto sm:w-auto">
-                  <div className="inline-flex h-11 items-center gap-1 whitespace-nowrap rounded-lg border border-gray-800 bg-black p-1">
+                  <div className="inline-flex h-11 w-auto items-center gap-1 whitespace-nowrap rounded-lg border border-gray-800 bg-black">
                     {URL_FILTERS.map((f) => (
                       <button
                         key={f.id}
                         onClick={() => handleFilterChange(f.id)}
                         className={cn(
-                          "inline-flex h-9 shrink-0 items-center justify-center rounded-md px-2.5 text-xs font-medium transition-colors",
+                          "inline-flex h-full flex-1 shrink-0 items-center justify-center rounded-md px-4 text-xs md:text-sm font-medium transition-colors",
                           urlFilter === f.id
                             ? "border border-gray-700 bg-gray-900 text-white shadow-sm"
                             : "border border-transparent text-gray-400 hover:text-gray-200",
@@ -1541,12 +1541,12 @@ function SiteCard({
                       value={urlSearch}
                       onChange={(e) => handleSearchChange(e.target.value)}
                       placeholder={t("searchUrls")}
-                      className="h-10 w-full rounded-lg border border-gray-800 bg-black py-1.5 pl-9 pr-3 text-sm text-white outline-none placeholder-gray-500 transition-colors focus:border-copper focus:ring-2 focus:ring-copper/20"
+                      className="h-11 w-full rounded-lg border border-gray-800 bg-black py-1.5 pl-9 pr-3 text-sm text-white outline-none placeholder-gray-500 transition-colors focus:border-copper focus:ring-2 focus:ring-copper/20"
                     />
                   </div>
                   <button
                     onClick={() => loadUrls(urlFilter, urlCurrentPage, urlSearch)}
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-800 bg-black text-gray-400 transition-colors hover:text-white"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-gray-800 bg-black text-gray-400 transition-colors hover:text-white"
                   >
                     <RefreshCw className="h-4 w-4" />
                   </button>
@@ -1798,7 +1798,7 @@ function SiteCard({
               {/* Filter + refresh row */}
               <div className="flex items-center gap-4">
                 <div className="w-full overflow-x-auto sm:w-auto">
-                  <div className="inline-flex h-11 items-center gap-1 whitespace-nowrap rounded-lg border border-gray-800 bg-black p-1">
+                  <div className="inline-flex h-11 w-auto items-center gap-1 whitespace-nowrap rounded-lg border border-gray-800 bg-black">
                     {LOG_FILTERS.map((f) => (
                       <button
                         key={f.id}
@@ -1808,7 +1808,7 @@ function SiteCard({
                           setLogPage(null);
                         }}
                         className={cn(
-                          "inline-flex h-9 shrink-0 items-center justify-center rounded-md px-2.5 text-xs font-medium transition-colors",
+                          "inline-flex h-full flex-1 shrink-0 items-center justify-center rounded-md px-4 text-xs md:text-sm font-medium transition-colors",
                           logFilter === f.id
                             ? "border border-gray-700 bg-gray-900 text-white shadow-sm"
                             : "border border-transparent text-gray-400 hover:text-gray-200",

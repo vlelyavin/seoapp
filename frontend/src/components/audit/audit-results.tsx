@@ -181,13 +181,13 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
         {/* Filter bar */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-4">
           <div className="w-full overflow-x-auto sm:w-auto">
-            <div className="inline-flex h-11 items-center gap-1 whitespace-nowrap rounded-lg border border-gray-800 bg-gray-950 p-1">
+            <div className="inline-flex h-11 w-full items-center gap-1 whitespace-nowrap rounded-lg border border-gray-800 bg-gray-950">
               {filterButtons.map((fb) => (
                 <button
                   key={fb.key}
                   onClick={() => setFilter(fb.key)}
                   className={cn(
-                    "inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-colors",
+                    "inline-flex h-full flex-1 shrink-0 items-center justify-center gap-1.5 rounded-md px-3 text-xs md:text-sm font-medium transition-colors",
                     filter === fb.key
                       ? "border border-gray-700 bg-gray-900 text-white shadow-sm"
                       : "border border-transparent text-gray-400 hover:text-gray-200"
@@ -219,7 +219,7 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
                 disabled={exportingFormat !== null}
                 onClick={() => setExportDialogOpen(true)}
                 className={cn(
-                  "flex h-11 items-center gap-1.5 rounded-lg px-3 text-sm font-semibold transition-colors",
+                  "flex h-11 items-center gap-1.5 rounded-lg px-6 text-sm font-semibold transition-colors",
                   exportingFormat
                     ? "cursor-not-allowed opacity-50 bg-gradient-to-r from-copper to-copper-light text-white"
                     : "bg-gradient-to-r from-copper to-copper-light text-white hover:opacity-90"

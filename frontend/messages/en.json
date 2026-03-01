@@ -160,7 +160,7 @@
     "generatingReport": "Generating report...",
     "loadingAudits": "Loading audits...",
     "theoryLevelLabel": "Reference sections",
-    "theoryLevelTooltip": "Background theory for each audit category.<ul><li><strong>Full</strong> — include theory for all categories</li><li><strong>Compact</strong> — include only for categories with issues</li><li><strong>None</strong> — omit all theory sections</li></ul>",
+    "theoryLevelTooltip": "Full — include theory for all categories. Compact — include only for categories with issues. None — omit all theory sections.",
     "theoryFull": "Full",
     "theoryCompact": "Compact",
     "theoryNone": "None",

@@ -178,13 +178,14 @@ export function ExportDialog({
                 </button>
                 {showTheoryTooltip && (
                   <div
-                    className="absolute bottom-full left-0 mb-2 w-72 rounded-lg border border-gray-800 bg-gray-950 p-2.5 text-xs text-gray-300 shadow-xl z-10 [&_ul]:mt-1.5 [&_ul]:space-y-1 [&_li]:flex [&_li]:gap-1.5 [&_strong]:text-gray-200"
-                    dangerouslySetInnerHTML={{ __html: t("theoryLevelTooltip") }}
-                  />
+                    className="absolute bottom-full left-0 mb-2 w-72 rounded-lg border border-gray-800 bg-gray-950 p-2.5 text-xs text-gray-300 shadow-xl z-10"
+                  >
+                    {t("theoryLevelTooltip")}
+                  </div>
                 )}
               </div>
             </div>
-            <div className="inline-flex w-full items-center gap-1 rounded-lg border border-gray-800 bg-gray-950 p-1">
+            <div className="inline-flex w-full items-center gap-1 rounded-lg border border-gray-800 bg-gray-950">
               {THEORY_LEVELS.map((opt) => (
                 <button
                   key={opt.value}
@@ -192,7 +193,7 @@ export function ExportDialog({
                   disabled={loading}
                   onClick={() => setTheoryLevel(opt.value)}
                   className={cn(
-                    "inline-flex h-9 flex-1 shrink-0 items-center justify-center rounded-md px-2.5 text-xs font-medium transition-colors",
+                    "inline-flex h-9 flex-1 shrink-0 items-center justify-center rounded-md px-2.5 text-xs md:text-sm font-medium transition-colors",
                     theoryLevel === opt.value
                       ? "border border-gray-700 bg-gray-900 text-white shadow-sm"
                       : "border border-transparent text-gray-400 hover:text-gray-200"
