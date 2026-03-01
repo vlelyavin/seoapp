@@ -130,7 +130,7 @@
     "passed_checks": "Проверок пройдено",
     "warnings": "Предупреждений",
     "critical_issues": "Критических проблем",
-    "theory_title": "Теоретическая справка",
+    "theory_title": "Справочная информация",
     "examples": "Примеры",
     "recommendation": "Рекомендация",
     "no_issues": "Проблем не обнаружено",

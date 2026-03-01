@@ -33,6 +33,7 @@ export async function GET(
   const includeCompanyName = searchParams.get("include_company_name") === "1";
   const includeCompanyLogo = searchParams.get("include_company_logo") === "1";
   const showPagesCrawled = searchParams.get("show_pages_crawled") === "1";
+  const theoryLevel = searchParams.get("theory_level") || "compact";
 
   if (!SUPPORTED_FORMATS.includes(requestedFormat as ExportFormat)) {
     return NextResponse.json(
@@ -216,6 +217,7 @@ export async function GET(
           language: lang || audit.language || "en",
           show_watermark: capabilities.showWatermark,
           show_pages_crawled: showPagesCrawled,
+          theory_level: theoryLevel,
           brand,
         }),
       });
@@ -252,6 +254,7 @@ export async function GET(
   if (lang) queryParams.set("lang", lang);
   queryParams.set("show_watermark", String(capabilities.showWatermark));
   if (showPagesCrawled) queryParams.set("show_pages_crawled", "true");
+  queryParams.set("theory_level", theoryLevel);
   if (brand) {
     if (brand.company_name) queryParams.set("company_name", brand.company_name);
     // Only pass logo_url as query param if it's a regular URL (not a data URI)
@@ -285,6 +288,7 @@ export async function GET(
           language: lang || audit.language || "en",
           show_watermark: capabilities.showWatermark,
           show_pages_crawled: showPagesCrawled,
+          theory_level: theoryLevel,
           brand,
         }),
       });

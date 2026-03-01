@@ -401,6 +401,13 @@
             display: block;
         }
 
+        /* Core Web Vitals table column widths */
+        .cwv-table { table-layout: fixed; }
+        .cwv-table th:first-child,
+        .cwv-table td:first-child { width: 40%; }
+        .cwv-table th:nth-child(n+2),
+        .cwv-table td:nth-child(n+2) { width: 20%; }
+
         /* Theory Block */
         .theory-block {
             margin-bottom: 14px;
@@ -648,14 +655,14 @@
                 <p class="section-description">{{ section.result.description }}</p>
                 {% endif %}
 
-                {% if section.result.summary %}
+                {% if section.result.summary and section.show_summary %}
                 <div class="section-summary">{{ section.result.summary }}</div>
                 {% endif %}
 
                 <!-- Theory -->
                 {% if section.result.theory %}
                 <details class="theory-block">
-                    <summary>{{ t.theory_title if t else 'Background Information' }}</summary>
+                    <summary>{{ t.theory_title if t else 'Reference' }}</summary>
                     <div class="theory-content">{{ section.result.theory | replace('\n', '<br>') | safe }}</div>
                 </details>
                 {% endif %}
@@ -715,7 +722,7 @@
                 {% for table in section.result.tables %}
                 <h3 class="table-title">{{ table.title }}</h3>
                 <div class="table-wrapper">
-                <table class="data-table">
+                <table class="data-table{% if section.id == 'speed' and table.headers|length == 4 %} cwv-table{% endif %}">
                     <thead>
                         <tr>
                             {% for header in table.headers %}

@@ -717,7 +717,17 @@ class ReportGenerator:
             return legacy
         return "Website SEO audit"
 
-    async def generate(self, audit: AuditResult, brand: dict | None = None) -> str:
+    @staticmethod
+    def _should_include_theory(result: 'AnalyzerResult', theory_level: str) -> bool:
+        """Determine if theory/reference section should be included based on level."""
+        if theory_level == "full":
+            return True
+        if theory_level == "none":
+            return False
+        # "compact" — include only for categories with warnings or errors
+        return result.severity in (SeverityLevel.WARNING, SeverityLevel.ERROR)
+
+    async def generate(self, audit: AuditResult, brand: dict | None = None, theory_level: str = "compact") -> str:
         """Generate HTML report and return file path."""
         template = self.env.get_template("report.html")
 
@@ -743,10 +753,23 @@ class ReportGenerator:
                 if lang != 'en':
                     result = translate_analyzer_content(result, lang, t)
 
+                # Filter theory based on theory_level
+                if result.theory and not self._should_include_theory(result, theory_level):
+                    result = copy.copy(result)
+                    result.theory = ""
+
                 # Get translated title, fallback to display_name from result
                 title = t(f"analyzers.{name}.name")
                 if title == f"analyzers.{name}.name":
                     title = result.display_name  # Fallback to analyzer's display_name
+
+                # Skip summary if it duplicates the first issue message
+                show_summary = True
+                if result.summary and result.issues:
+                    first_msg = result.issues[0].message.strip().rstrip('.')
+                    summary_clean = result.summary.strip().rstrip('.')
+                    if first_msg and (summary_clean == first_msg or summary_clean in first_msg or first_msg in summary_clean):
+                        show_summary = False
 
                 sections.append({
                     "id": name,
@@ -754,6 +777,7 @@ class ReportGenerator:
                     "icon": "",
                     "severity": result.severity,
                     "result": result,
+                    "show_summary": show_summary,
                 })
 
         # Extract domain
@@ -843,7 +867,7 @@ class ReportGenerator:
 
         return str(report_path)
 
-    async def generate_pdf(self, audit: AuditResult, brand: dict | None = None, show_watermark: bool = True) -> str:
+    async def generate_pdf(self, audit: AuditResult, brand: dict | None = None, show_watermark: bool = True, theory_level: str = "compact") -> str:
         """Generate PDF report and return file path."""
         try:
             from weasyprint import HTML, CSS
@@ -874,7 +898,7 @@ class ReportGenerator:
                 sections.append({"id": name, "title": title, "severity": result.severity, "result": result})
 
         # First generate HTML (for the detailed findings)
-        html_path = await self.generate(audit, brand=brand)
+        html_path = await self.generate(audit, brand=brand, theory_level=theory_level)
         with open(html_path, "r", encoding="utf-8") as f:
             html_content = f.read()
 
@@ -1113,6 +1137,12 @@ class ReportGenerator:
                 max-width: 300px !important;
                 word-break: normal !important;
             }
+            /* Core Web Vitals table */
+            .cwv-table { table-layout: fixed !important; }
+            .cwv-table th:first-child,
+            .cwv-table td:first-child { width: 40% !important; white-space: normal !important; }
+            .cwv-table th:nth-child(n+2),
+            .cwv-table td:nth-child(n+2) { width: 20% !important; }
         """
         print_css_string = print_css_string.replace("__WATERMARK__", watermark_css)
         print_css = CSS(string=print_css_string)
@@ -1520,7 +1550,7 @@ class ReportGenerator:
                 self._docx_set_font(run, size_pt=8, color_rgb=(55, 65, 81))
                 self._docx_add_hyperlink(p, url, url, font_size_pt=8, color_rgb=(55, 65, 81))
 
-    async def generate_docx(self, audit: AuditResult, brand: dict | None = None, show_watermark: bool = True) -> str:
+    async def generate_docx(self, audit: AuditResult, brand: dict | None = None, show_watermark: bool = True, theory_level: str = "compact") -> str:
         """Generate styled DOCX report and return file path."""
         try:
             from docx import Document
@@ -1556,8 +1586,19 @@ class ReportGenerator:
         # Create document
         doc = Document()
 
+        # Match PDF page setup: A4, margins 1.5cm sides, 2cm bottom
+        from docx.shared import Cm
+        section_doc = doc.sections[0]
+        section_doc.page_width = Cm(21.0)
+        section_doc.page_height = Cm(29.7)
+        section_doc.top_margin = Cm(1.5)
+        section_doc.bottom_margin = Cm(2.0)
+        section_doc.left_margin = Cm(1.5)
+        section_doc.right_margin = Cm(1.5)
+
         # --- Setup cross-platform DOCX fonts ---
         from docx.oxml import OxmlElement
+        from docx.enum.table import WD_TABLE_ALIGNMENT
 
         def _set_style_font(s, font_name=DOCX_DEFAULT_FONT):
             s.font.name = font_name
@@ -1574,11 +1615,15 @@ class ReportGenerator:
         style.font.size = Pt(10)
         _set_style_font(style)
 
+        # Match PDF heading sizes: H1=17pt bold, H2=14pt semibold
+        _heading_sizes = {1: 17, 2: 14, 3: 12}
         for heading_level in range(1, 4):
             style_name = f'Heading {heading_level}'
             if style_name in doc.styles:
                 h_style = doc.styles[style_name]
                 h_style.font.color.rgb = RGBColor(31, 41, 55)
+                h_style.font.size = Pt(_heading_sizes.get(heading_level, 12))
+                h_style.font.bold = True
                 _set_style_font(h_style)
 
         # Keep a fixed accent color for DOCX summaries.
@@ -1703,8 +1748,9 @@ class ReportGenerator:
 
         cat_table = doc.add_table(rows=1 + len(sorted_sections), cols=4)
         cat_table.style = 'Table Grid'
+        cat_table.alignment = WD_TABLE_ALIGNMENT.CENTER
 
-        # Set column widths: category ~50%, others share remaining space
+        # Match PDF proportions: Category ~50%, Status ~20%, Critical ~15%, Warnings ~15%
         cat_table.columns[0].width = Inches(3.25)
         cat_table.columns[1].width = Inches(1.25)
         cat_table.columns[2].width = Inches(1.0)
@@ -1734,6 +1780,13 @@ class ReportGenerator:
             SeverityLevel.ERROR: (153, 27, 27),
             SeverityLevel.INFO: (30, 64, 175),
         }
+        # Status badge background colors matching PDF (green/yellow/red/blue tints)
+        badge_bg_map = {
+            SeverityLevel.SUCCESS: 'F0FDF4',
+            SeverityLevel.WARNING: 'FFFBEB',
+            SeverityLevel.ERROR: 'FEF2F2',
+            SeverityLevel.INFO: 'EFF6FF',
+        }
 
         for row_idx, section in enumerate(sorted_sections, 1):
             result = section["result"]
@@ -1749,12 +1802,16 @@ class ReportGenerator:
             # Category
             cell = row.cells[0]
             cell.text = ''
+            self._docx_set_cell_margins(cell, top=50, right=80, bottom=50, left=80)
             run = cell.paragraphs[0].add_run(section["title"])
-            self._docx_set_font(run, size_pt=8, color_rgb=(55, 65, 81))
-            # Status badge
+            self._docx_set_font(run, size_pt=9, color_rgb=(55, 65, 81))
+            # Status badge with colored background
             cell = row.cells[1]
             cell.text = ''
             cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+            self._docx_set_cell_margins(cell, top=50, right=80, bottom=50, left=80)
+            badge_bg = badge_bg_map.get(section["severity"], 'F3F4F6')
+            self._docx_set_cell_shading(cell, badge_bg)
             badge = badge_text_map.get(section["severity"], "—")
             badge_clr = badge_color_map.get(section["severity"], (55, 65, 81))
             run = cell.paragraphs[0].add_run(badge)
@@ -1763,14 +1820,16 @@ class ReportGenerator:
             cell = row.cells[2]
             cell.text = ''
             cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+            self._docx_set_cell_margins(cell, top=50, right=80, bottom=50, left=80)
             run = cell.paragraphs[0].add_run(str(criticals))
-            self._docx_set_font(run, size_pt=8, bold=criticals > 0, color_rgb=(239, 68, 68) if criticals > 0 else (156, 163, 175))
+            self._docx_set_font(run, size_pt=9, bold=criticals > 0, color_rgb=(239, 68, 68) if criticals > 0 else (156, 163, 175))
             # Warning count
             cell = row.cells[3]
             cell.text = ''
             cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+            self._docx_set_cell_margins(cell, top=50, right=80, bottom=50, left=80)
             run = cell.paragraphs[0].add_run(str(warns))
-            self._docx_set_font(run, size_pt=8, bold=warns > 0, color_rgb=(245, 158, 11) if warns > 0 else (156, 163, 175))
+            self._docx_set_font(run, size_pt=9, bold=warns > 0, color_rgb=(245, 158, 11) if warns > 0 else (156, 163, 175))
 
         doc.add_paragraph()
 
@@ -1812,29 +1871,46 @@ class ReportGenerator:
                 section_title = result.display_name
             section_title = self._strip_docx_decorations(section_title)
 
-            # Section heading
+            # Section heading — match PDF: 17px bold with border-bottom
             heading = doc.add_heading(f"{section_index}. {section_title}", level=1)
             heading.paragraph_format.keep_with_next = True
-            heading.paragraph_format.space_before = Pt(10)
-            heading.paragraph_format.space_after = Pt(4)
+            heading.paragraph_format.space_before = Pt(14)
+            heading.paragraph_format.space_after = Pt(6)
+            # Bottom border for heading (matching PDF section-header border-bottom)
+            p_fmt = heading.paragraph_format
+            p_pr = heading._element.get_or_add_pPr()
+            p_bdr = OxmlElement('w:pBdr')
+            bottom = OxmlElement('w:bottom')
+            bottom.set(qn('w:val'), 'single')
+            bottom.set(qn('w:sz'), '4')
+            bottom.set(qn('w:space'), '4')
+            bottom.set(qn('w:color'), 'E5E7EB')
+            p_bdr.append(bottom)
+            p_pr.append(p_bdr)
 
             # Add severity badge after heading
             badge_label, badge_color = severity_badge_text.get(
                 result.severity, (t("report.badge_info"), (59, 130, 246))
             )
-            run = heading.add_run(f"  ({badge_label})")
-            self._docx_set_font(run, size_pt=12, bold=False, color_rgb=badge_color)
+            run = heading.add_run(f"  [{badge_label}]")
+            self._docx_set_font(run, size_pt=11, bold=False, color_rgb=badge_color)
 
-            # Summary
-            if result.summary:
+            # Summary — skip if it duplicates first issue message
+            show_summary = True
+            if result.summary and result.issues:
+                first_msg = result.issues[0].message.strip().rstrip('.')
+                summary_clean = result.summary.strip().rstrip('.')
+                if first_msg and (summary_clean == first_msg or summary_clean in first_msg or first_msg in summary_clean):
+                    show_summary = False
+            if result.summary and show_summary:
                 p = doc.add_paragraph()
                 p.paragraph_format.space_after = Pt(8)
                 p.paragraph_format.keep_with_next = True
                 run = p.add_run(result.summary)
-                self._docx_set_font(run, size_pt=10, bold=True)
+                self._docx_set_font(run, size_pt=11, bold=True, color_rgb=(31, 41, 55))
 
-            # Theory section
-            if result.theory:
+            # Theory section — filtered by theory_level
+            if result.theory and self._should_include_theory(result, theory_level):
                 p = doc.add_paragraph()
                 p.paragraph_format.space_after = Pt(4)
                 p.paragraph_format.keep_with_next = True
@@ -1877,28 +1953,36 @@ class ReportGenerator:
                     table = doc.add_table(rows=len(rows) + 1, cols=len(headers))
                     table.style = 'Table Grid'
 
-                    # Header row with gray background
+                    # Core Web Vitals table: 40% / 20% / 20% / 20%
+                    is_cwv = name == "speed" and len(headers) == 4
+                    if is_cwv:
+                        table.columns[0].width = Inches(2.6)
+                        table.columns[1].width = Inches(1.3)
+                        table.columns[2].width = Inches(1.3)
+                        table.columns[3].width = Inches(1.3)
+
+                    # Header row — match PDF: gray bg (#F1F5F9), uppercase 11px bold
                     for col_idx, header in enumerate(headers):
                         cell = table.rows[0].cells[col_idx]
                         cell.text = ''
                         p = cell.paragraphs[0]
-                        run = p.add_run(header)
-                        self._docx_set_font(run, size_pt=8, bold=True)
-                        self._docx_set_cell_shading(cell, 'F3F4F6')
-                        self._docx_set_cell_margins(cell, top=50, right=80, bottom=50, left=80)
+                        run = p.add_run(header.upper())
+                        self._docx_set_font(run, size_pt=8, bold=True, color_rgb=(75, 85, 99))
+                        self._docx_set_cell_shading(cell, 'F1F5F9')
+                        self._docx_set_cell_margins(cell, top=60, right=80, bottom=60, left=80)
 
-                    # Data rows
+                    # Data rows — match PDF: 9px padding, striped rows (#F8FAFC)
                     for row_idx, row_data in enumerate(rows):
                         for col_idx, header in enumerate(headers):
                             value = row_data.get(header, "")
                             cell = table.rows[row_idx + 1].cells[col_idx]
                             cell.text = ''
                             p = cell.paragraphs[0]
-                            self._docx_add_formatted_cell(p, value, font_size_pt=8)
-                            self._docx_set_cell_margins(cell, top=40, right=80, bottom=40, left=80)
-                            # Alternating row shading
+                            self._docx_add_formatted_cell(p, value, font_size_pt=9)
+                            self._docx_set_cell_margins(cell, top=50, right=80, bottom=50, left=80)
+                            # Alternating row shading matching PDF
                             if row_idx % 2 == 1:
-                                self._docx_set_cell_shading(cell, 'F9FAFB')
+                                self._docx_set_cell_shading(cell, 'F8FAFC')
 
             # Embed PageSpeed screenshots if available
             if name == "speed" and result.data:

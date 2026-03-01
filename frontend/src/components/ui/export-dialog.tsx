@@ -5,12 +5,16 @@ import { Download, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
 import type { ExportFormat } from "@/lib/plan-capabilities";
+
+export type TheoryLevel = "full" | "compact" | "none";
 
 export interface ExportOptions {
   includeCompanyName: boolean;
   includeCompanyLogo: boolean;
   showPagesCrawled: boolean;
+  theoryLevel: TheoryLevel;
 }
 
 interface ExportDialogProps {
@@ -38,6 +42,12 @@ const LANGUAGE_OPTIONS = [
   { value: "ru", label: "Русский" },
 ];
 
+const THEORY_LEVELS: { value: TheoryLevel; labelKey: string }[] = [
+  { value: "full", labelKey: "theoryFull" },
+  { value: "compact", labelKey: "theoryCompact" },
+  { value: "none", labelKey: "theoryNone" },
+];
+
 export function ExportDialog({
   open,
   onClose,
@@ -56,6 +66,7 @@ export function ExportDialog({
   const [showPagesCrawled, setShowPagesCrawled] = useState(false);
   const [includeCompanyName, setIncludeCompanyName] = useState(hasCompanyName);
   const [includeCompanyLogo, setIncludeCompanyLogo] = useState(false);
+  const [theoryLevel, setTheoryLevel] = useState<TheoryLevel>("compact");
   const selectedFormat = resolvedFormatOptions.includes(format)
     ? format
     : resolvedFormatOptions[0];
@@ -148,6 +159,33 @@ export function ExportDialog({
           </div>
         )}
 
+        {/* Reference level — segmented control, only for document formats */}
+        {isDocumentFormat && (
+          <div className="mb-4">
+            <label className="mb-1.5 block text-sm font-medium text-gray-300">
+              {t("theoryLevelLabel")}
+            </label>
+            <div className="inline-flex w-full items-center rounded-lg border border-gray-700 bg-gray-900 p-0.5">
+              {THEORY_LEVELS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  disabled={loading}
+                  onClick={() => setTheoryLevel(opt.value)}
+                  className={cn(
+                    "flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                    theoryLevel === opt.value
+                      ? "bg-gray-700 text-white shadow-sm"
+                      : "text-gray-400 hover:text-gray-200"
+                  )}
+                >
+                  {t(opt.labelKey)}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Toggles — only for document formats (PDF/DOCX/HTML) */}
         {isDocumentFormat && (
           <div className="mb-6 space-y-3">
@@ -228,7 +266,7 @@ export function ExportDialog({
         {/* Actions */}
         <div className="flex gap-3">
           <button
-            onClick={() => onExport(selectedFormat, lang, { includeCompanyName, includeCompanyLogo, showPagesCrawled })}
+            onClick={() => onExport(selectedFormat, lang, { includeCompanyName, includeCompanyLogo, showPagesCrawled, theoryLevel })}
             disabled={loading}
             className="flex-1 rounded-md bg-gradient-to-r from-copper to-copper-light px-4 py-2 text-sm font-semibold whitespace-nowrap text-white transition-opacity hover:opacity-90 disabled:opacity-50"
           >

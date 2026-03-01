@@ -3,13 +3,15 @@
 import { useState } from "react";
 import { ArrowUpDown } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
 import type { TableData } from "@/types/audit";
 
 interface AnalyzerTableProps {
   table: TableData;
+  analyzerName?: string;
 }
 
-export function AnalyzerTable({ table }: AnalyzerTableProps) {
+export function AnalyzerTable({ table, analyzerName }: AnalyzerTableProps) {
   const [sortCol, setSortCol] = useState<number | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const t = useTranslations("audit");
@@ -50,6 +52,9 @@ export function AnalyzerTable({ table }: AnalyzerTableProps) {
         })
       : rows;
 
+  // Core Web Vitals table: speed analyzer with 4 columns
+  const isCwvTable = analyzerName === "speed" && headers.length === 4;
+
   if (headers.length === 0 && rows.length === 0) return null;
 
   return (
@@ -60,7 +65,15 @@ export function AnalyzerTable({ table }: AnalyzerTableProps) {
         </h4>
       )}
       <div className="overflow-x-auto rounded-lg border border-gray-700">
-        <table className="w-full text-sm">
+        <table className={cn("w-full text-sm", isCwvTable && "table-fixed")}>
+          {isCwvTable && (
+            <colgroup>
+              <col style={{ width: "40%" }} />
+              <col style={{ width: "20%" }} />
+              <col style={{ width: "20%" }} />
+              <col style={{ width: "20%" }} />
+            </colgroup>
+          )}
           <thead className="sticky top-0 z-10">
             <tr className="border-b border-gray-700 bg-gray-900">
               {headers.map((h, i) => (
@@ -86,7 +99,10 @@ export function AnalyzerTable({ table }: AnalyzerTableProps) {
                 {row.map((cell, ci) => (
                   <td
                     key={ci}
-                    className="whitespace-nowrap px-3 py-1.5 text-xs text-gray-200"
+                    className={cn(
+                      "px-3 py-1.5 text-xs text-gray-200",
+                      isCwvTable && ci === 0 ? "whitespace-normal" : "whitespace-nowrap"
+                    )}
                   >
                     {renderCell(cell, t)}
                   </td>

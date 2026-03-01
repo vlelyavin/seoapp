@@ -102,6 +102,7 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
       if (options.includeCompanyName) params.set("include_company_name", "1");
       if (options.includeCompanyLogo) params.set("include_company_logo", "1");
       if (options.showPagesCrawled) params.set("show_pages_crawled", "1");
+      if (options.theoryLevel) params.set("theory_level", options.theoryLevel);
       const url = `/api/audit/${auditId}/export?${params.toString()}`;
 
       const response = await fetch(url);

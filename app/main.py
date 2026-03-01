@@ -392,6 +392,7 @@ async def download_report(
     accent_color: Optional[str] = None,
     logo_url: Optional[str] = None,
     show_watermark: bool = True,
+    theory_level: str = "compact",
 ):
     """
     Download generated report.
@@ -431,7 +432,7 @@ async def download_report(
         # Re-generate HTML with brand settings if provided
         if brand:
             generator = get_report_generator()
-            report_path = await generator.generate(audit, brand=brand)
+            report_path = await generator.generate(audit, brand=brand, theory_level=theory_level)
         elif not audit.report_path or not Path(audit.report_path).exists():
             raise HTTPException(status_code=404, detail="Report not found")
         else:
@@ -452,6 +453,7 @@ async def download_report(
                 audit,
                 brand=brand,
                 show_watermark=show_watermark,
+                theory_level=theory_level,
             )
         except ImportError as e:
             raise HTTPException(status_code=500, detail=str(e))
@@ -471,6 +473,7 @@ async def download_report(
                 audit,
                 brand=brand,
                 show_watermark=show_watermark,
+                theory_level=theory_level,
             )
         except ImportError as e:
             raise HTTPException(status_code=500, detail=str(e))
@@ -508,6 +511,7 @@ async def generate_report_from_data(request: Request):
         show_watermark = raw_show_watermark.strip().lower() in {"1", "true", "yes", "on"}
     else:
         show_watermark = bool(raw_show_watermark)
+    theory_level = body.get("theory_level", "compact")
 
     if not audit_data:
         raise HTTPException(status_code=400, detail="Missing audit data")
@@ -540,7 +544,7 @@ async def generate_report_from_data(request: Request):
     date_str = datetime.now().strftime("%Y-%m-%d")
 
     if format_type == "html":
-        report_path = await generator.generate(audit, brand=brand)
+        report_path = await generator.generate(audit, brand=brand, theory_level=theory_level)
         filename = f"seo-audit_{domain}_{date_str}.html"
         return FileResponse(report_path, filename=filename, media_type="text/html")
     elif format_type == "pdf":
@@ -549,6 +553,7 @@ async def generate_report_from_data(request: Request):
                 audit,
                 brand=brand,
                 show_watermark=show_watermark,
+                theory_level=theory_level,
             )
         except ImportError as e:
             raise HTTPException(status_code=500, detail=str(e))
@@ -560,6 +565,7 @@ async def generate_report_from_data(request: Request):
                 audit,
                 brand=brand,
                 show_watermark=show_watermark,
+                theory_level=theory_level,
             )
         except ImportError as e:
             raise HTTPException(status_code=500, detail=str(e))
