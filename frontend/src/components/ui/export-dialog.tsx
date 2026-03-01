@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { Download, X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+import { Checkbox } from "@/components/ui/checkbox";
 import type { ExportFormat } from "@/lib/plan-capabilities";
 
 interface ExportDialogProps {
@@ -12,6 +14,7 @@ interface ExportDialogProps {
   loading?: boolean;
   defaultLang?: string;
   formatOptions?: ExportFormat[];
+  hasCompanyLogo?: boolean;
 }
 
 const ALL_FORMAT_OPTIONS: Record<ExportFormat, string> = {
@@ -35,15 +38,20 @@ export function ExportDialog({
   loading = false,
   defaultLang = "en",
   formatOptions,
+  hasCompanyLogo = false,
 }: ExportDialogProps) {
   const t = useTranslations("audit");
   const resolvedFormatOptions =
     formatOptions && formatOptions.length > 0 ? formatOptions : (["pdf", "html", "docx"] as ExportFormat[]);
   const [format, setFormat] = useState<ExportFormat>(() => resolvedFormatOptions[0]);
   const [lang, setLang] = useState(defaultLang);
+  const [showPagesCrawled, setShowPagesCrawled] = useState(false);
+  const [includeCompanyLogo, setIncludeCompanyLogo] = useState(false);
   const selectedFormat = resolvedFormatOptions.includes(format)
     ? format
     : resolvedFormatOptions[0];
+
+  const isDocumentFormat = selectedFormat !== "json" && selectedFormat !== "csv";
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -111,8 +119,8 @@ export function ExportDialog({
         </div>
 
         {/* Language select — not shown for data formats (JSON/CSV) */}
-        {selectedFormat !== "json" && selectedFormat !== "csv" && (
-          <div className="mb-6">
+        {isDocumentFormat && (
+          <div className="mb-4">
             <label className="mb-1.5 block text-sm font-medium text-gray-300">
               {t("exportLanguage")}
             </label>
@@ -130,10 +138,54 @@ export function ExportDialog({
             </select>
           </div>
         )}
-        {/* Spacer to maintain layout when language is hidden */}
-        {(selectedFormat === "json" || selectedFormat === "csv") && (
-          <div className="mb-6" />
+
+        {/* Toggles — only for document formats (PDF/DOCX/HTML) */}
+        {isDocumentFormat && (
+          <div className="mb-6 space-y-3">
+            {/* Show scanned pages count */}
+            <label className="flex cursor-pointer items-center gap-2 text-sm">
+              <Checkbox
+                checked={showPagesCrawled}
+                onChange={() => setShowPagesCrawled((prev) => !prev)}
+              />
+              <span className="text-gray-300">
+                {t("exportShowPagesCrawled")}
+              </span>
+            </label>
+
+            {/* Include company logo */}
+            <label className="flex cursor-pointer items-center gap-2 text-sm">
+              <Checkbox
+                checked={includeCompanyLogo}
+                onChange={() => setIncludeCompanyLogo((prev) => !prev)}
+              />
+              <span className="text-gray-300">
+                {t("exportIncludeLogo")}
+                {!hasCompanyLogo && (
+                  <>
+                    {" "}
+                    <span className="text-xs text-gray-500">
+                      {t.rich("exportLogoHint", {
+                        link: (chunks) => (
+                          <Link
+                            href="/app/settings?tab=branding"
+                            className="text-gray-500 hover:text-copper transition-colors"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {chunks}
+                          </Link>
+                        ),
+                      })}
+                    </span>
+                  </>
+                )}
+              </span>
+            </label>
+          </div>
         )}
+
+        {/* Spacer when no toggles shown */}
+        {!isDocumentFormat && <div className="mb-6" />}
 
         {/* Actions */}
         <div className="flex gap-3">

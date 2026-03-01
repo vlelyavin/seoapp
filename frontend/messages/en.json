@@ -2,6 +2,7 @@
   "common": {
     "appName": "SEO Audit",
     "loading": "Loading...",
+    "loadingApp": "Loading...",
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
@@ -144,7 +145,12 @@
     "speedTestSuffix": "Speed test",
     "failedToStart": "Failed to start audit",
     "connectionError": "Connection error. Make sure the server is running.",
-    "exportFailed": "Export failed"
+    "exportFailed": "Export failed",
+    "includePageSpeedScreenshots": "Include PageSpeed screenshots",
+    "exportShowPagesCrawled": "Show scanned pages count in report",
+    "exportIncludeLogo": "Include company logo",
+    "exportLogoHint": "(you can set it <link>here</link>)",
+    "loadingAudits": "Loading audits..."
   },
   "settings": {
     "title": "Settings",
@@ -183,7 +189,9 @@
     "logoAlt": "Logo",
     "removeLogo": "Remove logo",
     "logoRemoved": "Logo removed",
-    "saveSettings": "Save Settings"
+    "saveSettings": "Save Settings",
+    "companyLogo": "Company logo",
+    "brandingDescription": "Your company name and logo will appear in the header of exported PDF and DOCX reports."
   },
   "admin": {
     "title": "Admin Dashboard",
@@ -224,7 +232,9 @@
     "userDeleted": "User deleted",
     "gscRevoked": "GSC access revoked",
     "googleRevoked": "Google auth revoked",
-    "actionFailed": "Action failed"
+    "actionFailed": "Action failed",
+    "loadingDashboard": "Loading dashboard...",
+    "loadingUsers": "Loading users..."
   },
   "plans": {
     "free": "Free",
@@ -265,7 +275,8 @@
     "pageSpeedScreenshots": "PageSpeed screenshots",
     "pageSpeedScreenshotsDisabled": "No PageSpeed screenshots",
     "brandedReports": "Custom branded reports",
-    "noBrandedReports": "No custom branded reports"
+    "noBrandedReports": "No custom branded reports",
+    "loadingPlans": "Loading plans..."
   },
   "indexing": {
     "title": "Indexator",

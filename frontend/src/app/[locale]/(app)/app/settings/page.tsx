@@ -54,10 +54,9 @@ export default function SettingsPage() {
 
         <div className="max-w-[40rem] space-y-4">
           <div>
-            <label className="mb-0.5 block text-sm font-medium text-gray-300">
+            <label className="mb-1.5 block text-sm font-medium text-gray-300">
               Email
             </label>
-            <p className="mb-1.5 text-xs text-gray-500">{t("emailDescription")}</p>
             <input
               type="email"
               value={session?.user?.email || ""}
@@ -67,10 +66,9 @@ export default function SettingsPage() {
           </div>
 
           <div>
-            <label className="mb-0.5 block text-sm font-medium text-gray-300">
+            <label className="mb-1.5 block text-sm font-medium text-gray-300">
               {t("name")}
             </label>
-            <p className="mb-1.5 text-xs text-gray-500">{t("nameDescription")}</p>
             <input
               type="text"
               value={name}

@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { redirect } from "next/navigation";
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
@@ -12,6 +13,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const { data: session, status } = useSession();
+  const t = useTranslations("common");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const toggleSidebar = useCallback(() => {
@@ -20,8 +22,9 @@ export default function DashboardLayout({
 
   if (status === "loading") {
     return (
-      <div className="flex h-dvh items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-white border-t-transparent" />
+      <div className="flex h-dvh flex-col items-center justify-center gap-3">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent" />
+        <p className="text-sm text-gray-400">{t("loadingApp")}</p>
       </div>
     );
   }

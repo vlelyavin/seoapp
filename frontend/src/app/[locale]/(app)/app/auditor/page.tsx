@@ -25,6 +25,7 @@ import { toast } from "sonner";
 
 export default function AuditorListPage() {
   const t = useTranslations("dashboard");
+  const tAudit = useTranslations("audit");
   const tBreadcrumbs = useTranslations("breadcrumbs");
   const [audits, setAudits] = useState<AuditSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -129,8 +130,9 @@ export default function AuditorListPage() {
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent" />
+        <p className="text-sm text-gray-400">{tAudit("loadingAudits")}</p>
       </div>
     );
   }

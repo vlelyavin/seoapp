@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { fastapiFetch } from "@/lib/api-client";
-import { access } from "fs/promises";
+import { access, readFile } from "fs/promises";
 import { constants as fsConstants } from "fs";
 import { join } from "path";
 import {
@@ -167,15 +167,21 @@ export async function GET(
       where: { userId: session.user.id },
     });
     if (branding) {
-      const origin = new URL(req.url).origin;
-
       let logoUrl: string | undefined;
       const publicLogoPath = toPublicLogoPath(branding.logoUrl);
       const filename = extractLogoFilenameFromUrl(publicLogoPath);
       if (publicLogoPath && filename) {
         try {
-          await access(join(getUploadsDir(), filename), fsConstants.R_OK);
-          logoUrl = `${origin}${publicLogoPath}`;
+          const filePath = join(getUploadsDir(), filename);
+          await access(filePath, fsConstants.R_OK);
+          const logoBytes = await readFile(filePath);
+          const ext = filename.split(".").pop()?.toLowerCase() || "png";
+          const mimeMap: Record<string, string> = {
+            jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png",
+            gif: "image/gif", webp: "image/webp", svg: "image/svg+xml",
+          };
+          const mime = mimeMap[ext] || "image/png";
+          logoUrl = `data:${mime};base64,${logoBytes.toString("base64")}`;
         } catch {
           logoUrl = undefined;
         }
@@ -191,13 +197,62 @@ export async function GET(
     }
   }
 
-  // Build query params for FastAPI
+  // Brand with a data-URI logo is too large for GET query params,
+  // so use the POST regenerate endpoint directly when we have cached data.
+  const hasDataUriLogo = brand?.logo_url?.startsWith("data:");
+
+  if (hasDataUriLogo && audit.resultJson) {
+    let regenerateRes: Response;
+    try {
+      regenerateRes = await fastapiFetch("/api/report/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          format,
+          audit: JSON.parse(audit.resultJson),
+          language: lang || audit.language || "en",
+          show_watermark: capabilities.showWatermark,
+          brand,
+        }),
+      });
+    } catch {
+      return NextResponse.json(
+        { error: "Audit service is unavailable" },
+        { status: 503 }
+      );
+    }
+
+    if (!regenerateRes.ok) {
+      return NextResponse.json(
+        { error: "Report generation failed" },
+        { status: regenerateRes.status }
+      );
+    }
+
+    const contentType =
+      regenerateRes.headers.get("content-type") || "application/octet-stream";
+    const disposition =
+      regenerateRes.headers.get("content-disposition") || "";
+    const blob = await regenerateRes.arrayBuffer();
+
+    return new NextResponse(blob, {
+      headers: {
+        "Content-Type": contentType,
+        "Content-Disposition": disposition,
+      },
+    });
+  }
+
+  // Build query params for FastAPI GET download
   const queryParams = new URLSearchParams({ format });
   if (lang) queryParams.set("lang", lang);
   queryParams.set("show_watermark", String(capabilities.showWatermark));
   if (brand) {
     if (brand.company_name) queryParams.set("company_name", brand.company_name);
-    if (brand.logo_url) queryParams.set("logo_url", brand.logo_url);
+    // Only pass logo_url as query param if it's a regular URL (not a data URI)
+    if (brand.logo_url && !brand.logo_url.startsWith("data:")) {
+      queryParams.set("logo_url", brand.logo_url);
+    }
   }
 
   let fastapiRes: Response;

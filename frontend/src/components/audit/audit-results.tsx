@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   BarChart3,
   CheckCircle,
@@ -43,6 +43,21 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
   const warnings = (meta.warnings as number) || 0;
   const criticalIssues = (meta.critical_issues as number) || 0;
   const planCapabilities = getPlanCapabilities(session?.user?.planId);
+  const [hasCompanyLogo, setHasCompanyLogo] = useState(false);
+
+  useEffect(() => {
+    if (!planCapabilities.canUseBranding) return;
+    async function checkBranding() {
+      try {
+        const res = await fetch("/api/settings/branding");
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.logoUrl) setHasCompanyLogo(true);
+        }
+      } catch { /* ignore */ }
+    }
+    checkBranding();
+  }, [planCapabilities.canUseBranding]);
 
   // Sort analyzers: errors first, then warnings, then success, then info
   const severityOrder: Record<SeverityLevel, number> = {
@@ -226,6 +241,7 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
             loading={exportingFormat !== null}
             defaultLang={locale}
             formatOptions={planCapabilities.allowedExportFormats}
+            hasCompanyLogo={hasCompanyLogo}
           />
         </div>
 

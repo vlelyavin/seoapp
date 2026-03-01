@@ -39,6 +39,21 @@ export default function AuditPage({
   const tAudit = useTranslations("audit");
   const tBreadcrumbs = useTranslations("breadcrumbs");
 
+  // Always fetch the audit URL so the title renders even during live progress/failure
+  useEffect(() => {
+    if (!auditId) return;
+    async function fetchAuditUrl() {
+      try {
+        const res = await fetch(`/api/audit/${auditId}`);
+        if (res.ok) {
+          const audit = await res.json();
+          if (audit.url) setAuditUrl(audit.url);
+        }
+      } catch { /* ignore */ }
+    }
+    fetchAuditUrl();
+  }, [auditId]);
+
   // Check if audit is in progress when opening without fastApiId
   useEffect(() => {
     if (!auditId || fastApiId) return;
@@ -212,11 +227,7 @@ export default function AuditPage({
     return (
       <div>
         <Breadcrumbs items={breadcrumbItems} />
-        {displayUrl && (
-          <h1 className="mb-4 md:mb-6 text-2xl font-bold text-white">
-            Website audit: {displayUrl}
-          </h1>
-        )}
+        <h1 className="mb-4 md:mb-6 text-2xl font-bold text-white">{breadcrumbLabel}</h1>
         <div className="rounded-xl border border-gray-800 bg-gray-950 p-4 sm:p-8 text-center">
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-red-800/50 bg-red-900/20">
             <AlertOctagon className="h-7 w-7 text-red-400" />
@@ -259,11 +270,7 @@ export default function AuditPage({
     return (
       <div>
         <Breadcrumbs items={breadcrumbItems} />
-        {displayUrl && (
-          <h1 className="mb-4 md:mb-6 text-2xl font-bold text-white">
-            Website audit: {displayUrl}
-          </h1>
-        )}
+        <h1 className="mb-4 md:mb-6 text-2xl font-bold text-white">{breadcrumbLabel}</h1>
         <div className="rounded-xl border border-gray-800 bg-gray-950 p-4 sm:p-8 text-center">
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-red-800/50 bg-red-900/20">
             <AlertOctagon className="h-7 w-7 text-red-400" />
@@ -290,7 +297,7 @@ export default function AuditPage({
   if (loading) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-white border-t-transparent" />
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent" />
         <p className="text-sm text-gray-400">{tAudit("loadingAudit")}</p>
       </div>
     );

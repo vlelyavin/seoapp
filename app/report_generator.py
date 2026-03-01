@@ -1303,9 +1303,22 @@ class ReportGenerator:
 
     @staticmethod
     def _fetch_logo_bytes(logo_url: str):
-        """Fetch logo bytes for DOCX rendering; returns None on failure."""
+        """Fetch logo bytes for rendering; returns None on failure.
+
+        Supports both HTTP(S) URLs and ``data:`` URIs (base64-encoded).
+        """
         if not logo_url:
             return None
+        # Handle base64 data URIs directly
+        if logo_url.startswith("data:"):
+            try:
+                import base64 as _b64
+                # data:[<mediatype>][;base64],<data>
+                _, encoded = logo_url.split(",", 1)
+                return _b64.b64decode(encoded)
+            except Exception as exc:
+                logger.warning(f"Failed to decode data-URI branding logo: {exc}")
+                return None
         try:
             req = Request(logo_url, headers={"User-Agent": "seoapp-docx"})
             with urlopen(req, timeout=6) as response:

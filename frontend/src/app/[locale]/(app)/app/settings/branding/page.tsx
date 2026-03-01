@@ -183,14 +183,14 @@ export default function BrandingPage() {
   return (
     <div className="space-y-6">
       <form onSubmit={handleSave} className="rounded-xl border border-gray-800 bg-gray-950 p-6 space-y-5">
-        <h2 className="mb-4 text-lg font-semibold text-white">{t("title")}</h2>
+        <h2 className="mb-1 text-lg font-semibold text-white">{t("title")}</h2>
+        <p className="mb-4 text-sm text-gray-500">{t("brandingDescription")}</p>
 
         <div className="max-w-[40rem] space-y-5">
         <div>
-          <label className="mb-0.5 block text-sm font-medium text-gray-300">
+          <label className="mb-1 block text-sm font-medium text-gray-300">
             {t("companyName")}
           </label>
-          <p className="mb-1.5 text-xs text-gray-500">{t("companyNameDescription")}</p>
           <input
             type="text"
             value={companyName}
@@ -201,14 +201,13 @@ export default function BrandingPage() {
         </div>
 
         <div>
-          <label className="mb-0.5 block text-sm font-medium text-gray-300">
-            {t("logo")}
+          <label className="mb-1 block text-sm font-medium text-gray-300">
+            {t("companyLogo")}
           </label>
-          <p className="mb-1.5 text-xs text-gray-500">{t("logoDescription")}</p>
 
           {/* Drop zone */}
           <label
-            className={`group relative flex h-[180px] w-[250px] cursor-pointer flex-col items-center justify-center rounded-xl border bg-gray-900 transition-colors ${
+            className={`group relative flex h-[180px] w-[250px] cursor-pointer flex-col items-center justify-center rounded-lg border bg-gray-900 transition-colors ${
               isDragOver
                 ? "border-copper ring-2 ring-copper/20"
                 : "border-gray-700 hover:border-copper hover:ring-2 hover:ring-copper/20"
@@ -259,7 +258,7 @@ export default function BrandingPage() {
             )}
 
             {uploading && (
-              <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/50">
+              <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/50">
                 <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent" />
               </div>
             )}

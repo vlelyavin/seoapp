@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { useRouter, Link } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { Rocket, ChevronDown, ChevronUp, Loader2, Globe } from "lucide-react";
 import { ANALYZER_NAMES, ANALYZER_LABELS } from "@/types/audit";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -23,9 +23,6 @@ export default function NewAuditPage() {
   const [selectedAnalyzers, setSelectedAnalyzers] = useState<string[]>([...REAL_ANALYZER_NAMES]);
   const [showAnalyzers, setShowAnalyzers] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [showPagesCrawled, setShowPagesCrawled] = useState(false);
-  const [includeCompanyLogo, setIncludeCompanyLogo] = useState(false);
-
   // Custom page limit state
   const [maxPages, setMaxPages] = useState<number>(10); // Default to Free plan limit
   const [planLimit, setPlanLimit] = useState<number>(10); // User's plan max limit
@@ -89,8 +86,6 @@ export default function NewAuditPage() {
           analyzers: realSelected.length === REAL_ANALYZER_NAMES.length ? null : realSelected,
           maxPages,
           includeScreenshots,
-          showPagesCrawled,
-          includeCompanyLogo,
         }),
       });
 
@@ -227,52 +222,14 @@ export default function NewAuditPage() {
 
           {/* Toggles */}
           <div className="mt-4 space-y-3">
-            {/* 1. PageSpeed Screenshots */}
+            {/* PageSpeed Screenshots */}
             <label className="flex cursor-pointer items-center gap-2 text-sm">
               <Checkbox
                 checked={includeScreenshots}
                 onChange={() => toggleAnalyzer("speed_screenshots")}
               />
               <span className="text-gray-300">
-                {ANALYZER_LABELS["speed_screenshots"]}
-              </span>
-              <span className="text-xs text-gray-500">
-                {t("screenshotsHint")}
-              </span>
-            </label>
-
-            {/* 2. Show scanned pages count */}
-            <label className="flex cursor-pointer items-center gap-2 text-sm">
-              <Checkbox
-                checked={showPagesCrawled}
-                onChange={() => setShowPagesCrawled((prev) => !prev)}
-              />
-              <span className="text-gray-300">
-                {t("showPagesCrawled")}
-              </span>
-            </label>
-
-            {/* 3. Include company logo */}
-            <label className="flex cursor-pointer items-center gap-2 text-sm">
-              <Checkbox
-                checked={includeCompanyLogo}
-                onChange={() => setIncludeCompanyLogo((prev) => !prev)}
-              />
-              <span className="text-gray-300">
-                {t.rich("includeCompanyLogo", {
-                  hint: (chunks) => (
-                    <span className="text-xs text-gray-500">{chunks}</span>
-                  ),
-                  link: (chunks) => (
-                    <Link
-                      href="/app/settings?tab=branding"
-                      className="text-gray-500 hover:text-copper transition-colors"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {chunks}
-                    </Link>
-                  ),
-                })}
+                {t("includePageSpeedScreenshots")} <span className="text-xs text-gray-500">{t("screenshotsHint")}</span>
               </span>
             </label>
           </div>
