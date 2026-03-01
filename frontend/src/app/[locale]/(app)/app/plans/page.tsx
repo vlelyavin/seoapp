@@ -19,14 +19,9 @@ export default function PlansPage() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [switching, setSwitching] = useState<string | null>(null);
-  const [currentPlanId, setCurrentPlanId] = useState<string | null>(null);
-
-  // Sync local plan state from session (covers initial load and external changes)
-  useEffect(() => {
-    if (session?.user?.planId) {
-      setCurrentPlanId(session.user.planId);
-    }
-  }, [session?.user?.planId]);
+  const [currentPlanId, setCurrentPlanId] = useState<string | null>(
+    session?.user?.planId ?? null
+  );
 
   useEffect(() => {
     async function loadPlans() {
@@ -55,13 +50,10 @@ export default function PlansPage() {
 
       if (res.ok) {
         setCurrentPlanId(planId);
-        const updatedSession = await update();
-        router.refresh();
         toast.success(t("planUpdated"));
-        // Safety net: force reload if session didn't pick up the new plan
-        if (updatedSession?.user?.planId !== planId) {
-          setTimeout(() => window.location.reload(), 500);
-        }
+        // Refresh session cookie in background — don't await, don't depend on result
+        update().catch(() => {});
+        router.refresh();
       } else {
         const data = await res.json();
         toast.error(data.error || t("updateFailed"));

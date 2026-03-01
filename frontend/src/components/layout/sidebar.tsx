@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
@@ -25,7 +26,20 @@ export function Sidebar({ open, onClose }: SidebarProps) {
   const { data: session } = useSession();
 
   const isAdmin = session?.user?.role === "admin";
-  const planId = (session?.user?.planId as string) ?? "free";
+
+  const [planId, setPlanId] = useState<string>(
+    (session?.user?.planId as string) ?? "free"
+  );
+
+  useEffect(() => {
+    if (!session?.user) return;
+    fetch("/api/user/plan")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.plan?.id) setPlanId(data.plan.id);
+      })
+      .catch(() => {});
+  }, [session?.user]);
 
   const { context, indexatorUsage, auditorUsage } = usePlanUsage(pathname);
 
