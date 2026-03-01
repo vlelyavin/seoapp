@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Download, X } from "lucide-react";
+import { Download, Info, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -67,6 +67,7 @@ export function ExportDialog({
   const [includeCompanyName, setIncludeCompanyName] = useState(hasCompanyName);
   const [includeCompanyLogo, setIncludeCompanyLogo] = useState(false);
   const [theoryLevel, setTheoryLevel] = useState<TheoryLevel>("compact");
+  const [showTheoryTooltip, setShowTheoryTooltip] = useState(false);
   const selectedFormat = resolvedFormatOptions.includes(format)
     ? format
     : resolvedFormatOptions[0];
@@ -162,10 +163,27 @@ export function ExportDialog({
         {/* Reference level — segmented control, only for document formats */}
         {isDocumentFormat && (
           <div className="mb-4">
-            <label className="mb-1.5 block text-sm font-medium text-gray-300">
-              {t("theoryLevelLabel")}
-            </label>
-            <div className="inline-flex w-full items-center rounded-lg border border-gray-700 bg-gray-900 p-0.5">
+            <div className="mb-1.5 flex items-center gap-1.5">
+              <label className="text-sm font-medium text-gray-300">
+                {t("theoryLevelLabel")}
+              </label>
+              <div className="relative flex items-center">
+                <button
+                  type="button"
+                  onMouseEnter={() => setShowTheoryTooltip(true)}
+                  onMouseLeave={() => setShowTheoryTooltip(false)}
+                  className="text-gray-500 hover:text-gray-300 transition-colors"
+                >
+                  <Info className="h-3.5 w-3.5" />
+                </button>
+                {showTheoryTooltip && (
+                  <div className="absolute bottom-full left-0 mb-2 w-64 rounded-lg border border-gray-800 bg-gray-950 p-2.5 text-xs text-gray-300 shadow-xl z-10">
+                    {t("theoryLevelTooltip")}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="flex border-b border-gray-800">
               {THEORY_LEVELS.map((opt) => (
                 <button
                   key={opt.value}
@@ -173,10 +191,10 @@ export function ExportDialog({
                   disabled={loading}
                   onClick={() => setTheoryLevel(opt.value)}
                   className={cn(
-                    "flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                    "shrink-0 whitespace-nowrap px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px",
                     theoryLevel === opt.value
-                      ? "bg-gray-700 text-white shadow-sm"
-                      : "text-gray-400 hover:text-gray-200"
+                      ? "border-copper text-white"
+                      : "border-transparent text-gray-400 hover:text-gray-200"
                   )}
                 >
                   {t(opt.labelKey)}

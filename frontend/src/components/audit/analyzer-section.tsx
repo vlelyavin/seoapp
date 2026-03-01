@@ -29,42 +29,16 @@ const severityIcons: Record<SeverityLevel, React.ComponentType<{ className?: str
   info: Info,
 };
 
-const TOOLTIP_KEYS: Record<string, string> = {
-  meta_tags: "tooltipMetaTags",
-  headings: "tooltipHeadings",
-  page_404: "tooltipPage404",
-  images: "tooltipImages",
-  links: "tooltipLinks",
-  robots: "tooltipRobots",
-  security: "tooltipSecurity",
-  content: "tooltipContent",
-  external_links: "tooltipExternalLinks",
-  content_sections: "tooltipContentSections",
-  hreflang: "tooltipHreflang",
-  cms: "tooltipCms",
-  speed: "tooltipSpeed",
-  favicon: "tooltipFavicon",
-  structure: "tooltipStructure",
-  schema: "tooltipSchema",
-  social_tags: "tooltipSocialTags",
-  mobile: "tooltipMobile",
-  url_quality: "tooltipUrlQuality",
-  duplicates: "tooltipDuplicates",
-  redirects: "tooltipRedirects",
-};
-
 export function AnalyzerSection({ result }: AnalyzerSectionProps) {
   const [expanded, setExpanded] = useState(
     result.severity === "error" || result.severity === "warning"
   );
   const [showTheory, setShowTheory] = useState(false);
-  const [showTooltip, setShowTooltip] = useState(false);
   const t = useTranslations("audit");
 
   const SevIcon = severityIcons[result.severity];
   const colors = SEVERITY_COLORS[result.severity];
   const issueCount = result.issues.reduce((sum, i) => sum + i.count, 0);
-  const tooltipKey = TOOLTIP_KEYS[result.name];
 
   return (
     <div className={cn("rounded-xl border", colors.border, "overflow-hidden")}>
@@ -79,23 +53,8 @@ export function AnalyzerSection({ result }: AnalyzerSectionProps) {
       >
         <SevIcon className={cn("h-5 w-5 shrink-0", colors.text)} />
         <div className="min-w-0 flex-1">
-          <h3 className="flex items-center gap-1.5 text-sm font-semibold text-white">
+          <h3 className="text-sm font-semibold text-white">
             {result.display_name}
-            {tooltipKey && (
-              <span
-                className="relative inline-flex"
-                onMouseEnter={(e) => { e.stopPropagation(); setShowTooltip(true); }}
-                onMouseLeave={() => setShowTooltip(false)}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <Info className="h-3.5 w-3.5 text-gray-500 hover:text-gray-300 transition-colors" />
-                {showTooltip && (
-                  <span className="absolute bottom-full left-0 mb-2 w-64 rounded-lg border border-gray-800 bg-gray-950 p-2.5 text-xs font-normal text-gray-300 shadow-xl z-10">
-                    {t(tooltipKey)}
-                  </span>
-                )}
-              </span>
-            )}
           </h3>
           {result.summary && (
             <p className="mt-0.5 truncate text-xs text-gray-400">

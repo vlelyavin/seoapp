@@ -160,6 +160,7 @@
     "generatingReport": "Generating report...",
     "loadingAudits": "Loading audits...",
     "theoryLevelLabel": "Reference sections",
+    "theoryLevelTooltip": "Reference sections contain background theory for each audit category. Choose how much of it to include in the exported report.",
     "theoryFull": "Full",
     "theoryCompact": "Compact",
     "theoryNone": "None",
@@ -313,6 +314,7 @@
   },
   "indexing": {
     "title": "Indexator",
+    "loadingIndexator": "Loading indexing data...",
     "comingSoon": "This feature is coming soon.",
     "connectGoogle": "Connect Google Search Console",
     "connectDesc": "Connect your Google account to manage site indexing via GSC and the Google Indexing API.",

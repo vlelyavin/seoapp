@@ -146,7 +146,7 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
       <div className="flex flex-row-reverse gap-6">
         {/* Left sidebar nav */}
         <aside className="hidden w-56 shrink-0 xl:block">
-        <div className="sticky top-0 space-y-1">
+        <div className="sticky top-20 space-y-1">
           {Object.entries(results).map(([name, result]) => (
             <button
               key={name}
@@ -219,10 +219,10 @@ export function AuditResultsView({ results, meta, auditId }: AuditResultsViewPro
                 disabled={exportingFormat !== null}
                 onClick={() => setExportDialogOpen(true)}
                 className={cn(
-                  "flex h-11 items-center gap-1.5 rounded-lg border px-3 text-sm font-medium transition-colors",
+                  "flex h-11 items-center gap-1.5 rounded-lg px-3 text-sm font-semibold transition-colors",
                   exportingFormat
-                    ? "cursor-not-allowed opacity-50 border-gray-700 text-gray-500"
-                    : "border-gray-800 bg-gray-950 text-gray-300 hover:bg-gray-900"
+                    ? "cursor-not-allowed opacity-50 bg-gradient-to-r from-copper to-copper-light text-white"
+                    : "bg-gradient-to-r from-copper to-copper-light text-white hover:opacity-90"
                 )}
               >
                 {exportingFormat ? (
