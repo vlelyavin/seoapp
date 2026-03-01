@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Check, X, Loader2, Zap, Rocket, Building2, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -14,35 +13,30 @@ export default function PlansPage() {
   const t = useTranslations("plans");
   const ut = useTranslations("marketing.unifiedPricing");
   const tBreadcrumbs = useTranslations("breadcrumbs");
-  const { data: session, update } = useSession();
-  const router = useRouter();
+  const { update } = useSession();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [switching, setSwitching] = useState<string | null>(null);
-  const [currentPlanId, setCurrentPlanId] = useState<string | null>(
-    session?.user?.planId ?? null
-  );
-
-  // Set initial planId from session once it loads (session is async)
-  useEffect(() => {
-    if (currentPlanId === null && session?.user?.planId) {
-      setCurrentPlanId(session.user.planId);
-    }
-  }, [session?.user?.planId, currentPlanId]);
+  const [currentPlanId, setCurrentPlanId] = useState<string | null>(null);
 
   useEffect(() => {
-    async function loadPlans() {
+    async function load() {
       try {
-        const res = await fetch("/api/plans");
-        if (res.ok) {
-          setPlans(await res.json());
+        const [plansRes, userPlanRes] = await Promise.all([
+          fetch("/api/plans"),
+          fetch("/api/user/plan"),
+        ]);
+        if (plansRes.ok) setPlans(await plansRes.json());
+        if (userPlanRes.ok) {
+          const data = await userPlanRes.json();
+          if (data.plan?.id) setCurrentPlanId(data.plan.id);
         }
       } catch {
         /* ignore */
       }
       setLoading(false);
     }
-    loadPlans();
+    load();
   }, []);
 
   async function handleSelectPlan(planId: string) {
@@ -60,7 +54,6 @@ export default function PlansPage() {
         toast.success(t("planUpdated"));
         // Refresh session cookie in background — don't await, don't depend on result
         update().catch(() => {});
-        router.refresh();
       } else {
         const data = await res.json();
         toast.error(data.error || t("updateFailed"));
