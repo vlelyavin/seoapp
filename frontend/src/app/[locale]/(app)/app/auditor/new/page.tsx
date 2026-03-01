@@ -3,12 +3,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
-import { useSession } from "next-auth/react";
+import { useRouter, Link } from "@/i18n/navigation";
 import { Rocket, ChevronDown, ChevronUp, Loader2, Globe } from "lucide-react";
-import { Link } from "@/i18n/navigation";
 import { ANALYZER_NAMES, ANALYZER_LABELS } from "@/types/audit";
-import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { toast } from "sonner";
@@ -20,7 +17,6 @@ export default function NewAuditPage() {
   const tBreadcrumbs = useTranslations("breadcrumbs");
   const locale = useLocale();
   const router = useRouter();
-  const { data: session } = useSession();
 
   const searchParams = useSearchParams();
   const [url, setUrl] = useState("");

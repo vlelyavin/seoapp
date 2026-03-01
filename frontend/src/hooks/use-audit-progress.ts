@@ -17,7 +17,7 @@ export function useAuditProgress(fastApiId: string | null, auditId: string | nul
   const connectionAttemptsRef = useRef(0);
   const esRef = useRef<EventSource | null>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const lastEventTimeRef = useRef<number>(Date.now());
+  const lastEventTimeRef = useRef<number>(0);
   const stallCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const connectingToastRef = useRef<string | number | null>(null);
 
@@ -74,6 +74,8 @@ export function useAuditProgress(fastApiId: string | null, auditId: string | nul
     pollIntervalRef.current = setInterval(poll, POLL_INTERVAL);
   }, [auditId, isPolling, dismissConnectingToast]);
 
+  const connectRef = useRef<() => void>(null);
+
   const connect = useCallback(() => {
     if (!fastApiId || isPolling) return;
 
@@ -129,7 +131,7 @@ export function useAuditProgress(fastApiId: string | null, auditId: string | nul
         );
         setTimeout(() => {
           if (!isPolling) {
-            connect();
+            connectRef.current?.();
           }
         }, SSE_RETRY_DELAY);
       }
@@ -137,12 +139,16 @@ export function useAuditProgress(fastApiId: string | null, auditId: string | nul
   }, [fastApiId, isPolling, startPolling, dismissConnectingToast]);
 
   useEffect(() => {
+    connectRef.current = connect;
+  });
+
+  useEffect(() => {
     if (!fastApiId) return;
 
     connectionAttemptsRef.current = 0;
     lastEventTimeRef.current = Date.now();
     dismissConnectingToast();
-    connect();
+    connect(); // eslint-disable-line react-hooks/set-state-in-effect -- connect initiates SSE subscription
 
     stallCheckIntervalRef.current = setInterval(checkForStall, 30000);
 

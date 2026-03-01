@@ -89,6 +89,7 @@ export default function AdminDashboardPage() {
       const params = new URLSearchParams();
       if (search) params.set("search", search);
       if (planFilter) params.set("plan", planFilter);
+      params.set("sortBy", sortBy);
       params.set("sortOrder", sortOrder);
       params.set("page", String(page));
       params.set("pageSize", String(pageSize));

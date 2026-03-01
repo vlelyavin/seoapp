@@ -24,7 +24,6 @@ function normalizeLogoUrl(url: string): string {
 
 export default function BrandingPage() {
   const t = useTranslations("branding");
-  const tCommon = useTranslations("common");
   const { data: session } = useSession();
   const [companyName, setCompanyName] = useState("");
   const [logoUrl, setLogoUrl] = useState("");

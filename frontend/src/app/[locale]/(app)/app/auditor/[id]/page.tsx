@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -19,7 +19,6 @@ export default function AuditPage({
   const searchParams = useSearchParams();
   const router = useRouter();
   const locale = useLocale();
-  const prevLocaleRef = useRef(locale);
 
   const [auditId, setAuditId] = useState<string>("");
   const [fastApiId, setFastApiId] = useState<string | null>(null);
@@ -102,22 +101,11 @@ export default function AuditPage({
     };
   }, [auditId, fastApiId, locale, router, tAudit]);
 
-  // Handle locale changes during active audit
-  useEffect(() => {
-    if (prevLocaleRef.current !== locale && fastApiId && !done) {
-      // Language changed during active audit - show brief loading state
-      setLoading(true);
-      const timer = setTimeout(() => setLoading(false), 300);
-      return () => clearTimeout(timer);
-    }
-    prevLocaleRef.current = locale;
-  }, [locale, fastApiId, done]);
-
   // When audit completes, fetch results
   useEffect(() => {
     if (!done || !auditId) return;
     if (progress?.status === "failed") {
-      setLoading(false);
+      setLoading(false); // eslint-disable-line react-hooks/set-state-in-effect -- early exit for failed audit
       return;
     }
 
@@ -167,7 +155,7 @@ export default function AuditPage({
 
     // Skip loading cached results if tracking live progress via fastApiId
     if (fastApiId) {
-      setLoading(false); // Still set loading to false to prevent infinite loader
+      setLoading(false); // eslint-disable-line react-hooks/set-state-in-effect -- early exit, skip cached load during live progress
       return;
     }
 

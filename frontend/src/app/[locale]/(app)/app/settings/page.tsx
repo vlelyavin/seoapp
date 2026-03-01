@@ -10,10 +10,15 @@ export default function SettingsPage() {
   const t = useTranslations("settings");
   const { data: session, update } = useSession();
   const [name, setName] = useState(session?.user?.name || "");
-  useEffect(() => {
-    if (session?.user?.name) setName(session.user.name);
-  }, [session?.user?.name]);
   const [saving, setSaving] = useState(false);
+
+  // Sync name when session loads/updates (e.g., after OAuth callback)
+  const sessionName = session?.user?.name;
+  /* eslint-disable react-hooks/set-state-in-effect -- sync external session state into local form state */
+  useEffect(() => {
+    if (sessionName) setName(sessionName);
+  }, [sessionName]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   async function handleSaveProfile(e: React.FormEvent) {
     e.preventDefault();

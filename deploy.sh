@@ -42,7 +42,7 @@ print_service_debug() {
 }
 
 # 1. Sync files
-echo "[1/7] Syncing files to app directory..."
+echo "[1/8] Syncing files to app directory..."
 sudo mkdir -p "$APP_DIR/reports" "$APP_DIR/screenshots" "$APP_DIR/frontend/public/uploads"
 sudo rsync -a --delete --exclude='node_modules' --exclude='.next' --exclude='venv' \
     --exclude='.git' --exclude='*.pyc' --exclude='__pycache__' \
@@ -54,26 +54,30 @@ sudo rm -rf "$APP_DIR/.git"
 sudo chown -R "$APP_USER:$APP_USER" "$APP_DIR"
 
 # 2. Python dependencies
-echo "[2/7] Installing Python dependencies..."
+echo "[2/8] Installing Python dependencies..."
 run_as_app "'$APP_DIR/venv/bin/pip' install -r '$APP_DIR/requirements.txt'"
 
-# 3. Node dependencies
-echo "[3/7] Installing Node.js dependencies..."
+# 3. Playwright browsers
+echo "[3/8] Installing Playwright browsers..."
+run_as_app "PLAYWRIGHT_BROWSERS_PATH='$APP_DIR/.cache/ms-playwright' '$APP_DIR/venv/bin/playwright' install chromium"
+
+# 4. Node dependencies
+echo "[4/8] Installing Node.js dependencies..."
 run_as_app "cd '$FRONTEND_DIR' && npm ci"
 
-# 4. Database schema & seed
-echo "[4/7] Updating database schema..."
+# 5. Database schema & seed
+echo "[5/8] Updating database schema..."
 run_as_app "cd '$FRONTEND_DIR' && npx prisma generate"
 run_as_app "cd '$FRONTEND_DIR' && npx prisma db push"
 run_as_app "cd '$FRONTEND_DIR' && npx tsx prisma/seed.ts"
 
-# 5. Build frontend
-echo "[5/7] Building Next.js frontend..."
+# 7. Build frontend
+echo "[6/8] Building Next.js frontend..."
 run_as_app "cd '$FRONTEND_DIR' && npm run build"
 ln -sf "$FRONTEND_DIR/.env" "$FRONTEND_DIR/.next/standalone/.env"
 
-# 6. Fix permissions & restart services
-echo "[6/7] Restarting services..."
+# 7. Fix permissions & restart services
+echo "[7/8] Restarting services..."
 sudo chown -R "$APP_USER:$APP_USER" "$APP_DIR"
 
 sudo cp "$APP_DIR/seoapp.service" /etc/systemd/system/seoapp.service 2>/dev/null || true
@@ -82,8 +86,8 @@ sudo systemctl daemon-reload
 sudo systemctl restart seoapp
 sudo systemctl restart nextjs-seoapp
 
-# 7. Health checks
-echo "[7/7] Running health checks..."
+# 8. Health checks
+echo "[8/8] Running health checks..."
 
 if ! wait_for_http "http://127.0.0.1:8000/health" 45 2; then
     echo "ERROR: FastAPI health check failed"

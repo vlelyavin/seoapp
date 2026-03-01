@@ -45,7 +45,6 @@ export function PlanBlock({
 }: PlanBlockProps) {
   const tPlans = useTranslations("plans");
   const tNav = useTranslations("nav");
-  const isFree = planId === "free";
   const capabilities = getPlanCapabilities(planId);
   const maxPages = MAX_PAGES[planId] ?? 20;
 

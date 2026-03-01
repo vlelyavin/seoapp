@@ -127,7 +127,7 @@ export async function sendDailyReportEmail(
   domain: string,
   date: string,
   data: DailyReportEmailData,
-  siteId: string
+  _siteId: string
 ): Promise<boolean> {
   const coverage =
     data.totalUrls > 0

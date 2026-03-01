@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
-import { Shield, ChevronDown } from "lucide-react";
-import { cn, formatDate } from "@/lib/utils";
+import { Shield } from "lucide-react";
+import { formatDate } from "@/lib/utils";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { toast } from "sonner";
 

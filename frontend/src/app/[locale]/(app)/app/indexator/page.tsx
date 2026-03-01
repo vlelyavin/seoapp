@@ -173,18 +173,6 @@ interface LogPage {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function relativeTime(dateStr: string | null | undefined, t?: ReturnType<typeof useTranslations<"indexing">>): string {
-  if (!dateStr) return "—";
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60_000);
-  if (mins < 1) return t ? t("relativeJustNow") : "just now";
-  if (mins < 60) return t ? t("relativeMinutes", { count: mins }) : `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return t ? t("relativeHours", { count: hrs }) : `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  return t ? t("relativeDays", { count: days }) : `${days}d ago`;
-}
-
 function gscStatusColor(
   status: string | null | undefined,
   t?: ReturnType<typeof useTranslations<"indexing">>,
@@ -273,7 +261,7 @@ export default function IndexingPage() {
   const [loadingStatus, setLoadingStatus] = useState(true);
   const [siteStats, setSiteStats] = useState<Record<string, SiteStats>>({});
   const [siteQuotas, setSiteQuotas] = useState<Record<string, Quota>>({});
-  const [globalQuota, setGlobalQuota] = useState<Quota | null>(null);
+  const [, setGlobalQuota] = useState<Quota | null>(null);
   const [syncing, setSyncing] = useState<Record<string, boolean>>({});
   const [running, setRunning] = useState<Record<string, boolean>>({});
   const [runStatuses, setRunStatuses] = useState<Record<string, RunStatus>>({});
@@ -987,15 +975,15 @@ function SiteCard({
   syncingUrls,
   running,
   runStatus,
-  copied,
+  copied: _copied,
   t,
-  onToggle,
+  onToggle: _onToggle,
   onSyncUrls,
   onRequestSubmit,
   onToggleAutoGoogle,
   onToggleAutoBing,
   onRunNow,
-  onCopyKey,
+  onCopyKey: _onCopyKey,
   onVerifySuccess,
   onVerifyFail,
   onDelete,
@@ -1223,25 +1211,6 @@ function SiteCard({
   };
 
   // ── Bulk inspect ─────────────────────────────────────────────────────────
-
-  const bulkInspect = async () => {
-    const urlsToInspect = urlPage?.urls.filter((u) => selectedUrls.has(u.id)).map((u) => u.url) ?? [];
-    if (urlsToInspect.length === 0) return;
-
-    const res = await fetch(`/api/indexing/sites/${site.id}/inspect`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ urls: urlsToInspect }),
-    });
-    if (res.status === 429) {
-      showToast(t("inspectionLimitReached"), false);
-      return;
-    }
-    if (res.ok) {
-      await loadUrls(urlFilter, urlCurrentPage, urlSearch);
-      setSelectedUrls(new Set());
-    }
-  };
 
   // ── IndexNow submit guard (with live pre-operation verification check) ──────
 
