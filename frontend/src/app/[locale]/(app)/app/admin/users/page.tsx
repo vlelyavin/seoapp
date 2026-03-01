@@ -60,8 +60,12 @@ export default function AdminUsersPage() {
         );
         // If the admin changed their own plan/role, refresh the session
         if (userId === session?.user?.id) {
-          await update();
+          const updatedSession = await update();
           router.refresh();
+          // Safety net: force reload if session didn't pick up the change
+          if (data.planId && updatedSession?.user?.planId !== data.planId) {
+            setTimeout(() => window.location.reload(), 500);
+          }
         }
         toast.success(t("userUpdated"));
       } else {

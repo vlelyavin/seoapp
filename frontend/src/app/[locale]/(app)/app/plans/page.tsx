@@ -19,6 +19,14 @@ export default function PlansPage() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [switching, setSwitching] = useState<string | null>(null);
+  const [currentPlanId, setCurrentPlanId] = useState<string | null>(null);
+
+  // Sync local plan state from session (covers initial load and external changes)
+  useEffect(() => {
+    if (session?.user?.planId) {
+      setCurrentPlanId(session.user.planId);
+    }
+  }, [session?.user?.planId]);
 
   useEffect(() => {
     async function loadPlans() {
@@ -46,9 +54,14 @@ export default function PlansPage() {
       });
 
       if (res.ok) {
-        await update();
+        setCurrentPlanId(planId);
+        const updatedSession = await update();
         router.refresh();
         toast.success(t("planUpdated"));
+        // Safety net: force reload if session didn't pick up the new plan
+        if (updatedSession?.user?.planId !== planId) {
+          setTimeout(() => window.location.reload(), 500);
+        }
       } else {
         const data = await res.json();
         toast.error(data.error || t("updateFailed"));
@@ -81,7 +94,7 @@ export default function PlansPage() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         {plans.map((plan) => {
-          const isCurrent = session?.user?.planId === plan.id;
+          const isCurrent = currentPlanId === plan.id;
           const isAgency = plan.id === "agency";
           const isPro = plan.id === "pro";
           const isSwitching = switching === plan.id;
@@ -226,7 +239,7 @@ export default function PlansPage() {
                     {t("currentPlan")}
                   </>
                 ) : plan.price >
-                  (plans.find((p) => p.id === session?.user?.planId)?.price ||
+                  (plans.find((p) => p.id === currentPlanId)?.price ||
                     0) ? (
                   <>
                     <ArrowRight className="h-4 w-4" />
