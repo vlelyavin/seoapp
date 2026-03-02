@@ -48,11 +48,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token.email && (needsRefresh || !token.role)) {
         const dbUser = await prisma.user.findUnique({
           where: { email: token.email },
-          select: { role: true, planId: true },
+          select: {
+            role: true,
+            planId: true,
+            paddleSubscriptionStatus: true,
+          },
         });
         if (dbUser) {
           token.role = dbUser.role;
           token.planId = dbUser.planId;
+          token.paddleSubscriptionStatus =
+            dbUser.paddleSubscriptionStatus ?? undefined;
         }
         // Auto-grant admin role if email matches ADMIN_EMAIL env var
         const adminEmail = process.env.ADMIN_EMAIL;
@@ -79,6 +85,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.id = token.id as string;
         session.user.role = token.role as string;
         session.user.planId = token.planId as string;
+        session.user.paddleSubscriptionStatus =
+          (token.paddleSubscriptionStatus as string) ?? null;
       }
       return session;
     },

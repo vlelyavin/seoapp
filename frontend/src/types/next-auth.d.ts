@@ -9,6 +9,7 @@ declare module "next-auth" {
       image?: string | null;
       role: string;
       planId: string;
+      paddleSubscriptionStatus?: string | null;
     };
   }
 
@@ -23,5 +24,6 @@ declare module "next-auth/jwt" {
     id?: string;
     role?: string;
     planId?: string;
+    paddleSubscriptionStatus?: string;
   }
 }

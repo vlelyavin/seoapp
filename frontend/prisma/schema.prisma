@@ -29,6 +29,14 @@ model User {
   indexingLogs            IndexingLog[]
   dailyQuotas             UserDailyQuota[]
   dailyReports            DailyReport[]
+
+  // Paddle Billing
+  paddleCustomerId         String?   @unique @db.VarChar(191)
+  paddleSubscriptionId     String?   @db.VarChar(191)
+  paddleSubscriptionStatus String?   @db.VarChar(50)
+  paddlePlanPriceId        String?   @db.VarChar(191)
+  paddleNextBillDate       DateTime?
+  paddleCancelledAt        DateTime?
 }
 
 model Account {

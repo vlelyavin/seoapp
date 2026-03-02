@@ -33,8 +33,8 @@ export async function GET() {
 
 /**
  * PATCH /api/user/plan
- * Switch the user's plan. Currently free — billing integration comes later.
- * Body: { planId: string }
+ * Switch to the free plan only. Paid plans go through Paddle checkout.
+ * Body: { planId: "free" }
  */
 export async function PATCH(req: Request) {
   const session = await auth();
@@ -52,6 +52,14 @@ export async function PATCH(req: Request) {
   const { planId } = body as { planId?: string };
   if (!planId || typeof planId !== "string") {
     return NextResponse.json({ error: "planId is required" }, { status: 400 });
+  }
+
+  // Only allow direct switching to free plan — paid plans require Paddle checkout
+  if (planId !== "free") {
+    return NextResponse.json(
+      { error: "Paid plans require checkout" },
+      { status: 400 }
+    );
   }
 
   const plan = await prisma.plan.findUnique({ where: { id: planId } });
