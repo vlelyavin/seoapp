@@ -324,7 +324,7 @@
     "activatingPlan": "Activating your plan..."
   },
   "indexing": {
-    "title": "Indexator",
+    "title": "Seoapp",
     "loadingIndexator": "Loading indexing data...",
     "comingSoon": "This feature is coming soon.",
     "connectGoogle": "Connect Google Search Console",
@@ -527,7 +527,7 @@
   "marketing": {
     "nav": {
       "auditor": "Auditor",
-      "indexator": "Indexator",
+      "indexator": "Seoapp",
       "pricing": "Pricing",
       "dashboard": "Dashboard",
       "signIn": "Sign In",
@@ -572,7 +572,7 @@
           "sectionLabel": "FAQ",
           "title": "Pricing Questions",
           "q1": "What's included in each plan?",
-          "a1": "Every plan includes both SEO Auditor and URL Indexator. Free gives you 3 audits/month (20 pages) and 1 site for manual indexing. Pro unlocks unlimited audits (200 pages), 5 sites with auto-indexing, and weekly reports. Agency adds 1000 pages, 10 sites, daily reports, and white-label exports.",
+          "a1": "Every plan includes both SEO Auditor and URL Seoapp. Free gives you 3 audits/month (20 pages) and 1 site for manual indexing. Pro unlocks unlimited audits (200 pages), 5 sites with auto-indexing, and weekly reports. Agency adds 1000 pages, 10 sites, daily reports, and white-label exports.",
           "q2": "Can I upgrade or downgrade my plan?",
           "a2": "Yes. You can change your plan at any time from the Plans page in your dashboard. Upgrades take effect immediately. Downgrades apply from the start of your next billing period.",
           "q3": "What export formats are available?",
@@ -606,7 +606,7 @@
       "ctaFree": "Get Started Free",
       "ctaPaid": "Get Started",
       "auditorLabel": "Auditor",
-      "indexatorLabel": "Indexator",
+      "indexatorLabel": "Seoapp",
       "exportsLabel": "Exports",
       "planAudience": {
         "free": "For individuals exploring SEO",
@@ -747,7 +747,7 @@
       "sections": {
         "introduction": {
           "heading": "Introduction",
-          "body": "Welcome to Indexator (seo.lvdev.co), operated by lvdev (\"Company\", \"we\", \"us\"). By accessing or using our Service, you agree to be bound by these Terms of Service (\"Terms\"). If you do not agree, do not use the Service."
+          "body": "Welcome to Seoapp (seo.lvdev.co), operated by lvdev (\"Company\", \"we\", \"us\"). By accessing or using our Service, you agree to be bound by these Terms of Service (\"Terms\"). If you do not agree, do not use the Service."
         },
         "serviceDescription": {
           "heading": "Service Description",
@@ -787,7 +787,7 @@
         },
         "intellectualProperty": {
           "heading": "Intellectual Property",
-          "body": "The Service, including its design, code, and content, is owned by Indexator. Reports and indexing data generated for your websites are yours to use, share, and distribute. White-label features (Agency plan) may be branded with your own logo and presented to your clients."
+          "body": "The Service, including its design, code, and content, is owned by Seoapp. Reports and indexing data generated for your websites are yours to use, share, and distribute. White-label features (Agency plan) may be branded with your own logo and presented to your clients."
         },
         "refundPolicy": {
           "heading": "Refund Policy",
@@ -817,7 +817,7 @@
       "sections": {
         "operator": {
           "heading": "Operator",
-          "body": "This Privacy Policy applies to Indexator (seo.lvdev.co), operated by lvdev. This policy explains what data we collect, how we use it, and your rights regarding your personal information."
+          "body": "This Privacy Policy applies to Seoapp (seo.lvdev.co), operated by lvdev. This policy explains what data we collect, how we use it, and your rights regarding your personal information."
         },
         "dataCollected": {
           "heading": "Data We Collect",
@@ -829,7 +829,7 @@
         },
         "thirdPartyServices": {
           "heading": "Third-Party Services",
-          "body": "We use the following third-party services to operate Indexator:\n• Google OAuth — for user authentication\n• Google Search Console API — for retrieving indexing data and submitting URLs\n• Paddle.com — for payment processing (Paddle acts as our Merchant of Record and has its own privacy policy at paddle.com/legal/privacy)"
+          "body": "We use the following third-party services to operate Seoapp:\n• Google OAuth — for user authentication\n• Google Search Console API — for retrieving indexing data and submitting URLs\n• Paddle.com — for payment processing (Paddle acts as our Merchant of Record and has its own privacy policy at paddle.com/legal/privacy)"
         },
         "dataSharing": {
           "heading": "Data Sharing",
