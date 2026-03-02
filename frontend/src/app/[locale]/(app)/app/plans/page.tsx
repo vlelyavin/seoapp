@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import {
   Check,
   X,
@@ -34,6 +35,7 @@ export default function PlansPage() {
   const ut = useTranslations("marketing.unifiedPricing");
   const tBreadcrumbs = useTranslations("breadcrumbs");
   const { data: session, update } = useSession();
+  const router = useRouter();
   const paddle = usePaddle();
   const [checkoutProcessing, setCheckoutProcessing] = useState(false);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -110,12 +112,28 @@ export default function PlansPage() {
 
   function handleSelectPlan(planId: string) {
     if (planId === "free") {
-      handleDowngradeToFree();
+      // Redirect to Settings → Billing to cancel
+      router.push("/app/settings/billing");
       return;
     }
 
     const priceId = PLAN_TO_PADDLE_PRICE[planId];
-    if (!priceId || !paddle) {
+    if (!priceId) {
+      toast.error(t("checkoutError"));
+      return;
+    }
+
+    // If user already has an active subscription, update it with proration
+    if (
+      subscription?.paddleSubscriptionId &&
+      subscription.paddleSubscriptionStatus === "active"
+    ) {
+      handleUpdateSubscription(planId, priceId);
+      return;
+    }
+
+    // Otherwise, open new checkout
+    if (!paddle) {
       toast.error(t("checkoutError"));
       return;
     }
@@ -133,37 +151,18 @@ export default function PlansPage() {
     });
   }
 
-  async function handleDowngradeToFree() {
-    setSwitching("free");
-
+  async function handleUpdateSubscription(planId: string, priceId: string) {
+    setSwitching(planId);
     try {
-      // Cancel Paddle subscription if active
-      if (
-        subscription?.paddleSubscriptionId &&
-        subscription.paddleSubscriptionStatus === "active"
-      ) {
-        const cancelRes = await fetch("/api/user/subscription", {
-          method: "DELETE",
-        });
-        if (!cancelRes.ok) {
-          toast.error(t("cancelFailed"));
-          setSwitching(null);
-          return;
-        }
-      }
-
-      // Switch plan to free
-      const res = await fetch("/api/user/plan", {
+      const res = await fetch("/api/user/subscription", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId: "free" }),
+        body: JSON.stringify({ priceId }),
       });
-
       if (res.ok) {
-        setCurrentPlanId("free");
         toast.success(t("planUpdated"));
-        update().catch(() => {});
         loadData();
+        update().catch(() => {});
       } else {
         const data = await res.json();
         toast.error(data.error || t("updateFailed"));
