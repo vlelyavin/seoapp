@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
-import { Paddle } from "@paddle/paddle-node-sdk";
+import { Paddle, Environment } from "@paddle/paddle-node-sdk";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-const paddle = new Paddle(process.env.PADDLE_API_KEY!);
+const paddle = new Paddle(process.env.PADDLE_API_KEY!, {
+  environment:
+    process.env.NEXT_PUBLIC_PADDLE_ENV === "sandbox"
+      ? Environment.sandbox
+      : Environment.production,
+});
 
 /**
  * GET /api/user/subscription

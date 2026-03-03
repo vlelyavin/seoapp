@@ -215,7 +215,7 @@
     "cancelTitle": "Cancel Subscription",
     "cancelConfirmation": "Are you sure? Your plan will remain active until {date}. After that, you'll be downgraded to the Free plan.",
     "keepPlan": "Keep my plan",
-    "confirmCancel": "Cancel subscription",
+    "confirmCancel": "Cancel",
     "cancelledBanner": "Your subscription will end on {date}",
     "resumeSubscription": "Resume subscription",
     "resumeSuccess": "Subscription resumed",

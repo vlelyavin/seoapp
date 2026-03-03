@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
-import { Paddle, EventName } from "@paddle/paddle-node-sdk";
+import { Paddle, EventName, Environment } from "@paddle/paddle-node-sdk";
 import { prisma } from "@/lib/prisma";
 import { PADDLE_PRICE_TO_PLAN } from "@/lib/paddle";
 
-const paddle = new Paddle(process.env.PADDLE_API_KEY!);
+const paddle = new Paddle(process.env.PADDLE_API_KEY!, {
+  environment:
+    process.env.NEXT_PUBLIC_PADDLE_ENV === "sandbox"
+      ? Environment.sandbox
+      : Environment.production,
+});
 
 /**
  * POST /api/webhooks/paddle
