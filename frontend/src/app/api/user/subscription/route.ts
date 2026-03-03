@@ -12,7 +12,8 @@ const paddle = new Paddle(process.env.PADDLE_API_KEY!, {
 
 /**
  * GET /api/user/subscription
- * Returns the current user's Paddle subscription info.
+ * Returns the current user's Paddle subscription info,
+ * including scheduledChange fetched live from Paddle.
  */
 export async function GET() {
   const session = await auth();
@@ -31,17 +32,57 @@ export async function GET() {
     },
   });
 
-  return NextResponse.json({ subscription: user });
+  // If there's an active subscription, fetch live data from Paddle
+  // to get scheduledChange and accurate billing dates
+  let scheduledChange: { action: string; effectiveAt: string } | null = null;
+  let currentBillingPeriodEndsAt: string | null = null;
+
+  if (user?.paddleSubscriptionId && user.paddleSubscriptionStatus === "active") {
+    try {
+      const sub = await paddle.subscriptions.get(user.paddleSubscriptionId);
+      if (sub.scheduledChange) {
+        scheduledChange = {
+          action: sub.scheduledChange.action,
+          effectiveAt: sub.scheduledChange.effectiveAt,
+        };
+      }
+      if (sub.currentBillingPeriod?.endsAt) {
+        currentBillingPeriodEndsAt = sub.currentBillingPeriod.endsAt;
+      }
+    } catch {
+      // If Paddle fetch fails, return DB data only
+    }
+  }
+
+  return NextResponse.json({
+    subscription: {
+      ...user,
+      scheduledChange,
+      currentBillingPeriodEndsAt,
+    },
+  });
 }
 
 /**
  * DELETE /api/user/subscription
- * Cancels the user's Paddle subscription at end of billing period.
+ * Cancels the user's Paddle subscription.
+ * Accepts optional JSON body: { effectiveFrom: "immediately" | "next_billing_period" }
  */
-export async function DELETE() {
+export async function DELETE(req: Request) {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Parse effectiveFrom from body (default: next_billing_period)
+  let effectiveFrom: "immediately" | "next_billing_period" = "next_billing_period";
+  try {
+    const body = await req.json();
+    if (body.effectiveFrom === "immediately") {
+      effectiveFrom = "immediately";
+    }
+  } catch {
+    // No body or invalid JSON — use default
   }
 
   const user = await prisma.user.findUnique({
@@ -66,20 +107,90 @@ export async function DELETE() {
     );
   }
 
+  // Check if subscription already has a pending scheduled cancel
+  try {
+    const sub = await paddle.subscriptions.get(user.paddleSubscriptionId);
+    if (sub.scheduledChange?.action === "cancel") {
+      return NextResponse.json({
+        success: true,
+        alreadyScheduled: true,
+        scheduledChange: {
+          action: sub.scheduledChange.action,
+          effectiveAt: sub.scheduledChange.effectiveAt,
+        },
+      });
+    }
+  } catch {
+    // If we can't check, proceed with cancel attempt
+  }
+
   try {
     await paddle.subscriptions.cancel(user.paddleSubscriptionId, {
-      effectiveFrom: "next_billing_period",
+      effectiveFrom,
     });
+
+    // If immediately, update DB right away (don't wait for webhook)
+    if (effectiveFrom === "immediately") {
+      await prisma.user.update({
+        where: { id: session.user.id },
+        data: {
+          paddleSubscriptionStatus: "canceled",
+          paddleCancelledAt: new Date(),
+          planId: "free",
+        },
+      });
+      return NextResponse.json({
+        success: true,
+        cancelledImmediately: true,
+      });
+    }
+
+    // For next_billing_period, fetch the updated subscription to get scheduledChange
+    let scheduledChange: { action: string; effectiveAt: string } | null = null;
+    try {
+      const sub = await paddle.subscriptions.get(user.paddleSubscriptionId);
+      if (sub.scheduledChange) {
+        scheduledChange = {
+          action: sub.scheduledChange.action,
+          effectiveAt: sub.scheduledChange.effectiveAt,
+        };
+      }
+    } catch {
+      // If we can't fetch, return success without scheduledChange
+    }
+
+    return NextResponse.json({ success: true, scheduledChange });
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : String(err);
+
+    // Handle "pending scheduled changes" error from Paddle
+    if (
+      errorMessage.toLowerCase().includes("scheduled change") ||
+      errorMessage.toLowerCase().includes("scheduled_change")
+    ) {
+      try {
+        const sub = await paddle.subscriptions.get(user.paddleSubscriptionId);
+        if (sub.scheduledChange) {
+          return NextResponse.json({
+            success: true,
+            alreadyScheduled: true,
+            scheduledChange: {
+              action: sub.scheduledChange.action,
+              effectiveAt: sub.scheduledChange.effectiveAt,
+            },
+          });
+        }
+      } catch {
+        // Fall through to error
+      }
+    }
+
     console.error("[subscription] Cancel failed:", errorMessage, err);
     return NextResponse.json(
       { error: "Failed to cancel subscription", details: errorMessage },
       { status: 500 }
     );
   }
-
-  return NextResponse.json({ success: true });
 }
 
 /**

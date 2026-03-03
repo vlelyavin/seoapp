@@ -5,9 +5,14 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
-import { AlertTriangle, ArrowRight, Loader2 } from "lucide-react";
+import { AlertTriangle, ArrowRight, Loader2, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { CancelSubscriptionDialog } from "@/components/ui/cancel-subscription-dialog";
+
+interface ScheduledChange {
+  action: string;
+  effectiveAt: string;
+}
 
 interface SubscriptionInfo {
   paddleSubscriptionId: string | null;
@@ -15,6 +20,8 @@ interface SubscriptionInfo {
   paddlePlanPriceId: string | null;
   paddleNextBillDate: string | null;
   paddleCancelledAt: string | null;
+  scheduledChange: ScheduledChange | null;
+  currentBillingPeriodEndsAt: string | null;
 }
 
 const PLAN_NAMES: Record<string, string> = {
@@ -28,6 +35,14 @@ const PLAN_PRICES: Record<string, number> = {
   pro: 15,
   agency: 35,
 };
+
+function formatDate(dateStr: string, locale?: string): string {
+  return new Date(dateStr).toLocaleDateString(locale ?? "en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
 
 export default function BillingPage() {
   const t = useTranslations("settings");
@@ -63,18 +78,71 @@ export default function BillingPage() {
     subscription?.paddleSubscriptionStatus === "canceled";
   const isPastDue =
     subscription?.paddleSubscriptionStatus === "past_due";
+  const hasPendingCancel =
+    hasActiveSubscription &&
+    subscription?.scheduledChange?.action === "cancel";
 
-  async function handleCancelSubscription() {
+  // Best date for "cancels on" / billing period end
+  const periodEndDate =
+    subscription?.scheduledChange?.effectiveAt ??
+    subscription?.currentBillingPeriodEndsAt ??
+    subscription?.paddleNextBillDate ??
+    null;
+
+  async function handleCancelSubscription(
+    effectiveFrom: "immediately" | "next_billing_period"
+  ) {
     setCancelling(true);
     try {
-      const res = await fetch("/api/user/subscription", { method: "DELETE" });
-      if (res.ok) {
+      const res = await fetch("/api/user/subscription", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ effectiveFrom }),
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
         toast.success(t("cancelSuccess"));
         setCancelModalOpen(false);
-        loadSubscription();
-        update().catch(() => {});
+
+        if (data.cancelledImmediately) {
+          // Cancelled immediately — update state to reflect cancelled status
+          setSubscription((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  paddleSubscriptionStatus: "canceled",
+                  paddleCancelledAt: new Date().toISOString(),
+                  scheduledChange: null,
+                }
+              : prev
+          );
+          update().catch(() => {});
+        } else if (data.scheduledChange) {
+          // Scheduled cancel — optimistically update state
+          setSubscription((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  scheduledChange: data.scheduledChange,
+                }
+              : prev
+          );
+        } else if (data.alreadyScheduled && data.scheduledChange) {
+          setSubscription((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  scheduledChange: data.scheduledChange,
+                }
+              : prev
+          );
+        } else {
+          // Fallback: re-fetch subscription data
+          loadSubscription();
+          update().catch(() => {});
+        }
       } else {
-        const data = await res.json();
         toast.error(data.error || t("cancelFailed"));
       }
     } catch {
@@ -117,17 +185,32 @@ export default function BillingPage() {
     ? new Date(subscription.paddleCancelledAt).toLocaleDateString()
     : nextBillDate;
 
+  // Formatted period end date for display
+  const formattedPeriodEndDate = periodEndDate
+    ? formatDate(periodEndDate)
+    : null;
+
   return (
     <>
-      <ConfirmDialog
+      <CancelSubscriptionDialog
         open={cancelModalOpen}
         onClose={() => setCancelModalOpen(false)}
         onConfirm={handleCancelSubscription}
-        title={t("cancelTitle")}
-        message={t("cancelConfirmation", { date: nextBillDate ?? "—" })}
-        confirmText={t("confirmCancel")}
-        cancelText={t("keepPlan")}
+        periodEndDate={formattedPeriodEndDate}
         loading={cancelling}
+        translations={{
+          title: t("cancelTitle"),
+          tabImmediately: t("cancelTabImmediately"),
+          tabOnDate: t("cancelTabOnDate", {
+            date: formattedPeriodEndDate ?? "—",
+          }),
+          messageImmediately: t("cancelMessageImmediately"),
+          messageEndOfPeriod: t("cancelMessageEndOfPeriod", {
+            date: formattedPeriodEndDate ?? "—",
+          }),
+          confirmCancel: t("confirmCancel"),
+          keepPlan: t("keepPlan"),
+        }}
       />
 
       <div className="space-y-6">
@@ -147,6 +230,16 @@ export default function BillingPage() {
                 <ArrowRight className="h-4 w-4" />
                 {t("upgradeCta")}
               </Link>
+            </div>
+          )}
+
+          {/* Pending cancellation banner */}
+          {hasPendingCancel && formattedPeriodEndDate && (
+            <div className="mb-6 flex items-center gap-3 rounded-lg border border-gray-700 bg-gray-900 p-4">
+              <Info className="h-5 w-5 shrink-0 text-gray-400" />
+              <p className="text-sm text-gray-400">
+                {t("pendingCancelBanner", { date: formattedPeriodEndDate })}
+              </p>
             </div>
           )}
 
@@ -192,23 +285,29 @@ export default function BillingPage() {
                 <span
                   className={cn(
                     "rounded-full px-2.5 py-0.5 text-xs font-medium",
-                    hasActiveSubscription
-                      ? "bg-emerald-500/10 text-emerald-400"
-                      : isCanceled
-                        ? "bg-gray-700/50 text-gray-400"
-                        : "bg-amber-500/10 text-amber-400"
+                    hasPendingCancel
+                      ? "bg-amber-500/10 text-amber-400"
+                      : hasActiveSubscription
+                        ? "bg-emerald-500/10 text-emerald-400"
+                        : isCanceled
+                          ? "bg-gray-700/50 text-gray-400"
+                          : "bg-amber-500/10 text-amber-400"
                   )}
                 >
-                  {hasActiveSubscription
-                    ? t("statusActive")
-                    : isCanceled
-                      ? t("statusCanceled")
-                      : t("statusPastDue")}
+                  {hasPendingCancel
+                    ? t("statusCancelsOn", {
+                        date: formattedPeriodEndDate ?? "—",
+                      })
+                    : hasActiveSubscription
+                      ? t("statusActive")
+                      : isCanceled
+                        ? t("statusCanceled")
+                        : t("statusPastDue")}
                 </span>
               </div>
 
               {/* Next billing date */}
-              {nextBillDate && hasActiveSubscription && (
+              {nextBillDate && hasActiveSubscription && !hasPendingCancel && (
                 <div className="flex items-center justify-between border-b border-gray-800 pb-4">
                   <span className="text-sm text-gray-400">{t("nextBilling")}</span>
                   <span className="text-sm text-white">{nextBillDate}</span>
@@ -216,7 +315,7 @@ export default function BillingPage() {
               )}
 
               {/* Payment method */}
-              {hasActiveSubscription && (
+              {hasActiveSubscription && !hasPendingCancel && (
                 <div className="flex items-center justify-between pb-4">
                   <span className="text-sm text-gray-400">{t("paymentMethod")}</span>
                   <span className="text-sm text-white">{t("managedByPaddle")}</span>
@@ -225,7 +324,7 @@ export default function BillingPage() {
 
               {/* Actions */}
               <div className="flex flex-wrap gap-3 pt-2">
-                {hasActiveSubscription && (
+                {hasActiveSubscription && !hasPendingCancel && (
                   <button
                     onClick={() => setCancelModalOpen(true)}
                     className="rounded-md border border-gray-700 px-4 py-2 text-sm text-gray-400 transition-colors hover:border-red-700 hover:text-red-400"
