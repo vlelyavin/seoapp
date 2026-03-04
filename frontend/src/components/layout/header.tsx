@@ -8,6 +8,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useSession, signOut, signIn } from "next-auth/react";
 import { LogOut, Menu, X, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
 
 interface HeaderProps {
   onToggleSidebar?: () => void;
@@ -124,6 +125,7 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
 
           {/* Right section */}
           <div className="ml-auto flex items-center gap-3">
+            <LanguageSwitcher />
             {user ? (
               <div className="flex items-center gap-2">
                 {/* Marketing context: Dashboard button only */}
