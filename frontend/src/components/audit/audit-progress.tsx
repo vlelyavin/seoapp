@@ -8,6 +8,8 @@ import type { ProgressEvent } from "@/types/audit";
 
 interface AuditProgressViewProps {
   progress: ProgressEvent | null;
+  connected: boolean;
+  isPolling: boolean;
 }
 
 /* ── Progress Ring ─────────────────────────────────────────── */
@@ -120,13 +122,13 @@ function getProgressMessage(progress: ProgressEvent | null, t: ReturnType<typeof
 
 interface ActivityEntry {
   id: string;
-  type: "url" | "stage" | "analyzer";
+  type: "url" | "stage" | "analyzer" | "analyzer_done";
   label: string;
 }
 
 /* ── Main Component ────────────────────────────────────────── */
 
-export function AuditProgressView({ progress }: AuditProgressViewProps) {
+export function AuditProgressView({ progress, connected, isPolling }: AuditProgressViewProps) {
   const t = useTranslations("audit");
   const pct = progress?.progress || 0;
   const logRef = useRef<HTMLDivElement>(null);
@@ -134,6 +136,7 @@ export function AuditProgressView({ progress }: AuditProgressViewProps) {
   const lastUrlRef = useRef<string | null>(null);
   const lastStageRef = useRef<string | null>(null);
   const lastAnalyzerRef = useRef<string | null>(null);
+  const lastAnalyzerCompleteRef = useRef<string | null>(null);
   const entryIdRef = useRef(0);
 
   // Build activity log from progress changes
@@ -166,7 +169,7 @@ export function AuditProgressView({ progress }: AuditProgressViewProps) {
       }
     }
 
-    // Track analyzer changes
+    // Track analyzer starts
     if (
       progress.analyzer_name &&
       progress.analyzer_phase === "running" &&
@@ -176,6 +179,22 @@ export function AuditProgressView({ progress }: AuditProgressViewProps) {
       activityRef.current = [
         ...activityRef.current,
         { id: String(++entryIdRef.current), type: "analyzer", label: progress.analyzer_name },
+      ];
+      if (activityRef.current.length > 20) {
+        activityRef.current = activityRef.current.slice(-20);
+      }
+    }
+
+    // Track analyzer completions
+    if (
+      progress.analyzer_name &&
+      progress.analyzer_phase === "completed" &&
+      `completed-${progress.analyzer_name}` !== lastAnalyzerCompleteRef.current
+    ) {
+      lastAnalyzerCompleteRef.current = `completed-${progress.analyzer_name}`;
+      activityRef.current = [
+        ...activityRef.current,
+        { id: String(++entryIdRef.current), type: "analyzer_done", label: `✓ ${progress.analyzer_name}` },
       ];
       if (activityRef.current.length > 20) {
         activityRef.current = activityRef.current.slice(-20);
@@ -197,9 +216,27 @@ export function AuditProgressView({ progress }: AuditProgressViewProps) {
 
   const currentStage = getPipelineStage(progress);
 
+  // Connection badge
+  const connectionMeta = connected && !isPolling
+    ? { dotClass: "bg-emerald-400 animate-pulse", label: t("transportLive") }
+    : isPolling
+      ? { dotClass: "bg-amber-400", label: t("transportPolling") }
+      : { dotClass: "bg-copper-light animate-pulse", label: t("transportReconnecting") };
+
+  // Analyzer progress description for pipeline
+  function getAnalyzerDescription(): string {
+    if (currentStage !== "analyzing" || !progress) return "";
+    const completed = progress.analyzers_completed ?? 0;
+    const total = progress.analyzers_total ?? 0;
+    const count = total > 0 ? ` (${completed}/${total})` : "";
+    if (progress.analyzer_name) return `${progress.analyzer_name}${count}`;
+    if (total > 0) return `${completed}/${total} analyzers`;
+    return "";
+  }
+
   const pipelineStages: { key: Stage; label: string; description: string }[] = [
-    { key: "crawling", label: t("stageCrawling"), description: getProgressMessage(progress, t) },
-    { key: "analyzing", label: t("stageAnalyzing"), description: progress?.analyzer_name && currentStage === "analyzing" ? progress.analyzer_name : "" },
+    { key: "crawling", label: t("stageCrawling"), description: currentStage === "crawling" ? getProgressMessage(progress, t) : "" },
+    { key: "analyzing", label: t("stageAnalyzing"), description: getAnalyzerDescription() },
     { key: "report", label: t("stageGeneratingReport"), description: "" },
   ];
 
@@ -212,6 +249,11 @@ export function AuditProgressView({ progress }: AuditProgressViewProps) {
           <p className="mt-0.5 text-sm text-gray-400">{getProgressMessage(progress, t)}</p>
         </div>
         <div className="flex items-center gap-2">
+          {/* Connection badge */}
+          <span className="inline-flex items-center gap-1.5 rounded-lg border border-gray-800 bg-gray-900 px-3 py-1.5 text-xs font-medium text-gray-300">
+            <span className={cn("h-1.5 w-1.5 rounded-full", connectionMeta.dotClass)} />
+            {connectionMeta.label}
+          </span>
           {/* Stage badge */}
           <span className="inline-flex items-center gap-1.5 rounded-lg border border-gray-800 bg-gray-900 px-3 py-1.5 text-xs font-medium text-gray-300">
             <span className="h-1.5 w-1.5 rounded-full bg-copper-light animate-pulse" />
@@ -322,7 +364,7 @@ export function AuditProgressView({ progress }: AuditProgressViewProps) {
             className="flex-1 overflow-y-auto rounded-xl border border-gray-800 bg-gray-900 p-3 max-h-[500px]"
           >
             {displayLog.length === 0 ? (
-              <p className="py-8 text-center text-sm text-gray-600">{t("progressConnecting")}</p>
+              <p className="py-8 text-center text-sm text-gray-600">{t("noActivityYet")}</p>
             ) : (
               <div className="space-y-1.5">
                 {displayLog.map((entry) => (
@@ -330,9 +372,10 @@ export function AuditProgressView({ progress }: AuditProgressViewProps) {
                     <span
                       className={cn(
                         "h-1.5 w-1.5 shrink-0 rounded-full",
-                        entry.type === "url" && "bg-gray-500",
-                        entry.type === "stage" && "bg-copper-light",
-                        entry.type === "analyzer" && "bg-green-500"
+                        entry.type === "url" && "bg-emerald-400",
+                        entry.type === "stage" && "bg-gray-400",
+                        entry.type === "analyzer" && "bg-copper-light",
+                        entry.type === "analyzer_done" && "bg-emerald-400"
                       )}
                     />
                     <span
