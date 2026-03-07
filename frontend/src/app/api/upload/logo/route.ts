@@ -80,13 +80,13 @@ export async function POST(req: Request) {
       stale.map(async (name) => {
         try {
           await unlink(join(uploadDir, name));
-        } catch {
-          // Best-effort cleanup only.
+        } catch (err) {
+          console.error("[api/upload/logo] deleting stale logo file failed:", err);
         }
       })
     );
-  } catch {
-    // Keep upload success even if cleanup failed.
+  } catch (err) {
+    console.error("[api/upload/logo] stale logo cleanup failed:", err);
   }
 
   return NextResponse.json({ url: `/uploads/${filename}` });

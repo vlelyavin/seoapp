@@ -198,8 +198,8 @@ export async function POST(req: Request) {
 
             // Small delay to avoid hammering the API
             await new Promise((r) => setTimeout(r, 200));
-          } catch {
-            // Individual URL inspection failure — continue with next
+          } catch (err) {
+            console.error("[api/cron/weekly-resync] individual URL inspection failed:", err);
           }
         }
 

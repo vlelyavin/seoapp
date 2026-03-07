@@ -70,8 +70,8 @@ export async function GET(
             const enData = await enRes.json();
             if (!enData.partial) cacheData = enData;
           }
-        } catch {
-          // If English fetch fails, cache whatever we have
+        } catch (err) {
+          console.error("[api/audit/results] fetching English results for caching failed:", err);
         }
       }
 
@@ -108,8 +108,8 @@ export async function GET(
       if (translateRes.ok) {
         return NextResponse.json(await translateRes.json());
       }
-    } catch {
-      // If translation fails, return cached data as-is
+    } catch (err) {
+      console.error("[api/audit/results] translating cached results failed:", err);
     }
 
     return NextResponse.json(cachedData);

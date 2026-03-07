@@ -91,8 +91,8 @@ export async function GET(req: Request) {
 
           return { ...audit, ...updateData };
         }
-      } catch {
-        // Timeout or network error — return as-is
+      } catch (err) {
+        console.error("[api/audit/list] fetching audit status from FastAPI failed:", err);
       }
 
       return audit;

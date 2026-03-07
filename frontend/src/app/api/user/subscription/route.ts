@@ -49,8 +49,8 @@ export async function GET() {
       if (sub.currentBillingPeriod?.endsAt) {
         currentBillingPeriodEndsAt = sub.currentBillingPeriod.endsAt;
       }
-    } catch {
-      // If Paddle fetch fails, return DB data only
+    } catch (err) {
+      console.error("[api/user/subscription] Paddle subscription fetch failed:", err);
     }
   }
 
@@ -81,8 +81,8 @@ export async function DELETE(req: Request) {
     if (body.effectiveFrom === "immediately") {
       effectiveFrom = "immediately";
     }
-  } catch {
-    // No body or invalid JSON — use default
+  } catch (err) {
+    console.error("[api/user/subscription] parsing request body failed:", err);
   }
 
   const user = await prisma.user.findUnique({
@@ -120,8 +120,8 @@ export async function DELETE(req: Request) {
         },
       });
     }
-  } catch {
-    // If we can't check, proceed with cancel attempt
+  } catch (err) {
+    console.error("[api/user/subscription] checking scheduled cancel status failed:", err);
   }
 
   try {
@@ -155,8 +155,8 @@ export async function DELETE(req: Request) {
           effectiveAt: sub.scheduledChange.effectiveAt,
         };
       }
-    } catch {
-      // If we can't fetch, return success without scheduledChange
+    } catch (err) {
+      console.error("[api/user/subscription] fetching scheduledChange after cancel failed:", err);
     }
 
     return NextResponse.json({ success: true, scheduledChange });
@@ -180,8 +180,8 @@ export async function DELETE(req: Request) {
             },
           });
         }
-      } catch {
-        // Fall through to error
+      } catch (err) {
+        console.error("[api/user/subscription] fetching subscription after cancel error failed:", err);
       }
     }
 

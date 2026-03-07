@@ -89,8 +89,8 @@ export async function POST(
         totalUrls,
       },
     });
-  } catch {
-    // Non-fatal
+  } catch (err) {
+    console.error("[api/indexing/sites/run-auto-index] upserting daily report failed:", err);
   }
 
   return NextResponse.json(result);

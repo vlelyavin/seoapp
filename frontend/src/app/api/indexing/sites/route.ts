@@ -122,8 +122,8 @@ export async function POST(req: Request) {
         }
       }
     }
-  } catch {
-    // Non-fatal — use fallback
+  } catch (err) {
+    console.error("[api/indexing/sites] fetching sitemap from Google Search Console failed:", err);
   }
 
   const site = await prisma.site.create({
