@@ -120,7 +120,20 @@ export function useAuditProgress(fastApiId: string | null, auditId: string | nul
         if (res.ok) {
           const data: ProgressEvent = await res.json();
           trackProgress(data);
-          setProgress(data);
+          setProgress((prev) => {
+          if (
+            prev &&
+            prev.progress === data.progress &&
+            prev.status === data.status &&
+            prev.current_url === data.current_url &&
+            prev.pages_crawled === data.pages_crawled &&
+            prev.analyzer_name === data.analyzer_name &&
+            prev.analyzers_completed === data.analyzers_completed
+          ) {
+            return prev;
+          }
+          return data;
+        });
           setConnected(true);
           dismissConnectingToast();
           lastEventTimeRef.current = Date.now();
@@ -172,7 +185,20 @@ export function useAuditProgress(fastApiId: string | null, auditId: string | nul
       try {
         const data: ProgressEvent = JSON.parse(event.data);
         trackProgress(data);
-        setProgress(data);
+        setProgress((prev) => {
+          if (
+            prev &&
+            prev.progress === data.progress &&
+            prev.status === data.status &&
+            prev.current_url === data.current_url &&
+            prev.pages_crawled === data.pages_crawled &&
+            prev.analyzer_name === data.analyzer_name &&
+            prev.analyzers_completed === data.analyzers_completed
+          ) {
+            return prev;
+          }
+          return data;
+        });
         dismissConnectingToast();
         lastEventTimeRef.current = Date.now();
 
