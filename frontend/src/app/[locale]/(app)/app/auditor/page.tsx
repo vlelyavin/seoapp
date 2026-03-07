@@ -305,7 +305,7 @@ export default function AuditorListPage() {
       {/* Floating "Start new audit" button — mobile only */}
       <Link
         href="/app/auditor/new"
-        className="fixed bottom-6 right-6 z-40 flex items-center gap-2 rounded-full bg-gradient-to-r from-copper to-copper-light px-5 py-2 text-sm font-semibold text-white shadow-lg transition-opacity hover:opacity-90 md:hidden"
+        className="fixed bottom-6 right-6 z-40 flex items-center gap-2 rounded-xl bg-gradient-to-r from-copper to-copper-light px-5 py-2 text-sm font-semibold text-white shadow-lg transition-opacity hover:opacity-90 md:hidden"
       >
         <Plus className="h-4 w-4" />
         {t("startAudit")}
