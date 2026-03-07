@@ -308,7 +308,7 @@ export function AuditProgressView({ progress, connected = true, isPolling = fals
           )}
 
           {/* Pipeline stepper */}
-          <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
+          <div className="rounded-xl border border-gray-800 bg-gray-950 p-4">
             <div className="space-y-3">
               {pipelineStages.map((stage, i) => {
                 const state = getStageState(currentStage, stage.key);
@@ -361,7 +361,7 @@ export function AuditProgressView({ progress, connected = true, isPolling = fals
           <h3 className="mb-3 text-sm font-medium text-gray-400">Live Activity</h3>
           <div
             ref={logRef}
-            className="flex-1 overflow-y-auto rounded-xl border border-gray-800 bg-gray-900 p-3 max-h-[500px]"
+            className="flex-1 overflow-y-auto rounded-xl border border-gray-800 bg-gray-950 p-3 max-h-[500px]"
           >
             {displayLog.length === 0 ? (
               <p className="py-8 text-center text-sm text-gray-600">{t("noActivityYet")}</p>
