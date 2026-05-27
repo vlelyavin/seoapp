@@ -1,0 +1,216 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                      String               @id @default(cuid()) @db.VarChar(191)
+  name                    String?
+  email                   String               @unique @db.VarChar(191)
+  emailVerified           DateTime?
+  password                String?
+  image                   String?              @db.Text
+  role                    String               @default("user") @db.VarChar(50)
+  planId                  String               @default("free") @db.VarChar(191)
+  plan                    Plan                 @relation(fields: [planId], references: [id])
+  createdAt               DateTime             @default(now())
+  updatedAt               DateTime             @updatedAt
+  gscConnected            Boolean              @default(false)
+  gscConnectedAt          DateTime?
+  emailReports            Boolean              @default(true)
+  accounts                Account[]
+  audits                  Audit[]
+  brandSettings           BrandSettings?
+  sites                   Site[]
+  indexingLogs            IndexingLog[]
+  dailyQuotas             UserDailyQuota[]
+  dailyReports            DailyReport[]
+
+  // Paddle Billing
+  paddleCustomerId         String?   @unique @db.VarChar(191)
+  paddleSubscriptionId     String?   @db.VarChar(191)
+  paddleSubscriptionStatus String?   @db.VarChar(50)
+  paddlePlanPriceId        String?   @db.VarChar(191)
+  paddleNextBillDate       DateTime?
+  paddleCancelledAt        DateTime?
+}
+
+model Account {
+  id                String  @id @default(cuid()) @db.VarChar(191)
+  userId            String  @db.VarChar(191)
+  type              String  @db.VarChar(50)
+  provider          String  @db.VarChar(191)
+  providerAccountId String  @db.VarChar(191)
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String? @db.VarChar(50)
+  scope             String? @db.Text
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String @db.VarChar(191)
+  token      String @unique @db.VarChar(191)
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Plan {
+  id              String  @id @db.VarChar(191)
+  name            String  @db.VarChar(100)
+  auditsPerMonth  Int
+  maxPages        Int
+  whiteLabel      Boolean @default(false)
+  price           Float   @default(0)
+  maxSites        Int     @default(1)
+  autoIndexing    Boolean @default(false)
+  reportFrequency String  @default("none") @db.VarChar(20)
+  users           User[]
+}
+
+model Audit {
+  id             String    @id @default(cuid()) @db.VarChar(191)
+  fastApiId      String    @unique @db.VarChar(191)
+  userId         String    @db.VarChar(191)
+  url            String    @db.Text
+  status         String    @default("pending") @db.VarChar(50)
+  language       String    @default("en") @db.VarChar(10)
+  pagesCrawled   Int       @default(0)
+  totalIssues    Int       @default(0)
+  criticalIssues Int       @default(0)
+  warnings       Int       @default(0)
+  passedChecks   Int       @default(0)
+  resultJson     String?   @db.LongText
+  reportPath     String?   @db.Text
+  errorMessage   String?   @db.Text
+  startedAt      DateTime  @default(now())
+  completedAt    DateTime?
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, startedAt])
+}
+
+model BrandSettings {
+  id           String  @id @default(cuid()) @db.VarChar(191)
+  userId       String  @unique @db.VarChar(191)
+  companyName  String?
+  logoUrl      String? @db.Text
+  primaryColor String  @default("#2563eb") @db.VarChar(20)
+  accentColor  String  @default("#7c3aed") @db.VarChar(20)
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Site {
+  id                 String        @id @default(cuid()) @db.VarChar(191)
+  userId             String        @db.VarChar(191)
+  domain             String        @db.VarChar(191)
+  gscPermissionLevel String?       @db.VarChar(50)
+  autoIndexGoogle    Boolean       @default(false)
+  autoIndexBing      Boolean       @default(false)
+  sitemapUrl         String?       @db.Text
+  indexnowKey           String?       @db.VarChar(191)
+  indexnowKeyVerified   Boolean       @default(false)
+  lastSyncedAt          DateTime?
+  syncLockedAt          DateTime?
+  autoIndexLockedAt     DateTime?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  indexedUrls        IndexedUrl[]
+  dailyReports       DailyReport[]
+
+  @@unique([userId, domain])
+}
+
+model IndexedUrl {
+  id               String        @id @default(cuid()) @db.VarChar(191)
+  siteId           String        @db.VarChar(191)
+  url              String        @db.VarChar(500)
+  gscStatus        String?       @db.VarChar(100)
+  indexingStatus   String        @default("none") @db.VarChar(50)
+  submissionMethod String        @default("none") @db.VarChar(50)
+  submittedAt      DateTime?
+  lastSyncedAt     DateTime?
+  errorMessage     String?       @db.Text
+  httpStatus       Int?
+  isNew            Boolean       @default(false)
+  isChanged        Boolean       @default(false)
+  lastmod          String?       @db.VarChar(50)
+  retryCount       Int           @default(0)
+  lastInspectedAt  DateTime?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  site             Site          @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  indexingLogs     IndexingLog[]
+
+  @@unique([siteId, url])
+}
+
+model IndexingLog {
+  id             String      @id @default(cuid()) @db.VarChar(191)
+  siteId         String?     @db.VarChar(191)
+  indexedUrlId   String?     @db.VarChar(191)
+  userId         String      @db.VarChar(191)
+  action         String      @db.VarChar(100)
+  details        String?     @db.Text
+  createdAt      DateTime    @default(now())
+  indexedUrl     IndexedUrl? @relation(fields: [indexedUrlId], references: [id], onDelete: SetNull)
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([siteId, createdAt])
+}
+
+model UserDailyQuota {
+  id                 String   @id @default(cuid()) @db.VarChar(191)
+  userId             String   @db.VarChar(191)
+  date               String   @db.VarChar(20)
+  googleSubmissions  Int      @default(0)
+  inspectionsUsed    Int      @default(0)
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+}
+
+model DailyReport {
+  id                    String   @id @default(cuid()) @db.VarChar(191)
+  siteId                String   @db.VarChar(191)
+  userId                String   @db.VarChar(191)
+  reportDate            String   @db.VarChar(20)
+  newPagesFound         Int      @default(0)
+  changedPagesFound     Int      @default(0)
+  removedPagesFound     Int      @default(0)
+  submittedGoogle       Int      @default(0)
+  submittedGoogleFailed Int      @default(0)
+  submittedBing         Int      @default(0)
+  submittedBingFailed   Int      @default(0)
+  pages404              Int      @default(0)
+  totalIndexed          Int      @default(0)
+  totalUrls             Int      @default(0)
+  details               String?  @db.Text
+  createdAt             DateTime @default(now())
+  site                  Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([siteId, reportDate])
+  @@index([userId, reportDate])
+}
+
+model CronJobLog {
+  id          String   @id @default(cuid()) @db.VarChar(191)
+  jobName     String   @unique @db.VarChar(191)
+  lastRunAt   DateTime
+  lastResult  String   @db.Text
+  lastSummary String?  @db.Text
+  updatedAt   DateTime @updatedAt
+}

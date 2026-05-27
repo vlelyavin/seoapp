@@ -1,0 +1,156 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-ubuntu);
+  --font-mono: var(--font-geist-mono);
+
+  /* Pure neutral gray scale override - NO blue tints */
+  --color-gray-50: #fafafa;
+  --color-gray-100: #f5f5f5;
+  --color-gray-200: #e5e5e5;
+  --color-gray-300: #d4d4d4;
+  --color-gray-400: #a3a3a3;
+  --color-gray-500: #737373;
+  --color-gray-600: #525252;
+  --color-gray-700: #404040;
+  --color-gray-800: #262626;
+  --color-gray-900: #171717;
+  --color-gray-950: #0a0a0a;
+
+  /* Copper/bronze accent (lvdev.co exact) */
+  --color-copper: #b34e22;
+  --color-copper-light: #e38748;
+}
+
+body {
+  font-family: var(--font-ubuntu), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Dark Theme Only - CSS Variables */
+:root {
+  /* Dark theme colors (pure black & white) */
+  --color-background: 0 0 0;           /* Pure black #000000 */
+  --color-foreground: 255 255 255;      /* Pure white #ffffff */
+  --color-card: 10 10 10;              /* Very dark gray #0a0a0a */
+  --color-card-foreground: 255 255 255; /* Pure white */
+  --color-border: 26 26 26;            /* Dark gray #1a1a1a */
+  --color-input: 26 26 26;             /* Dark gray */
+  --color-ring: 160 160 160;            /* Light gray accent */
+  --color-accent: 20 20 20;            /* Slightly lighter #141414 */
+  --color-accent-foreground: 255 255 255;
+  --color-muted: 26 26 26;
+  --color-muted-foreground: 160 160 160; /* Light gray #a0a0a0 */
+  --color-secondary: 26 26 26;
+  --color-secondary-foreground: 255 255 255;
+
+  /* Semantic colors */
+  --color-success: 16 185 129;
+  --color-warning: 245 158 11;
+  --color-error: 239 68 68;
+  --color-info: 160 160 160;
+  --color-critical: 220 38 38;
+}
+
+/* Landing page button — gradient with glow + shine hover */
+.landing-btn {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.4s ease-in-out;
+}
+
+.landing-btn::before,
+.landing-btn::after {
+  position: absolute;
+  content: "";
+  z-index: 1;
+  top: -50%;
+  width: 2rem;
+  height: 200%;
+  transform: rotate(35deg);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0));
+  will-change: left;
+  transition: left 0.6s ease-in-out;
+}
+
+.landing-btn::before {
+  left: calc(-150% - 5rem);
+}
+
+.landing-btn::after {
+  left: -150%;
+}
+
+.landing-btn:hover {
+  box-shadow: 0 0 0 3px #e38748;
+}
+
+.landing-btn:hover::before {
+  transition-delay: 0.05s;
+  left: calc(150% - 5rem);
+}
+
+.landing-btn:hover::after {
+  left: 150%;
+}
+
+/* Landing page outline button — border glow on hover */
+.landing-btn-outline {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.4s ease-in-out, box-shadow 0.4s ease-in-out;
+}
+
+.landing-btn-outline:hover {
+  box-shadow: 0 0 0 3px #e38748;
+}
+
+/* Safari form element resets — remove native styling */
+select,
+input[type="checkbox"],
+input[type="radio"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a3a3a3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2rem;
+}
+
+/* Sonner toast overrides — force neutral dark theme on all toast types */
+[data-sonner-toaster] {
+  --normal-bg: #0a0a0a;
+  --normal-border: #404040;
+  --normal-text: #fafafa;
+  --success-bg: #0a0a0a;
+  --success-border: #404040;
+  --success-text: #fafafa;
+  --error-bg: #0a0a0a;
+  --error-border: #404040;
+  --error-text: #fafafa;
+  --info-bg: #0a0a0a;
+  --info-border: #404040;
+  --info-text: #fafafa;
+  --warning-bg: #0a0a0a;
+  --warning-border: #404040;
+  --warning-text: #fafafa;
+}
+
+/* Sonner toast icon colors */
+[data-sonner-toast][data-type="success"] [data-icon] {
+  color: #10b981;
+}
+[data-sonner-toast][data-type="error"] [data-icon] {
+  color: #ef4444;
+}
+[data-sonner-toast][data-type="info"] [data-icon] {
+  color: #3b82f6;
+}
+[data-sonner-toast][data-type="loading"] [data-icon] {
+  color: #9ca3af;
+}

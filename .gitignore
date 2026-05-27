@@ -1,0 +1,74 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+/lib/
+/lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+venv.*/
+ENV/
+env/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Environment & secrets (.env.example is the committed template)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Generated output
+reports/
+screenshots/
+frontend/public/uploads/
+/package-lock.json
+
+# Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/dev.db
+frontend/prisma/dev.db
+frontend/prisma/dev.db-journal
+frontend/prisma/prod.db
+
+# App dir doubles as the seoapp user home — never commit these
+.cache/
+.config/
+.pki/
+.npm/
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Reference files
+portfolio_reference/

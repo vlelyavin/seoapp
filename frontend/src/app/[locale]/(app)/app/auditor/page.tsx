@@ -1,0 +1,368 @@
+"use client";
+
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { Link } from "@/i18n/navigation";
+import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import {
+  Plus,
+  FileSearch,
+  Trash2,
+  ExternalLink,
+  AlertCircle,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  XCircle,
+  Loader2,
+  BarChart3,
+  Globe,
+  FileWarning,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import type { AuditSummary } from "@/types/audit";
+import { toast } from "sonner";
+import { useRouter } from "@/i18n/navigation";
+
+const PAGE_SIZE = 10;
+
+export default function AuditorListPage() {
+  const t = useTranslations("dashboard");
+  const tAudit = useTranslations("audit");
+  const tBreadcrumbs = useTranslations("breadcrumbs");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [audits, setAudits] = useState<AuditSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const currentPage = Math.max(parseInt(searchParams.get("page") || "1", 10), 1);
+
+  const fetchAudits = useCallback(async () => {
+    try {
+      const res = await fetch("/api/audit/list?take=100");
+      if (res.ok) {
+        setAudits(await res.json());
+      }
+    } catch {
+      /* ignore */
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAudits();
+  }, [fetchAudits]);
+
+  const handleDelete = async (id: string) => {
+    if (!confirm(t("confirmDeleteMessage"))) return;
+    setDeletingId(id);
+    try {
+      const res = await fetch(`/api/audit/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setAudits((prev) => prev.filter((a) => a.id !== id));
+      } else {
+        toast.error(t("deleteFailed"));
+      }
+    } catch {
+      toast.error(t("deleteFailed"));
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const statusIcon = (status: string) => {
+    switch (status) {
+      case "completed":
+        return <CheckCircle2 className="h-6 w-6 shrink-0 text-emerald-400" />;
+      case "failed":
+        return <XCircle className="h-6 w-6 shrink-0 text-red-400" />;
+      case "pending":
+        return <Clock className="h-6 w-6 shrink-0 text-gray-400" />;
+      default:
+        return <Loader2 className="h-6 w-6 shrink-0 animate-spin text-copper" />;
+    }
+  };
+
+  const statusLabel = (status: string) => {
+    switch (status) {
+      case "completed":
+        return "Completed";
+      case "failed":
+        return "Failed";
+      case "pending":
+        return "Pending";
+      case "crawling":
+        return "Crawling";
+      case "analyzing":
+        return "Analyzing";
+      case "screenshots":
+        return "Screenshots";
+      case "generating_report":
+        return "Generating report";
+      default:
+        return status;
+    }
+  };
+
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const shortenUrl = (url: string) => {
+    try {
+      const u = new URL(url);
+      return u.hostname + (u.pathname !== "/" ? u.pathname : "");
+    } catch {
+      return url;
+    }
+  };
+
+  const stats = useMemo(() => {
+    const completed = audits.filter((a) => a.status === "completed");
+    return {
+      totalAudits: audits.length,
+      totalPages: completed.reduce((sum, a) => sum + a.pagesCrawled, 0),
+      totalErrors: completed.reduce((sum, a) => sum + a.criticalIssues, 0),
+      totalWarnings: completed.reduce((sum, a) => sum + a.warnings, 0),
+    };
+  }, [audits]);
+
+  // Pagination
+  const totalPages = Math.max(Math.ceil(audits.length / PAGE_SIZE), 1);
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedAudits = audits.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  const goToPage = (page: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (page <= 1) {
+      params.delete("page");
+    } else {
+      params.set("page", String(page));
+    }
+    const qs = params.toString();
+    router.push(`/app/auditor${qs ? `?${qs}` : ""}`);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent" />
+        <p className="text-sm text-gray-400">{tAudit("loadingAudits")}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 pb-20 md:pb-0">
+      <div className="flex items-center justify-between">
+        <div>
+          <Breadcrumbs
+            items={[
+              { label: tBreadcrumbs("dashboard"), href: "/app" },
+              { label: "Auditor" },
+            ]}
+          />
+          <h1 className="text-2xl font-bold text-white">{t("recentAudits")}</h1>
+        </div>
+        <Link
+          href="/app/auditor/new"
+          className="hidden md:flex items-center gap-2 rounded-md bg-gradient-to-r from-copper to-copper-light px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+        >
+          <Plus className="h-4 w-4" />
+          {t("startAudit")}
+        </Link>
+      </div>
+
+      {/* General stats */}
+      {audits.length > 0 && (
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-xl border border-gray-800 bg-gray-950 p-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-gray-900 p-2 text-white">
+                <BarChart3 className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-white">{stats.totalAudits}</p>
+                <p className="text-[11px] leading-tight whitespace-nowrap text-gray-400 sm:text-xs">Total Audits</p>
+              </div>
+            </div>
+          </div>
+          <div className="rounded-xl border border-gray-800 bg-gray-950 p-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-gray-900 p-2 text-white">
+                <Globe className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-white">{stats.totalPages}</p>
+                <p className="text-[11px] leading-tight whitespace-nowrap text-gray-400 sm:text-xs">Pages Crawled</p>
+              </div>
+            </div>
+          </div>
+          <div className="rounded-xl border border-gray-800 bg-gray-950 p-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-red-900/35 p-2 text-red-400">
+                <AlertCircle className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-white">{stats.totalErrors}</p>
+                <p className="text-[11px] leading-tight whitespace-nowrap text-gray-400 sm:text-xs">Errors</p>
+              </div>
+            </div>
+          </div>
+          <div className="rounded-xl border border-gray-800 bg-gray-950 p-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-yellow-900/35 p-2 text-yellow-400">
+                <FileWarning className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-white">{stats.totalWarnings}</p>
+                <p className="text-[11px] leading-tight whitespace-nowrap text-gray-400 sm:text-xs">Warnings</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {audits.length === 0 ? (
+        <div className="rounded-xl border border-gray-800 bg-gray-950 p-12 text-center">
+          <FileSearch className="mx-auto mb-4 h-12 w-12 text-gray-600" />
+          <p className="text-sm text-gray-400">{t("noAudits")}</p>
+          <Link
+            href="/app/auditor/new"
+            className="mt-4 inline-flex items-center gap-2 rounded-md bg-gradient-to-r from-copper to-copper-light px-6 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+          >
+            <Plus className="h-4 w-4" />
+            {t("startAudit")}
+          </Link>
+        </div>
+      ) : (
+        <>
+          <div className="space-y-3">
+            {paginatedAudits.map((audit) => (
+              <div
+                key={audit.id}
+                className="group rounded-xl border border-gray-800 bg-gray-950 p-3 md:p-4 transition-colors hover:border-gray-700"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <Link
+                    href={`/app/auditor/${audit.id}`}
+                    className="min-w-0 flex-1"
+                  >
+                    <div className="flex items-center gap-2 md:gap-3">
+                      {statusIcon(audit.status)}
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-white">
+                          {shortenUrl(audit.url)}
+                        </p>
+                        <div className="mt-1 flex items-center gap-x-3 text-xs text-gray-500 whitespace-nowrap">
+                          <span>{formatDate(audit.startedAt)}</span>
+                          {audit.status === "completed" && (
+                            <span>{audit.pagesCrawled} pages total</span>
+                          )}
+                          {audit.status === "failed" && (
+                            <span className="text-red-400">{statusLabel("failed")}</span>
+                          )}
+                          {!["completed", "failed", "pending"].includes(audit.status) && (
+                            <span className="text-copper">{statusLabel(audit.status)}</span>
+                          )}
+                        </div>
+                        {audit.status === "completed" && (audit.criticalIssues > 0 || audit.warnings > 0) && (
+                          <div className="mt-1 flex items-center gap-x-3">
+                            {audit.criticalIssues > 0 && (
+                              <span className="flex items-center gap-1 text-xs font-medium text-red-400">
+                                <AlertCircle className="h-3 w-3" />
+                                {audit.criticalIssues} {t("criticalLabel")}
+                              </span>
+                            )}
+                            {audit.warnings > 0 && (
+                              <span className="flex items-center gap-1 text-xs font-medium text-yellow-400">
+                                <AlertTriangle className="h-3 w-3" />
+                                {audit.warnings} {t("warningsLabel")}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+
+                  <div className="flex shrink-0 items-center gap-0">
+                    {audit.status === "completed" && (
+                      <Link
+                        href={`/app/auditor/${audit.id}`}
+                        className="rounded-md p-2 text-gray-500 transition-colors hover:bg-gray-900 hover:text-white"
+                        title="View results"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                      </Link>
+                    )}
+                    <button
+                      onClick={() => handleDelete(audit.id)}
+                      disabled={deletingId === audit.id}
+                      className={cn(
+                        "rounded-md p-2 text-gray-500 transition-colors hover:bg-gray-900 hover:text-red-400",
+                        deletingId === audit.id && "opacity-50"
+                      )}
+                      title={t("deleteAudit")}
+                    >
+                      {deletingId === audit.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 pt-2">
+              <button
+                onClick={() => goToPage(safePage - 1)}
+                disabled={safePage <= 1}
+                className="flex items-center gap-1 rounded-lg border border-gray-800 bg-gray-900 px-3 py-1.5 text-sm text-gray-400 transition-colors hover:border-gray-700 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Previous
+              </button>
+              <span className="px-3 text-sm text-gray-500">
+                Page {safePage} of {totalPages}
+              </span>
+              <button
+                onClick={() => goToPage(safePage + 1)}
+                disabled={safePage >= totalPages}
+                className="flex items-center gap-1 rounded-lg border border-gray-800 bg-gray-900 px-3 py-1.5 text-sm text-gray-400 transition-colors hover:border-gray-700 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Next
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Floating "Start new audit" button — mobile only */}
+      <Link
+        href="/app/auditor/new"
+        className="fixed bottom-6 right-6 z-40 flex items-center gap-2 rounded-xl bg-gradient-to-r from-copper to-copper-light px-5 py-2 text-sm font-semibold text-white shadow-lg transition-opacity hover:opacity-90 md:hidden"
+      >
+        <Plus className="h-4 w-4" />
+        {t("startAudit")}
+      </Link>
+    </div>
+  );
+}

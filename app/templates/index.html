@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEO Аудит</title>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --color-primary: #2563eb;
+            --color-primary-dark: #1d4ed8;
+            --color-success: #10b981;
+            --color-warning: #f59e0b;
+            --color-error: #ef4444;
+            --color-text: #1f2937;
+            --color-text-light: #6b7280;
+            --color-bg: #f3f4f6;
+            --color-white: #ffffff;
+            --color-border: #e5e7eb;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--color-text);
+            background: var(--color-bg);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 48px 24px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--color-text-light);
+        }
+
+        .card {
+            background: var(--color-white);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 16px;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--color-text-light);
+        }
+
+        .form-hint {
+            font-size: 13px;
+            color: var(--color-text-light);
+            margin-top: 6px;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 16px;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            background: var(--color-white);
+            cursor: pointer;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 24px;
+            font-size: 16px;
+            font-weight: 500;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s, opacity 0.2s;
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--color-primary-dark);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-link {
+            background: none;
+            color: var(--color-primary);
+            padding: 8px 0;
+            font-size: 14px;
+        }
+
+        .btn-link:hover {
+            text-decoration: underline;
+        }
+
+        .btn-success {
+            width: 100%;
+            background: var(--color-success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        /* Progress Section */
+        .progress-section {
+            margin-top: 32px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--color-border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--color-primary);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-stages {
+            margin-top: 16px;
+        }
+
+        .stage {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            font-size: 14px;
+            color: var(--color-text-light);
+        }
+
+        .stage.active {
+            color: var(--color-text);
+            font-weight: 500;
+        }
+
+        .stage.completed {
+            color: var(--color-success);
+        }
+
+        .stage-icon {
+            width: 20px;
+            margin-right: 8px;
+            text-align: center;
+        }
+
+        .stage-spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--color-border);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Result Section */
+        .result-section {
+            margin-top: 32px;
+            text-align: center;
+        }
+
+        .result-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .result-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .result-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .stat {
+            padding: 12px;
+            background: var(--color-bg);
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--color-text-light);
+        }
+
+        .stat.error .stat-value { color: var(--color-error); }
+        .stat.warning .stat-value { color: var(--color-warning); }
+        .stat.success .stat-value { color: var(--color-success); }
+
+        /* Error */
+        .error-message {
+            padding: 16px;
+            background: #fee2e2;
+            border-radius: 8px;
+            color: var(--color-error);
+            margin-top: 16px;
+        }
+
+        /* Analyzers Section */
+        .analyzers-section {
+            margin-top: 8px;
+        }
+
+        .analyzers-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            padding: 8px 0;
+            user-select: none;
+        }
+
+        .analyzers-toggle-label {
+            font-weight: 500;
+            font-size: 14px;
+            color: var(--color-text);
+        }
+
+        .analyzers-toggle-arrow {
+            font-size: 12px;
+            color: var(--color-text-light);
+            transition: transform 0.2s;
+        }
+
+        .analyzers-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px 16px;
+            padding: 8px 0 4px;
+        }
+
+        .analyzer-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 0;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .analyzer-checkbox input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: var(--color-primary);
+            flex-shrink: 0;
+        }
+
+        .analyzer-checkbox span {
+            line-height: 1.3;
+        }
+
+        .analyzers-actions {
+            display: flex;
+            gap: 12px;
+            padding: 4px 0 8px;
+            font-size: 13px;
+        }
+
+        .analyzers-actions button {
+            background: none;
+            border: none;
+            color: var(--color-primary);
+            cursor: pointer;
+            font-size: 13px;
+            padding: 0;
+        }
+
+        .analyzers-actions button:hover {
+            text-decoration: underline;
+        }
+
+        .analyzer-separator {
+            grid-column: 1 / -1;
+            border-top: 1px solid var(--color-border);
+            margin: 4px 0;
+        }
+
+        /* Hide/Show */
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body x-data="auditApp()">
+    <div class="container">
+        <header class="header">
+            <h1>SEO Аудит</h1>
+            <p>Автоматичний аналіз вашого сайту</p>
+        </header>
+
+        <div class="card">
+            <!-- Form -->
+            <form @submit.prevent="startAudit" x-show="!isRunning && !isCompleted">
+                <div class="form-group">
+                    <label class="form-label">URL сайту для аудиту *</label>
+                    <input
+                        type="url"
+                        class="form-input"
+                        x-model="url"
+                        placeholder="https://example.com"
+                        required
+                    >
+                    <p class="form-hint">Введіть головну сторінку вашого сайту</p>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Мова звіту</label>
+                    <select class="form-select" x-model="language">
+                        <option value="uk">🇺🇦 Українська</option>
+                        <option value="ru">🇷🇺 Русский</option>
+                    </select>
+                </div>
+
+                <!-- Analyzer Selection -->
+                <div class="form-group">
+                    <div class="analyzers-section">
+                        <div class="analyzers-toggle" @click="showAnalyzers = !showAnalyzers">
+                            <span class="analyzers-toggle-label">Параметри аналізу</span>
+                            <span class="analyzers-toggle-arrow" :style="showAnalyzers ? 'transform: rotate(180deg)' : ''">&#9660;</span>
+                        </div>
+
+                        <div x-show="showAnalyzers" x-cloak>
+                            <div class="analyzers-actions">
+                                <button type="button" @click="toggleAllAnalyzers(true)">Обрати всі</button>
+                                <button type="button" @click="toggleAllAnalyzers(false)">Скасувати всі</button>
+                            </div>
+
+                            <div class="analyzers-grid">
+                                <template x-for="item in analyzerList" :key="item.key">
+                                    <div>
+                                        <div x-show="item.separator" class="analyzer-separator"></div>
+                                        <label class="analyzer-checkbox" x-show="!item.separator">
+                                            <input type="checkbox" x-model="analyzers[item.key]">
+                                            <span x-text="item.label"></span>
+                                        </label>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" :disabled="!url || !hasSelectedAnalyzers()">
+                    Розпочати аудит
+                </button>
+            </form>
+
+            <!-- Progress -->
+            <div class="progress-section" x-show="isRunning" x-cloak>
+                <div class="progress-header">
+                    <span x-text="statusMessage"></span>
+                    <span x-text="Math.round(progress) + '%'"></span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" :style="'width: ' + progress + '%'"></div>
+                </div>
+
+                <div class="progress-stages">
+                    <div class="stage" :class="{ active: currentStage === 'crawling', completed: stageCompleted('crawling') }">
+                        <span class="stage-icon">
+                            <template x-if="currentStage === 'crawling'">
+                                <div class="stage-spinner"></div>
+                            </template>
+                            <template x-if="stageCompleted('crawling')">✓</template>
+                            <template x-if="!stageCompleted('crawling') && currentStage !== 'crawling'">○</template>
+                        </span>
+                        Сканування сайту <span x-show="pagesCrawled > 0" x-text="'(' + pagesCrawled + ' сторінок)'"></span>
+                    </div>
+                    <div class="stage" :class="{ active: currentStage === 'analyzing', completed: stageCompleted('analyzing') }">
+                        <span class="stage-icon">
+                            <template x-if="currentStage === 'analyzing'">
+                                <div class="stage-spinner"></div>
+                            </template>
+                            <template x-if="stageCompleted('analyzing')">✓</template>
+                            <template x-if="!stageCompleted('analyzing') && currentStage !== 'analyzing'">○</template>
+                        </span>
+                        Аналіз контенту
+                    </div>
+                    <div class="stage" :class="{ active: currentStage === 'report', completed: stageCompleted('report') }">
+                        <span class="stage-icon">
+                            <template x-if="currentStage === 'report'">
+                                <div class="stage-spinner"></div>
+                            </template>
+                            <template x-if="stageCompleted('report')">✓</template>
+                            <template x-if="!stageCompleted('report') && currentStage !== 'report'">○</template>
+                        </span>
+                        Генерація звіту
+                    </div>
+                </div>
+            </div>
+
+            <!-- Result -->
+            <div class="result-section" x-show="isCompleted" x-cloak>
+                <div class="result-icon">✅</div>
+                <div class="result-title">Аудит завершено!</div>
+                <p style="color: var(--color-text-light);">Скановано <span x-text="pagesCrawled"></span> сторінок</p>
+
+                <div style="margin-top: 24px;">
+                    <p class="form-label" style="text-align: center; margin-bottom: 12px;">Завантажити звіт:</p>
+                    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                        <a :href="'/api/audit/' + auditId + '/download?format=html'"
+                           class="btn btn-success" style="text-decoration: none; min-width: 100px;">
+                            HTML
+                        </a>
+                        <a :href="'/api/audit/' + auditId + '/download?format=pdf'"
+                           class="btn btn-success" style="text-decoration: none; min-width: 100px;">
+                            PDF
+                        </a>
+                        <a :href="'/api/audit/' + auditId + '/download?format=docx'"
+                           class="btn btn-success" style="text-decoration: none; min-width: 100px;">
+                            Word
+                        </a>
+                    </div>
+                </div>
+
+                <button class="btn btn-link" @click="reset()" style="margin-top: 16px;">
+                    Почати новий аудит
+                </button>
+            </div>
+
+            <!-- Error -->
+            <div class="error-message" x-show="errorMessage" x-cloak x-text="errorMessage"></div>
+        </div>
+    </div>
+
+    <script>
+        function auditApp() {
+            return {
+                url: '',
+                language: 'uk',
+                showAnalyzers: false,
+                analyzers: {
+                    // Existing analyzers (default: checked)
+                    cms: true,
+                    meta_tags: true,
+                    headings: true,
+                    page_404: true,
+                    speed: true,
+                    images: true,
+                    content: true,
+                    links: true,
+                    favicon: true,
+                    external_links: true,
+                    robots: true,
+                    structure: true,
+                    content_sections: true,
+                    // New analyzers (default: unchecked)
+                    schema: false,
+                    social_tags: false,
+                    security: false,
+                    mobile: false,
+                    url_quality: false,
+                    hreflang: false,
+                    duplicates: false,
+                    redirects: false,
+                },
+                analyzerList: [
+                    { key: 'cms', label: 'CMS / Платформа' },
+                    { key: 'meta_tags', label: 'Мета-теги' },
+                    { key: 'headings', label: 'Заголовки H1-H6' },
+                    { key: 'page_404', label: 'Сторінка 404' },
+                    { key: 'speed', label: 'Швидкість' },
+                    { key: 'images', label: 'Зображення' },
+                    { key: 'content', label: 'Контент' },
+                    { key: 'links', label: 'Биті посилання' },
+                    { key: 'favicon', label: 'Фавікон' },
+                    { key: 'external_links', label: 'Зовнішні посилання' },
+                    { key: 'robots', label: 'Індексація' },
+                    { key: 'structure', label: 'Структура сайту' },
+                    { key: 'content_sections', label: 'Інформаційні розділи' },
+                    { key: '_sep', separator: true, label: '' },
+                    { key: 'schema', label: 'Структуровані дані' },
+                    { key: 'social_tags', label: 'Соціальні мета-теги' },
+                    { key: 'security', label: 'HTTPS та безпека' },
+                    { key: 'mobile', label: 'Мобільна адаптивність' },
+                    { key: 'url_quality', label: 'Якість URL' },
+                    { key: 'hreflang', label: 'Hreflang' },
+                    { key: 'duplicates', label: 'Дублікати контенту' },
+                    { key: 'redirects', label: 'Редиректи' },
+                ],
+                isRunning: false,
+                isCompleted: false,
+                auditId: null,
+                progress: 0,
+                statusMessage: '',
+                pagesCrawled: 0,
+                errorMessage: '',
+                currentStage: '',
+                completedStages: [],
+
+                stageCompleted(stage) {
+                    return this.completedStages.includes(stage);
+                },
+
+                hasSelectedAnalyzers() {
+                    return Object.values(this.analyzers).some(v => v);
+                },
+
+                toggleAllAnalyzers(state) {
+                    for (const key in this.analyzers) {
+                        this.analyzers[key] = state;
+                    }
+                },
+
+                reset() {
+                    this.isRunning = false;
+                    this.isCompleted = false;
+                    this.auditId = null;
+                    this.progress = 0;
+                    this.statusMessage = '';
+                    this.pagesCrawled = 0;
+                    this.errorMessage = '';
+                    this.currentStage = '';
+                    this.completedStages = [];
+                },
+
+                async startAudit() {
+                    this.isRunning = true;
+                    this.isCompleted = false;
+                    this.progress = 0;
+                    this.errorMessage = '';
+                    this.completedStages = [];
+
+                    const selectedAnalyzers = Object.keys(this.analyzers).filter(k => this.analyzers[k]);
+
+                    try {
+                        // Start audit
+                        const response = await fetch('/api/audit', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                url: this.url,
+                                language: this.language,
+                                analyzers: selectedAnalyzers
+                            })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Не вдалося розпочати аудит');
+                        }
+
+                        const data = await response.json();
+                        this.auditId = data.audit_id;
+
+                        // Connect to SSE stream
+                        const eventSource = new EventSource(`/api/audit/${this.auditId}/status`);
+
+                        eventSource.addEventListener('progress', (event) => {
+                            const progress = JSON.parse(event.data);
+
+                            this.progress = progress.progress;
+                            this.statusMessage = progress.message;
+                            this.pagesCrawled = progress.pages_crawled || 0;
+
+                            // Track stages
+                            if (progress.stage) {
+                                if (this.currentStage && this.currentStage !== progress.stage) {
+                                    this.completedStages.push(this.currentStage);
+                                }
+                                this.currentStage = progress.stage;
+                            }
+
+                            if (progress.status === 'completed') {
+                                this.completedStages.push(this.currentStage);
+                                this.isRunning = false;
+                                this.isCompleted = true;
+                                eventSource.close();
+                            } else if (progress.status === 'failed') {
+                                this.isRunning = false;
+                                this.errorMessage = progress.message || 'Виникла помилка';
+                                eventSource.close();
+                            }
+                        });
+
+                        eventSource.onerror = () => {
+                            if (this.isRunning) {
+                                this.isRunning = false;
+                                this.errorMessage = 'Втрачено з\'єднання з сервером';
+                            }
+                            eventSource.close();
+                        };
+
+                    } catch (error) {
+                        this.isRunning = false;
+                        this.errorMessage = error.message || 'Виникла помилка';
+                    }
+                }
+            };
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+[Unit]
+Description=SEO App - Next.js Frontend
+After=network-online.target seoapp.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=seoapp
+Group=seoapp
+WorkingDirectory=/var/www/seoapp/frontend/.next/standalone
+Environment="NODE_ENV=production"
+Environment="PORT=3000"
+Environment="HOSTNAME=127.0.0.1"
+Environment="FRONTEND_ROOT=/var/www/seoapp/frontend"
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+RestartSec=5
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Limits
+LimitNOFILE=65536
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target
