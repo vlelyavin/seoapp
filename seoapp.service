@@ -21,5 +21,11 @@ PrivateTmp=true
 LimitNOFILE=65536
 TimeoutStopSec=30
 
+# Memory limits — kernel throttles near MemoryHigh and OOM-kills at MemoryMax.
+# The application's own RSS watchdog aborts audits before reaching MemoryMax,
+# so the kernel limit is a hard backstop, not the primary control.
+MemoryHigh=8G
+MemoryMax=10G
+
 [Install]
 WantedBy=multi-user.target

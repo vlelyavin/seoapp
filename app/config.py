@@ -52,6 +52,9 @@ class Settings(BaseSettings):
     MAX_CONCURRENT_AUDITS: int = 3  # parallel audits; RAM-bound (each holds crawled pages), tune per server
     SCREENSHOT_TIMEOUT: int = 60  # max seconds for the homepage screenshot
     REPORT_TIMEOUT: int = 180  # max seconds for report generation
+    # Per-process RSS ceiling (MiB) before the watchdog cancels the running
+    # audit. Set well below the systemd MemoryMax to allow graceful shutdown.
+    MEMORY_WATCHDOG_MB: int = 6500
 
     # Browser viewport
     VIEWPORT_WIDTH: int = 1920

@@ -4,8 +4,6 @@ import json
 from collections import Counter
 from typing import Any, Dict, List
 
-from bs4 import BeautifulSoup
-
 from ..models import AnalyzerResult, AuditIssue, PageData, SeverityLevel
 from .base import BaseAnalyzer
 
@@ -51,51 +49,30 @@ class SchemaAnalyzer(BaseAnalyzer):
         total_pages = 0
 
         for url, page in pages.items():
-            if page.status_code != 200 or not page.html_content:
+            if page.status_code != 200:
                 continue
 
             total_pages += 1
-            soup = page.get_soup()
-            if soup is None:
-                continue
-
             page_has_schema = False
 
-            # Find JSON-LD blocks
-            json_ld_scripts = soup.find_all('script', type='application/ld+json')
-            for script in json_ld_scripts:
+            for script_text in page.json_ld_scripts:
                 try:
-                    content = script.string
-                    if not content:
-                        continue
-                    data = json.loads(content)
+                    data = json.loads(script_text)
                     pages_with_json_ld.add(url)
                     page_has_schema = True
-
-                    # Extract @type(s)
                     self._extract_types(data, url, schema_types, schema_type_examples)
-
                 except (json.JSONDecodeError, ValueError) as e:
-                    json_ld_errors.append({
-                        'url': url,
-                        'error': str(e),
-                    })
+                    json_ld_errors.append({"url": url, "error": str(e)})
 
-            # Check for Microdata
-            microdata_elements = soup.find_all(attrs={'itemscope': True})
-            if microdata_elements:
+            if page.microdata_itemtypes:
                 pages_with_microdata.add(url)
                 page_has_schema = True
-
-                for elem in microdata_elements:
-                    itemtype = elem.get('itemtype', '')
-                    if itemtype:
-                        # Extract type name from URL like "https://schema.org/Product"
-                        type_name = itemtype.rstrip('/').split('/')[-1]
-                        if type_name:
-                            schema_types[type_name] += 1
-                            if type_name not in schema_type_examples:
-                                schema_type_examples[type_name] = url
+                for itemtype in page.microdata_itemtypes:
+                    type_name = itemtype.rstrip("/").split("/")[-1]
+                    if type_name:
+                        schema_types[type_name] += 1
+                        if type_name not in schema_type_examples:
+                            schema_type_examples[type_name] = url
 
             if page_has_schema:
                 pages_with_schema.add(url)

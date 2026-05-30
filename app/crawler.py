@@ -14,6 +14,7 @@ from bs4 import BeautifulSoup
 
 from .config import settings
 from .models import ImageData, LinkData, PageData
+from .page_extraction import extract_analyzer_fields
 
 logger = logging.getLogger(__name__)
 
@@ -325,8 +326,16 @@ class WebCrawler:
                     final_url=final_url,
                 )
 
-                # Cache the parsed soup for analyzers to reuse
+                # Pre-extract every soup-derived field analyzers might need,
+                # then drop the soup + html_content so per-page steady-state
+                # memory stays in the tens of KB instead of multi-MB. The
+                # extracted payloads on page_data are what analyzers consume.
                 page_data.set_soup(soup)
+                try:
+                    extract_analyzer_fields(soup, page_data, url)
+                finally:
+                    page_data.clear_cache()
+                    page_data.html_content = None
 
                 return page_data
 

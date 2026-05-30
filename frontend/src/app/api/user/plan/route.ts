@@ -19,6 +19,7 @@ export async function GET() {
   }
 
   // Billing disabled: report unlimited plan values so the UI reflects no caps.
+  // maxSites comes from getPlanCapabilities (Number.MAX_SAFE_INTEGER).
   return NextResponse.json({
     plan: {
       id: user.plan.id,

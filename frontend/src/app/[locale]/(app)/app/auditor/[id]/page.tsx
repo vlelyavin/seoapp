@@ -8,7 +8,8 @@ import { useAuditProgress } from "@/hooks/use-audit-progress";
 import { AuditProgressView } from "@/components/audit/audit-progress";
 import { AuditResultsView } from "@/components/audit/audit-results";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { AlertOctagon, ArrowLeft } from "lucide-react";
+import { AlertOctagon, ArrowLeft, RotateCcw } from "lucide-react";
+import { toast } from "sonner";
 import type { AuditResults } from "@/types/audit";
 
 export default function AuditPage({
@@ -27,6 +28,29 @@ export default function AuditPage({
   const [loading, setLoading] = useState(true);
   const [pageError, setPageError] = useState<string | null>(null);
   const [auditUrl, setAuditUrl] = useState<string | null>(null);
+  const [restarting, setRestarting] = useState(false);
+
+  async function handleRestart() {
+    if (!auditUrl || restarting) return;
+    setRestarting(true);
+    try {
+      const res = await fetch("/api/audit/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: auditUrl, language: locale, progressLanguage: locale }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || tAudit("error"));
+        setRestarting(false);
+        return;
+      }
+      router.push(`/app/auditor/${data.id}?fastApiId=${data.fastApiId}`);
+    } catch {
+      toast.error(tAudit("error"));
+      setRestarting(false);
+    }
+  }
 
   useEffect(() => {
     params.then(({ id }) => {
@@ -235,16 +259,29 @@ export default function AuditPage({
           <h2 className="mb-2 text-xl font-semibold text-white">
             {tAudit("failed")}
           </h2>
-          <p className="mb-6 text-sm text-gray-400">
+          <p className="mb-6 mx-auto max-w-lg text-sm text-gray-300 whitespace-pre-line">
             {progress.message}
           </p>
-          <Link
-            href="/app"
-            className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-copper to-copper-light px-6 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {tAudit("backToDashboard")}
-          </Link>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            {auditUrl && (
+              <button
+                type="button"
+                onClick={handleRestart}
+                disabled={restarting}
+                className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-copper to-copper-light px-6 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+              >
+                <RotateCcw className={`h-4 w-4 ${restarting ? "animate-spin" : ""}`} />
+                {restarting ? tAudit("startingAudit") : tAudit("startAudit")}
+              </button>
+            )}
+            <Link
+              href="/app"
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-700 px-6 py-2.5 text-sm font-medium text-gray-300 transition-colors hover:bg-gray-900"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              {tAudit("backToDashboard")}
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -278,16 +315,29 @@ export default function AuditPage({
           <h2 className="mb-2 text-xl font-semibold text-white">
             {tAudit("failed")}
           </h2>
-          <p className="mb-6 text-sm text-gray-400">
+          <p className="mb-6 mx-auto max-w-lg text-sm text-gray-300 whitespace-pre-line">
             {pageError}
           </p>
-          <Link
-            href="/app"
-            className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-copper to-copper-light px-6 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {tAudit("backToDashboard")}
-          </Link>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            {auditUrl && (
+              <button
+                type="button"
+                onClick={handleRestart}
+                disabled={restarting}
+                className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-copper to-copper-light px-6 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+              >
+                <RotateCcw className={`h-4 w-4 ${restarting ? "animate-spin" : ""}`} />
+                {restarting ? tAudit("startingAudit") : tAudit("startAudit")}
+              </button>
+            )}
+            <Link
+              href="/app"
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-700 px-6 py-2.5 text-sm font-medium text-gray-300 transition-colors hover:bg-gray-900"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              {tAudit("backToDashboard")}
+            </Link>
+          </div>
         </div>
       </div>
     );

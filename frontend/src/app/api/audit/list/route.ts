@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { sweepStaleAuditsForUser } from "@/lib/stale-audits";
 
 const IN_PROGRESS_STATUSES = ["crawling", "analyzing", "generating_report", "screenshots", "pending"];
 const STALE_THRESHOLD_MS = 2 * 60 * 1000; // 2 minutes
@@ -10,6 +11,10 @@ export async function GET(req: Request) {
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  // Fast path: mark any audit started before the FastAPI process's last boot
+  // as failed without an extra round-trip. Cheap and idempotent.
+  await sweepStaleAuditsForUser(session.user.id);
 
   const { searchParams } = new URL(req.url);
   const take = Math.min(Math.max(parseInt(searchParams.get("take") || "20", 10) || 20, 1), 100);
@@ -66,8 +71,13 @@ export async function GET(req: Request) {
 
         if (!res.ok) {
           // If FastAPI returns 404, the audit no longer exists — mark as failed
+          // and surface the last-known page count so the user knows how far it got.
           if (res.status === 404) {
-            const failedData = { status: "failed" as const, errorMessage: "Audit expired or not found on server", completedAt: new Date() };
+            const lastKnown = audit.pagesCrawled || 0;
+            const msg = lastKnown > 0
+              ? `Audit interrupted: the backend lost the run at ${lastKnown} pages (service restart or memory limit). Start a new audit.`
+              : `Audit interrupted: the backend lost the run before reporting any progress (service restart or memory limit). Start a new audit.`;
+            const failedData = { status: "failed" as const, errorMessage: msg, completedAt: new Date() };
             await prisma.audit.updateMany({
               where: { id: audit.id, status: { notIn: ["completed", "failed"] } },
               data: failedData,

@@ -96,42 +96,26 @@ class ContentSectionsAnalyzer(BaseAnalyzer):
                     faq_pages.append(url)
                     break
 
-            # Analyze HTML content for blog indicators
-            if page.html_content:
-                html = page.html_content.lower()
+            # Pre-extracted signals replace direct html_content access.
+            signals = page.section_signals or {}
+            has_details = signals.get("has_details_tag", False)
+            has_summary = signals.get("has_summary_tag", False)
+            has_faq_schema = signals.get("has_faq_schema_marker", False)
 
-                # Check for FAQ structure
-                has_details = '<details' in html
-                has_summary = '<summary' in html
-                has_faq_schema = 'faqpage' in html or '"@type":"faq' in html.replace(' ', '')
+            if has_details and has_summary:
+                pages_with_faq_structure.append(url)
+            if has_faq_schema:
+                pages_with_schema_faq.append(url)
 
-                if has_details and has_summary:
-                    pages_with_faq_structure.append(url)
-
-                if has_faq_schema:
-                    pages_with_schema_faq.append(url)
-
-                # Check for blog indicators (only if this is a blog page)
-                if url in blog_pages:
-                    # Date patterns
-                    date_patterns = [
-                        r'\d{1,2}[./]\d{1,2}[./]\d{2,4}',
-                        r'\d{4}-\d{2}-\d{2}',
-                        r'(січня|лютого|березня|квітня|травня|червня|липня|серпня|вересня|жовтня|листопада|грудня)',
-                        r'(january|february|march|april|may|june|july|august|september|october|november|december)',
-                    ]
-                    for pattern in date_patterns:
-                        if re.search(pattern, html, re.IGNORECASE):
-                            blog_indicators['has_dates'] = True
-                            break
-
-                    # Category/tag patterns
-                    if re.search(r'(categor|катего|рубрик)', html):
-                        blog_indicators['has_categories'] = True
-                    if re.search(r'(tag|тег|мітк)', html):
-                        blog_indicators['has_tags'] = True
-                    if re.search(r'(author|автор)', html):
-                        blog_indicators['has_author'] = True
+            if url in blog_pages:
+                if signals.get("has_dates_pattern"):
+                    blog_indicators['has_dates'] = True
+                if signals.get("has_categories_pattern"):
+                    blog_indicators['has_categories'] = True
+                if signals.get("has_tags_pattern"):
+                    blog_indicators['has_tags'] = True
+                if signals.get("has_author_pattern"):
+                    blog_indicators['has_author'] = True
 
         # Create issues
         has_blog = len(blog_pages) > 0

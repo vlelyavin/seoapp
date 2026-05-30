@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
-import { Save, Lock, ImageOff, ImageIcon } from "lucide-react";
+import { Save, ImageOff, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 
 function normalizeLogoUrl(url: string): string {
@@ -24,7 +23,6 @@ function normalizeLogoUrl(url: string): string {
 
 export default function BrandingPage() {
   const t = useTranslations("branding");
-  const { data: session } = useSession();
   const [companyName, setCompanyName] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
   const [saving, setSaving] = useState(false);
@@ -33,8 +31,6 @@ export default function BrandingPage() {
   const [imageError, setImageError] = useState(false);
   const [logoVersion, setLogoVersion] = useState<number>(0);
   const [isDragOver, setIsDragOver] = useState(false);
-
-  const isAgency = session?.user?.planId === "agency";
 
   // Reset image error state when logoUrl changes (e.g., after loading from API)
   useEffect(() => {
@@ -63,8 +59,8 @@ export default function BrandingPage() {
         }
       } catch { /* ignore */ }
     }
-    if (isAgency) load();
-  }, [isAgency]);
+    load();
+  }, []);
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
@@ -168,17 +164,6 @@ export default function BrandingPage() {
   }
 
   const logoSrc = previewUrl || (logoUrl ? `${logoUrl}?v=${logoVersion}` : "");
-
-  if (!isAgency) {
-    return (
-      <div className="py-12 text-center">
-        <Lock className="mx-auto mb-4 h-12 w-12 text-gray-600" />
-        <p className="text-sm text-gray-400">
-          {t("proRequired")}
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">

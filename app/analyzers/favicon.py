@@ -46,54 +46,26 @@ class FaviconAnalyzer(BaseAnalyzer):
         html_favicons = []
         apple_touch_icons = []
 
-        # Check home page for favicon links
+        # Check home page for favicon links — uses the pre-extracted favicon_links.
         home_page = pages.get(base_url) or pages.get(base_url + "/")
         if not home_page:
-            # Try to find any page
             for url, page in pages.items():
-                if page.status_code == 200 and page.html_content:
+                if page.status_code == 200 and page.favicon_links:
                     home_page = page
                     break
 
-        if home_page and home_page.html_content:
-            soup = home_page.get_soup()
-            if soup is None:
-                return self.create_result(
-                    severity=SeverityLevel.ERROR,
-                    summary=self.t("analyzer_content.favicon.issues.no_favicon"),
-                    issues=[],
-                    data={},
-                )
-
-            # Find all favicon links
-            for link in soup.find_all('link', rel=True):
-                rel = link.get('rel', [])
-                if isinstance(rel, str):
-                    rel = [rel]
-
-                href = link.get('href', '')
-                if not href:
-                    continue
-
-                # Make absolute URL
-                if not href.startswith(('http://', 'https://')):
-                    href = urljoin(base_url, href)
-
-                if 'icon' in rel or 'shortcut' in rel:
-                    sizes = link.get('sizes', '')
-                    type_attr = link.get('type', '')
-                    html_favicons.append({
-                        'href': href,
-                        'sizes': sizes,
-                        'type': type_attr,
-                    })
-
-                if 'apple-touch-icon' in rel:
-                    sizes = link.get('sizes', '')
-                    apple_touch_icons.append({
-                        'href': href,
-                        'sizes': sizes,
-                    })
+        if home_page and home_page.favicon_links:
+            for entry in home_page.favicon_links:
+                rel_kind = entry.get("rel_kind")
+                payload = {
+                    "href": entry.get("href", ""),
+                    "sizes": entry.get("sizes", ""),
+                    "type": entry.get("type", ""),
+                }
+                if rel_kind == "apple-touch-icon":
+                    apple_touch_icons.append({"href": payload["href"], "sizes": payload["sizes"]})
+                else:
+                    html_favicons.append(payload)
 
         has_html_favicon = len(html_favicons) > 0
         has_apple_icon = len(apple_touch_icons) > 0

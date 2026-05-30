@@ -92,17 +92,37 @@ from .i18n import get_translator
 # Ensure directories exist
 settings.ensure_dirs()
 
-# Analyzer concurrency control (max 10 analyzers running simultaneously)
-_analyzer_semaphore = asyncio.Semaphore(10)
+# Analyzer concurrency control (max 4 analyzers running simultaneously)
+# Lowered from 10 to keep peak RAM bounded — most analyzers iterate every crawled
+# page and allocate per-analyzer aggregates; with 10 in flight a 500-page audit
+# on a heavy site (e.g. cnn.com) blew through 15 GB and got OOM-killed.
+_analyzer_semaphore = asyncio.Semaphore(4)
 
 # Limit concurrent audits to prevent resource exhaustion
 _audit_semaphore = asyncio.Semaphore(settings.MAX_CONCURRENT_AUDITS)
+
+
+_STARTUP_MARKER_PATH = Path(__file__).resolve().parent.parent / ".fastapi-started-at"
+
+
+def _write_startup_marker() -> None:
+    """Stamp the moment this process can first serve audits.
+
+    Next.js reads this file to detect that audits with startedAt < marker
+    belong to a previous (lost) process and should be marked failed without
+    waiting for the in-memory TTL or a per-audit 404 poll.
+    """
+    try:
+        _STARTUP_MARKER_PATH.write_text(datetime.utcnow().isoformat() + "Z")
+    except OSError as e:
+        logger.warning(f"Could not write startup marker {_STARTUP_MARKER_PATH}: {e}")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan: startup and shutdown hooks."""
     # Startup
+    _write_startup_marker()
     cleanup_task = asyncio.create_task(cleanup_old_audits())
     logger.info("Audit cleanup task started")
 
@@ -611,13 +631,61 @@ async def translate_results(request: Request):
     return JSONResponse(content={**cached_data, "results": results_dict})
 
 
+def _read_rss_mb() -> int:
+    """Read this process's resident-set size in MiB. Linux-only (uses /proc/self/status)."""
+    try:
+        with open("/proc/self/status", "r") as f:
+            for line in f:
+                if line.startswith("VmRSS:"):
+                    return int(line.split()[1]) // 1024
+    except (OSError, ValueError):
+        pass
+    return 0
+
+
+async def _memory_watchdog(audit_id: str, audit_task: asyncio.Task, state: Dict, threshold_mb: int):
+    """Watchdog: if process RSS exceeds threshold, abort the audit task.
+
+    Records the trigger reason on `state` so the audit handler can emit a
+    useful error message instead of a generic CancelledError.
+    """
+    try:
+        while not audit_task.done():
+            await asyncio.sleep(5)
+            rss = _read_rss_mb()
+            if rss > threshold_mb:
+                state["oom_abort"] = True
+                state["oom_rss_mb"] = rss
+                state["oom_threshold_mb"] = threshold_mb
+                logger.warning(
+                    f"[Audit {audit_id}] Memory watchdog tripped at {rss} MiB "
+                    f"(threshold {threshold_mb} MiB); aborting"
+                )
+                audit_task.cancel()
+                return
+    except asyncio.CancelledError:
+        return
+
+
 async def run_audit(audit_id: str, request: AuditRequest):
     """Background task to run the full audit with 10-minute timeout."""
     async with _audit_semaphore:
-        await _run_audit_inner(audit_id, request)
+        state: Dict = {"oom_abort": False}
+        audit_task = asyncio.current_task()
+        watchdog = asyncio.create_task(
+            _memory_watchdog(audit_id, audit_task, state, settings.MEMORY_WATCHDOG_MB)
+        )
+        try:
+            await _run_audit_inner(audit_id, request, state)
+        finally:
+            watchdog.cancel()
+            try:
+                await watchdog
+            except (asyncio.CancelledError, Exception):
+                pass
 
 
-async def _run_audit_inner(audit_id: str, request: AuditRequest):
+async def _run_audit_inner(audit_id: str, request: AuditRequest, state: Dict):
     """Inner audit logic, guarded by _audit_semaphore."""
     channel = broadcast_channels[audit_id]
     audit, _ = audits[audit_id]
@@ -1120,6 +1188,51 @@ async def _run_audit_inner(audit_id: str, request: AuditRequest):
             f"[Audit {audit.id}] Completed successfully in "
             f"{(time.time() - audit_start_ts):.2f}s"
         )
+
+    except asyncio.CancelledError:
+        # Watchdog-triggered cancellation has an `oom_abort` flag on `state`.
+        # Anything else (server shutdown, external cancel) re-raises.
+        if not state.get("oom_abort"):
+            raise
+
+        rss = state.get("oom_rss_mb", 0)
+        threshold = state.get("oom_threshold_mb", 0)
+        crawled = len(pages)
+        logger.error(
+            f"[Audit {audit_id}] Aborted by memory watchdog at {rss} MiB "
+            f"(threshold {threshold} MiB), {crawled} pages crawled"
+        )
+        audit.status = AuditStatus.FAILED
+        audit.error_message = (
+            f"Memory limit reached after crawling {crawled} pages "
+            f"({rss} MiB used, limit {threshold} MiB). "
+            f"Try a smaller max_pages, or audit a lighter site."
+        )
+
+        if hasattr(audit, 'pages') and audit.pages:
+            for page in audit.pages.values():
+                page.clear_cache()
+            audit.pages.clear()
+
+        for directory in [settings.REPORTS_DIR, settings.SCREENSHOTS_DIR]:
+            dir_path = Path(directory)
+            if dir_path.exists():
+                for f in dir_path.glob(f"*{audit_id}*"):
+                    try:
+                        f.unlink()
+                    except OSError:
+                        pass
+
+        await emit_progress(ProgressEvent(
+            status=AuditStatus.FAILED,
+            progress=0,
+            message=audit.error_message,
+            pages_crawled=crawled,
+            stage="error",
+            current_task_type="idle",
+            analyzers_total=analyzers_total,
+            analyzers_completed=completed_total(),
+        ))
 
     except Exception as e:
         logger.error(f"Audit {audit_id} failed: {e}", exc_info=True)

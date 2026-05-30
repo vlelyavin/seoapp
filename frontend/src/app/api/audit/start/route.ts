@@ -67,6 +67,7 @@ export async function POST(req: Request) {
 
   // Billing disabled: no monthly audit limit and no per-plan page cap. Crawl
   // depth is bounded only by a safety ceiling so one audit can't crawl unbounded.
+  // 1000 is supported after the soup-drop refactor + RSS watchdog backstop.
   const MAX_PAGES_CEILING = 1000;
   const effectiveMaxPages = Math.min(maxPages || 100, MAX_PAGES_CEILING);
 

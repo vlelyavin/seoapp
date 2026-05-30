@@ -85,6 +85,25 @@ class PageData(BaseModel):
     redirect_chain: List[str] = Field(default_factory=list)
     final_url: Optional[str] = None
 
+    # Pre-extracted analyzer payloads. These are filled by extract_analyzer_fields()
+    # immediately after parsing in the crawler, so the soup and html_content can
+    # be dropped right away — keeping per-page steady-state memory well under a
+    # megabyte instead of the 3-5 MB lxml soups would otherwise hold.
+    og_tags: Dict[str, str] = Field(default_factory=dict)
+    twitter_tags: Dict[str, str] = Field(default_factory=dict)
+    json_ld_scripts: List[str] = Field(default_factory=list)
+    microdata_itemtypes: List[str] = Field(default_factory=list)
+    hreflang_links: List[Dict[str, str]] = Field(default_factory=list)
+    viewport_content: Optional[str] = None
+    favicon_links: List[Dict[str, str]] = Field(default_factory=list)
+    meta_generator: Optional[str] = None
+    cms_html_signals: List[str] = Field(default_factory=list)
+    section_signals: Dict[str, bool] = Field(default_factory=dict)
+    main_content_text: Optional[str] = None
+    main_content_mode: Optional[str] = None
+    main_content_word_count: int = 0
+    has_mixed_http_resource: bool = False
+
     # Cached parsed HTML (not serialized)
     _soup_cache: Optional[BeautifulSoup] = None
 

@@ -3,11 +3,8 @@
 import asyncio
 import hashlib
 import random
-import re
 from typing import Any, Dict, List, Set, Tuple
 from urllib.parse import urljoin, urlparse, urlunparse
-
-from bs4 import BeautifulSoup
 
 from ..models import AnalyzerResult, AuditIssue, PageData, SeverityLevel
 from .base import BaseAnalyzer
@@ -34,15 +31,6 @@ class DuplicatesAnalyzer(BaseAnalyzer):
     _MIN_LENGTH_RATIO = 0.70
     _MINHASH_CANDIDATE_THRESHOLD = 0.85
     _NEAR_DUPLICATE_THRESHOLD = 0.90
-
-    _EXCLUDED_TAGS = frozenset(
-        {"script", "style", "noscript", "header", "footer", "nav", "aside"}
-    )
-    _BOILERPLATE_HINT_RE = re.compile(
-        r"(menu|nav|header|footer|sidebar|cookie|banner|popup|modal|subscribe|breadcrumbs?)",
-        re.IGNORECASE,
-    )
-    _WHITESPACE_RE = re.compile(r"\s+")
 
     def __init__(self):
         super().__init__()
@@ -73,65 +61,6 @@ class DuplicatesAnalyzer(BaseAnalyzer):
                 "",
             )
         )
-
-    def _is_boilerplate_node(self, node) -> bool:
-        """Heuristically detect boilerplate containers by id/class names."""
-        attrs: List[str] = []
-        node_id = node.get("id")
-        if node_id:
-            attrs.append(str(node_id))
-        node_classes = node.get("class") or []
-        if isinstance(node_classes, str):
-            attrs.append(node_classes)
-        else:
-            attrs.extend(str(cls) for cls in node_classes)
-
-        if not attrs:
-            return False
-        return bool(self._BOILERPLATE_HINT_RE.search(" ".join(attrs)))
-
-    def _select_content_root(self, soup: BeautifulSoup) -> Tuple[object, str]:
-        """Prefer semantic content containers for conservative comparison."""
-        main = soup.find("main")
-        if main and main.get_text(" ", strip=True):
-            return main, "main"
-
-        article = soup.find("article")
-        if article and article.get_text(" ", strip=True):
-            return article, "article"
-
-        return (soup.body or soup), "fallback"
-
-    def _should_skip_text_node(self, root, parent) -> bool:
-        """Skip strings that belong to excluded/boilerplate containers."""
-        ancestor = parent
-        while ancestor is not None:
-            name = getattr(ancestor, "name", None)
-            if name in self._EXCLUDED_TAGS:
-                return True
-            if hasattr(ancestor, "attrs") and self._is_boilerplate_node(ancestor):
-                return True
-            if ancestor == root:
-                break
-            ancestor = getattr(ancestor, "parent", None)
-        return False
-
-    def _extract_text(self, soup: BeautifulSoup) -> Tuple[str, str]:
-        """Extract and normalize content text with boilerplate suppression."""
-        root, mode = self._select_content_root(soup)
-        texts: List[str] = []
-
-        for element in root.find_all(string=True):
-            parent = element.parent
-            if parent is None or self._should_skip_text_node(root, parent):
-                continue
-
-            stripped = element.strip()
-            if stripped:
-                texts.append(stripped)
-
-        text = self._WHITESPACE_RE.sub(" ", " ".join(texts)).strip().lower()
-        return text, mode
 
     def _create_shingles(self, text: str, shingle_size: int = 3) -> Set[Tuple[str, ...]]:
         """Create shingles (n-word tuples) from text."""
@@ -244,19 +173,14 @@ class DuplicatesAnalyzer(BaseAnalyzer):
             extraction_mode_counts: Dict[str, int] = {"main": 0, "article": 0, "fallback": 0}
 
             for url, page in pages.items():
-                if page.status_code != 200 or not page.html_content:
+                if page.status_code != 200 or not page.main_content_text:
                     continue
 
-                soup = page.get_soup()
-                if soup is None:
-                    continue
+                text = page.main_content_text
+                mode = page.main_content_mode or "fallback"
+                word_count = page.main_content_word_count or len(text.split())
 
-                text, mode = self._extract_text(soup)
-                if not text:
-                    continue
-
-                words = text.split()
-                if len(words) < self._MIN_WORDS:
+                if word_count < self._MIN_WORDS:
                     continue
 
                 shingles = self._create_shingles(text, shingle_size=3)
@@ -265,7 +189,7 @@ class DuplicatesAnalyzer(BaseAnalyzer):
 
                 signatures[url] = self._create_minhash_signature(shingles)
                 text_hashes[url] = hashlib.sha256(text.encode("utf-8")).hexdigest()
-                content_word_counts[url] = len(words)
+                content_word_counts[url] = word_count
                 normalized_urls[url] = self._normalize_url(url)
                 extraction_mode_counts[mode] = extraction_mode_counts.get(mode, 0) + 1
 

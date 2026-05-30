@@ -1,6 +1,5 @@
 """HTTPS and security headers analyzer."""
 
-import re
 from typing import Any, Dict, List
 
 from ..models import AnalyzerResult, AuditIssue, PageData, SeverityLevel
@@ -144,46 +143,11 @@ class SecurityAnalyzer(BaseAnalyzer):
                     "value": self.t("analyzer_content.security.issues.status_check_failed"),
                 }
 
-        # 3. Check for mixed content on HTTPS pages
-        mixed_content_pattern = re.compile(
-            r'(?:src|href)\s*=\s*["\']http://[^"\']+["\']',
-            re.IGNORECASE
-        )
-        resource_tag_pattern = re.compile(
-            r'<(?:img|script|iframe|source|video|audio|embed|object)\s[^>]*src\s*=\s*["\']http://[^"\']+["\']',
-            re.IGNORECASE
-        )
-        stylesheet_pattern = re.compile(
-            r'<link\s[^>]*rel\s*=\s*["\']stylesheet["\'][^>]*href\s*=\s*["\']http://[^"\']+["\']',
-            re.IGNORECASE
-        )
-        stylesheet_pattern_alt = re.compile(
-            r'<link\s[^>]*href\s*=\s*["\']http://[^"\']+["\'][^>]*rel\s*=\s*["\']stylesheet["\']',
-            re.IGNORECASE
-        )
-
-        pages_with_mixed_content: List[str] = []
-
-        for url, page in pages.items():
-            if page.status_code != 200 or not page.html_content:
-                continue
-
-            if not url.startswith("https://"):
-                continue
-
-            html = page.html_content
-            has_mixed = False
-
-            # Check resource tags (img, script, iframe, etc.)
-            if resource_tag_pattern.search(html):
-                has_mixed = True
-
-            # Check stylesheet links
-            if not has_mixed and (stylesheet_pattern.search(html) or stylesheet_pattern_alt.search(html)):
-                has_mixed = True
-
-            if has_mixed:
-                pages_with_mixed_content.append(url)
+        # 3. Mixed content on HTTPS pages — flag pre-computed in the crawler.
+        pages_with_mixed_content: List[str] = [
+            url for url, page in pages.items()
+            if page.status_code == 200 and url.startswith("https://") and page.has_mixed_http_resource
+        ]
 
         if pages_with_mixed_content:
             issues.append(self.create_issue(

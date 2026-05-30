@@ -2,8 +2,6 @@
 
 from typing import Any, Dict, List
 
-from bs4 import BeautifulSoup
-
 from ..models import AnalyzerResult, AuditIssue, PageData, SeverityLevel
 from .base import BaseAnalyzer
 
@@ -56,32 +54,16 @@ class SocialTagsAnalyzer(BaseAnalyzer):
         h_twitter_card = self.t("tables.twitter_card")
 
         for url, page in pages.items():
-            if page.status_code != 200 or not page.html_content:
+            if page.status_code != 200:
                 continue
 
             total_pages += 1
-            soup = page.get_soup()
-            if soup is None:
-                continue
 
-            # Check Open Graph tags
-            og_title = soup.find('meta', attrs={'property': 'og:title'})
-            og_description = soup.find('meta', attrs={'property': 'og:description'})
-            og_image = soup.find('meta', attrs={'property': 'og:image'})
-            og_url = soup.find('meta', attrs={'property': 'og:url'})
-            og_type = soup.find('meta', attrs={'property': 'og:type'})
-
-            has_og = bool(og_title)
-            has_og_image = bool(og_image and og_image.get('content', '').strip())
-            has_og_desc = bool(og_description and og_description.get('content', '').strip())
-
-            # Check Twitter Card tags
-            twitter_card = soup.find('meta', attrs={'name': 'twitter:card'})
-            twitter_title = soup.find('meta', attrs={'name': 'twitter:title'})
-            twitter_description = soup.find('meta', attrs={'name': 'twitter:description'})
-            twitter_image = soup.find('meta', attrs={'name': 'twitter:image'})
-
-            has_twitter = bool(twitter_card)
+            # Pre-extracted og:* and twitter:* meta dicts keyed by suffix.
+            has_og = "title" in page.og_tags
+            has_og_image = bool(page.og_tags.get("image"))
+            has_og_desc = bool(page.og_tags.get("description"))
+            has_twitter = "card" in page.twitter_tags
 
             # Track pages
             if has_og:

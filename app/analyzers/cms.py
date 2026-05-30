@@ -206,36 +206,32 @@ class CMSAnalyzer(BaseAnalyzer):
 
         detected_cms: List[Tuple[str, int, List[str]]] = []  # (cms_name, confidence, evidence)
 
-        # Get homepage HTML for analysis
+        # Pre-extracted signals on PageData replace direct html_content access.
         home_page = pages.get(base_url) or pages.get(base_url + "/")
         if not home_page:
             for url, page in pages.items():
-                if page.status_code == 200 and page.html_content:
+                if page.status_code == 200 and (page.meta_generator or page.cms_html_signals):
                     home_page = page
                     break
 
-        html_content = home_page.html_content if home_page else ""
+        meta_generator = (home_page.meta_generator or "") if home_page else ""
+        matched_signals = set(home_page.cms_html_signals) if home_page else set()
 
-        # Analyze each CMS signature
         for cms_name, signatures in self.CMS_SIGNATURES.items():
             confidence = 0
-            evidence = []
+            evidence: List[str] = []
 
-            # Check meta generator
-            if html_content:
-                for pattern in signatures.get("meta_generator", []):
-                    if re.search(f'<meta[^>]*generator[^>]*content=["\'][^"\']*{pattern}', html_content, re.IGNORECASE):
-                        confidence += 50
-                        evidence.append(f"Meta generator: {pattern}")
-                        break
+            for pattern in signatures.get("meta_generator", []):
+                if re.search(pattern, meta_generator, re.IGNORECASE):
+                    confidence += 50
+                    evidence.append(f"Meta generator: {pattern}")
+                    break
 
-                # Check HTML patterns
-                for pattern in signatures.get("html_patterns", []):
-                    if re.search(pattern, html_content, re.IGNORECASE):
-                        confidence += 15
-                        evidence.append(f"HTML pattern: {pattern}")
+            for pattern in signatures.get("html_patterns", []):
+                if pattern in matched_signals:
+                    confidence += 15
+                    evidence.append(f"HTML pattern: {pattern}")
 
-            # Limit confidence
             if confidence > 100:
                 confidence = 100
 

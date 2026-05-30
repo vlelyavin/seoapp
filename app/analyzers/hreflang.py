@@ -53,27 +53,17 @@ class HreflangAnalyzer(BaseAnalyzer):
         all_languages: Set[str] = set()
         hreflang_entries: List[Dict[str, str]] = []
 
-        # 1. Parse hreflang tags from all pages
+        # 1. Pull pre-extracted hreflang entries (filled in the crawler).
         for url, page in pages.items():
-            if page.status_code != 200 or not page.html_content:
-                continue
-
-            soup = page.get_soup()
-            if soup is None:
+            if page.status_code != 200 or not page.hreflang_links:
                 continue
 
             page_hreflangs: Dict[str, str] = {}
-
-            for link in soup.find_all('link', rel='alternate'):
-                hreflang_attr = link.get('hreflang')
-                href_attr = link.get('href')
-
-                if not hreflang_attr or not href_attr:
+            for entry in page.hreflang_links:
+                lang_code = entry.get("lang", "").strip().lower()
+                target_url = entry.get("href", "").strip()
+                if not lang_code or not target_url:
                     continue
-
-                lang_code = hreflang_attr.strip().lower()
-                target_url = href_attr.strip()
-
                 page_hreflangs[lang_code] = target_url
                 all_languages.add(lang_code)
                 hreflang_entries.append({

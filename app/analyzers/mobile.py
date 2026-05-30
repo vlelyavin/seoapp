@@ -40,31 +40,18 @@ class MobileAnalyzer(BaseAnalyzer):
         total_ok = 0
 
         for url, page in pages.items():
-            if page.status_code != 200 or not page.html_content:
+            if page.status_code != 200:
                 continue
 
-            soup = page.get_soup()
-            if soup is None:
-                continue
-
-            # Check for viewport meta tag (case-insensitive name attribute)
-            viewport_meta = soup.find('meta', attrs={'name': lambda v: v and v.lower() == 'viewport'})
-
-            has_viewport = False
-            has_correct_viewport = False
-
-            if viewport_meta:
-                has_viewport = True
-                content = viewport_meta.get('content', '')
-                if 'width=device-width' in content:
-                    has_correct_viewport = True
+            viewport_content = page.viewport_content
+            has_viewport = viewport_content is not None
+            has_correct_viewport = has_viewport and "width=device-width" in (viewport_content or "")
 
             if not has_viewport:
                 pages_no_viewport.append(url)
             elif not has_correct_viewport:
                 pages_bad_viewport.append(url)
 
-            # Count pages that are fully OK
             if has_correct_viewport:
                 total_ok += 1
 

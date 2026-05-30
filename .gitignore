@@ -47,6 +47,9 @@ screenshots/
 frontend/public/uploads/
 /package-lock.json
 
+# FastAPI process start marker (runtime, mtime changes on every boot)
+.fastapi-started-at
+
 # Next.js
 frontend/node_modules/
 frontend/.next/
