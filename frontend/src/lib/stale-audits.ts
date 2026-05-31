@@ -9,6 +9,14 @@ const IN_PROGRESS_STATUSES = ["pending", "crawling", "analyzing", "generating_re
 const STALE_AUDIT_MESSAGE =
   "Audit interrupted: the backend was restarted before this run finished. Start a new audit.";
 
+// Heartbeat staleness: a real audit completes within FastAPI's TOTAL_TIMEOUT
+// (10 min) and the watchdog cancels memory blow-ups in seconds. Anything
+// still flagged in-progress 30 minutes after startedAt is almost certainly a
+// closed-tab orphan whose terminal state never made it back to Postgres.
+const HEARTBEAT_STALENESS_MS = 30 * 60 * 1000;
+const HEARTBEAT_STALE_MESSAGE =
+  "Audit interrupted: no progress reported for over 30 minutes — the backend likely crashed. Start a new audit.";
+
 let cachedMarker: { mtimeMs: number; value: Date | null } | null = null;
 
 async function readMarker(): Promise<Date | null> {
@@ -36,18 +44,37 @@ async function readMarker(): Promise<Date | null> {
  * fetches audits.
  */
 export async function sweepStaleAuditsForUser(userId: string): Promise<void> {
+  // 1. Marker-based sweep: anything started before the FastAPI process boot
+  //    cannot still be running. Cheap because of the cached marker mtime.
   const marker = await readMarker();
-  if (!marker) return;
+  if (marker) {
+    await prisma.audit.updateMany({
+      where: {
+        userId,
+        status: { in: IN_PROGRESS_STATUSES },
+        startedAt: { lt: marker },
+      },
+      data: {
+        status: "failed",
+        errorMessage: STALE_AUDIT_MESSAGE,
+        completedAt: new Date(),
+      },
+    });
+  }
 
+  // 2. Heartbeat sweep: catches "user closed the tab right when the watchdog
+  //    cancelled the run, then the FastAPI state aged out of memory before
+  //    anyone polled" — the row would otherwise be stuck at crawling/0 forever.
+  const heartbeatCutoff = new Date(Date.now() - HEARTBEAT_STALENESS_MS);
   await prisma.audit.updateMany({
     where: {
       userId,
       status: { in: IN_PROGRESS_STATUSES },
-      startedAt: { lt: marker },
+      startedAt: { lt: heartbeatCutoff },
     },
     data: {
       status: "failed",
-      errorMessage: STALE_AUDIT_MESSAGE,
+      errorMessage: HEARTBEAT_STALE_MESSAGE,
       completedAt: new Date(),
     },
   });

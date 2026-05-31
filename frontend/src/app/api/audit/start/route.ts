@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { fastapiFetch } from "@/lib/api-client";
+import { sweepStaleAuditsForUser } from "@/lib/stale-audits";
+
+const IN_PROGRESS_STATUSES = ["pending", "crawling", "analyzing", "generating_report", "screenshots"];
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -63,6 +66,30 @@ export async function POST(req: Request) {
   const allowedLanguages = ["en", "uk", "ru"];
   if (!allowedLanguages.includes(language)) {
     return NextResponse.json({ error: "Unsupported language" }, { status: 400 });
+  }
+
+  // Block concurrent audits on the same URL: running two heavy crawls in the
+  // same FastAPI process is exactly what tripped the memory watchdog on
+  // cnn.com. Sweep stale rows first so a previously-orphaned audit doesn't
+  // permanently lock the URL.
+  await sweepStaleAuditsForUser(session.user.id);
+  const existing = await prisma.audit.findFirst({
+    where: {
+      userId: session.user.id,
+      url,
+      status: { in: IN_PROGRESS_STATUSES },
+    },
+    select: { id: true },
+  });
+  if (existing) {
+    return NextResponse.json(
+      {
+        error:
+          "You already have an audit running for this URL. Wait for it to finish before starting another one.",
+        existingAuditId: existing.id,
+      },
+      { status: 409 },
+    );
   }
 
   // Billing disabled: no monthly audit limit and no per-plan page cap. Crawl

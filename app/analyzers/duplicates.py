@@ -1,23 +1,17 @@
-"""Duplicate content analyzer."""
+"""Duplicate content analyzer.
+
+MinHash signatures and content hashes are pre-computed by the crawler (see
+app.page_extraction + app.minhash). The analyzer just compares the cached
+values, which keeps raw page text out of memory on large/heavy sites.
+"""
 
 import asyncio
-import hashlib
-import random
 from typing import Any, Dict, List, Set, Tuple
 from urllib.parse import urljoin, urlparse, urlunparse
 
+from .. import minhash
 from ..models import AnalyzerResult, AuditIssue, PageData, SeverityLevel
 from .base import BaseAnalyzer
-
-
-# MinHash config: independent permutations h_i(x) = (a_i*x + b_i) mod prime with
-# fixed seeded coefficients, so signatures are stable across processes (Python's
-# built-in hash() is randomized per process via PYTHONHASHSEED).
-_NUM_HASHES = 50
-_MINHASH_PRIME = (1 << 61) - 1  # Mersenne prime
-_minhash_rng = random.Random(0x5EED5EED)
-_MINHASH_A = [_minhash_rng.randrange(1, _MINHASH_PRIME) for _ in range(_NUM_HASHES)]
-_MINHASH_B = [_minhash_rng.randrange(0, _MINHASH_PRIME) for _ in range(_NUM_HASHES)]
 
 
 class DuplicatesAnalyzer(BaseAnalyzer):
@@ -61,47 +55,6 @@ class DuplicatesAnalyzer(BaseAnalyzer):
                 "",
             )
         )
-
-    def _create_shingles(self, text: str, shingle_size: int = 3) -> Set[Tuple[str, ...]]:
-        """Create shingles (n-word tuples) from text."""
-        words = text.split()
-        if len(words) < shingle_size:
-            return set()
-        return {
-            tuple(words[i : i + shingle_size])
-            for i in range(len(words) - shingle_size + 1)
-        }
-
-    def _create_minhash_signature(
-        self, shingles: Set[Tuple[str, ...]], num_hashes: int = _NUM_HASHES
-    ) -> List[int]:
-        """Create a MinHash signature using independent hash permutations."""
-        if not shingles:
-            return [0] * num_hashes
-
-        # Stable per-shingle base hash (process-independent, unlike hash()).
-        base_hashes = [
-            int.from_bytes(
-                hashlib.blake2b(" ".join(s).encode("utf-8"), digest_size=8).digest(),
-                "big",
-            )
-            for s in shingles
-        ]
-
-        prime = _MINHASH_PRIME
-        signature: List[int] = []
-        for i in range(num_hashes):
-            a = _MINHASH_A[i]
-            b = _MINHASH_B[i]
-            signature.append(min((a * x + b) % prime for x in base_hashes))
-        return signature
-
-    def _estimate_jaccard(self, sig1: List[int], sig2: List[int]) -> float:
-        """Estimate Jaccard similarity from two MinHash signatures."""
-        if not sig1 or not sig2:
-            return 0.0
-        matches = sum(1 for a, b in zip(sig1, sig2) if a == b)
-        return matches / len(sig1)
 
     def _group_pairs(self, pairs: List[Tuple[str, str, float]]) -> List[Set[str]]:
         """Group URLs connected through duplicate pairs."""
@@ -161,11 +114,9 @@ class DuplicatesAnalyzer(BaseAnalyzer):
         issues: List[AuditIssue] = []
         tables: List[Dict[str, Any]] = []
 
-        # Steps 1-2 (BeautifulSoup parsing, MinHash, O(n^2) pairwise compare) are
-        # CPU-bound — run them off the event loop so this analyzer doesn't block
-        # SSE progress or the other analyzers running concurrently.
+        # The O(n^2) pairwise compare is CPU-bound — run it off the event loop
+        # so this analyzer doesn't block SSE progress or other analyzers.
         def _detect_duplicates():
-            # Step 1: Build signatures from conservative content extraction.
             signatures: Dict[str, List[int]] = {}
             text_hashes: Dict[str, str] = {}
             content_word_counts: Dict[str, int] = {}
@@ -173,29 +124,24 @@ class DuplicatesAnalyzer(BaseAnalyzer):
             extraction_mode_counts: Dict[str, int] = {"main": 0, "article": 0, "fallback": 0}
 
             for url, page in pages.items():
-                if page.status_code != 200 or not page.main_content_text:
+                if page.status_code != 200 or page.is_redirect_stub:
+                    continue
+                if not page.main_content_minhash or not page.main_content_hash:
                     continue
 
-                text = page.main_content_text
-                mode = page.main_content_mode or "fallback"
-                word_count = page.main_content_word_count or len(text.split())
-
+                word_count = page.main_content_word_count
                 if word_count < self._MIN_WORDS:
                     continue
 
-                shingles = self._create_shingles(text, shingle_size=3)
-                if not shingles:
-                    continue
-
-                signatures[url] = self._create_minhash_signature(shingles)
-                text_hashes[url] = hashlib.sha256(text.encode("utf-8")).hexdigest()
+                signatures[url] = page.main_content_minhash
+                text_hashes[url] = page.main_content_hash
                 content_word_counts[url] = word_count
                 normalized_urls[url] = self._normalize_url(url)
+                mode = page.main_content_mode or "fallback"
                 extraction_mode_counts[mode] = extraction_mode_counts.get(mode, 0) + 1
 
             canonical_targets = self._build_canonical_targets(pages)
 
-            # Step 2: Compare pages pairwise (conservative thresholds).
             urls = list(signatures.keys())
             exact_duplicate_pairs: List[Tuple[str, str, float]] = []
             near_duplicate_pairs: List[Tuple[str, str, float]] = []
@@ -219,17 +165,16 @@ class DuplicatesAnalyzer(BaseAnalyzer):
                     if ratio < self._MIN_LENGTH_RATIO:
                         continue
 
-                    jaccard = self._estimate_jaccard(signatures[url_a], signatures[url_b])
-                    if jaccard < self._MINHASH_CANDIDATE_THRESHOLD:
+                    jac = minhash.jaccard(signatures[url_a], signatures[url_b])
+                    if jac < self._MINHASH_CANDIDATE_THRESHOLD:
                         continue
 
                     candidate_pairs += 1
 
-                    # Strict exactness: only equal normalized content hashes.
                     if text_hashes[url_a] == text_hashes[url_b]:
                         exact_duplicate_pairs.append((url_a, url_b, 1.0))
-                    elif jaccard >= self._NEAR_DUPLICATE_THRESHOLD:
-                        near_duplicate_pairs.append((url_a, url_b, jaccard))
+                    elif jac >= self._NEAR_DUPLICATE_THRESHOLD:
+                        near_duplicate_pairs.append((url_a, url_b, jac))
 
             return (
                 signatures,

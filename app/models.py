@@ -91,7 +91,11 @@ class PageData(BaseModel):
     # megabyte instead of the 3-5 MB lxml soups would otherwise hold.
     og_tags: Dict[str, str] = Field(default_factory=dict)
     twitter_tags: Dict[str, str] = Field(default_factory=dict)
-    json_ld_scripts: List[str] = Field(default_factory=list)
+    # JSON-LD: store the extracted schema.org @type values (and parse-error count)
+    # instead of the raw script bodies — a single CNN article often carries
+    # 5-10 JSON-LD blocks totaling 100+ KB, all of which we'd just throw away.
+    json_ld_types: List[str] = Field(default_factory=list)
+    json_ld_parse_errors: int = 0
     microdata_itemtypes: List[str] = Field(default_factory=list)
     hreflang_links: List[Dict[str, str]] = Field(default_factory=list)
     viewport_content: Optional[str] = None
@@ -99,10 +103,17 @@ class PageData(BaseModel):
     meta_generator: Optional[str] = None
     cms_html_signals: List[str] = Field(default_factory=list)
     section_signals: Dict[str, bool] = Field(default_factory=dict)
-    main_content_text: Optional[str] = None
+    # Duplicates analyzer payloads (pre-computed so the raw content text never
+    # needs to be retained — see app/minhash.py for the seeded coefficients).
     main_content_mode: Optional[str] = None
     main_content_word_count: int = 0
+    main_content_minhash: List[int] = Field(default_factory=list)
+    main_content_hash: Optional[str] = None  # 16-char sha256 prefix for exact-match
     has_mixed_http_resource: bool = False
+    # JS / meta-refresh redirect stubs (e.g. cnn.com/terms → /terms0): the
+    # crawler still records the hop but the analyzers ignore stubs so they
+    # don't produce false positives like "missing title" on a redirect shim.
+    is_redirect_stub: bool = False
 
     # Cached parsed HTML (not serialized)
     _soup_cache: Optional[BeautifulSoup] = None

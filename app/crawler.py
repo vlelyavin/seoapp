@@ -28,6 +28,86 @@ _TRACKING_PARAMS = re.compile(
     re.IGNORECASE,
 )
 
+# Response headers we actually consume (security analyzer + content-type sniff).
+# Keeping only these turns a CDN-style 30-50 header dict into a 5-7 entry dict;
+# multiplied by 1000 pages on cnn.com that's tens of MB saved.
+_HEADER_ALLOWLIST = frozenset({
+    'strict-transport-security',
+    'x-content-type-options',
+    'x-frame-options',
+    'content-security-policy',
+    'server',
+    'content-type',
+    'cache-control',
+})
+
+# JS-redirect detection. CNN's edition.cnn.com/terms is a tiny stub whose only
+# job is `window.location.replace('/terms0')`; with no JS runtime in the
+# crawler, we'd otherwise report it as "missing title / no headings / empty
+# body". Catching the redirect lets us enqueue the real page instead.
+_JS_REDIRECT_PATTERNS = [
+    re.compile(r'window\.location\.replace\s*\(\s*[\'"]([^\'"]+)[\'"]', re.IGNORECASE),
+    re.compile(r'window\.location\.assign\s*\(\s*[\'"]([^\'"]+)[\'"]', re.IGNORECASE),
+    re.compile(r'window\.location\.href\s*=\s*[\'"]([^\'"]+)[\'"]', re.IGNORECASE),
+    re.compile(r'window\.location\s*=\s*[\'"]([^\'"]+)[\'"]', re.IGNORECASE),
+    re.compile(r'location\.replace\s*\(\s*[\'"]([^\'"]+)[\'"]', re.IGNORECASE),
+    re.compile(r'location\.href\s*=\s*[\'"]([^\'"]+)[\'"]', re.IGNORECASE),
+    re.compile(r'document\.location(?:\.href)?\s*=\s*[\'"]([^\'"]+)[\'"]', re.IGNORECASE),
+]
+_META_REFRESH_URL = re.compile(r'url\s*=\s*[\'"]?([^\'";\s]+)', re.IGNORECASE)
+# Fallback for stubs that hide the URL behind a variable (e.g. cnn.com/terms:
+# `const fallback = '/terms0'; window.location.replace(redirect || fallback)`).
+# When a location call exists but no string literal sits inline with it, pick
+# the first URL-shaped quoted string anywhere in the same script.
+_LOCATION_CALL_RE = re.compile(
+    r'(?:window\.|document\.)?location(?:\.(?:replace|assign|href))?\s*[=(]',
+    re.IGNORECASE,
+)
+_URL_LITERAL_RE = re.compile(r'''[\'"](/[^\s\'"\\]+|https?://[^\s\'"\\]+)[\'"]''')
+
+
+def _detect_redirect_stub(soup, html: str) -> Optional[str]:
+    """Return the redirect target URL if the page is a JS/meta-refresh stub.
+
+    A stub has near-empty body content AND either a meta-refresh directive or
+    a window.location.* JavaScript assignment. Real pages always have visible
+    text far past the 64-char threshold here.
+    """
+    body = soup.find('body')
+    if body and len(body.get_text(strip=True)) > 64:
+        return None
+
+    meta_refresh = soup.find(
+        'meta',
+        attrs={'http-equiv': lambda v: isinstance(v, str) and v.lower() == 'refresh'},
+    )
+    if meta_refresh:
+        content = (meta_refresh.get('content', '') or '').strip()
+        m = _META_REFRESH_URL.search(content)
+        if m:
+            target = m.group(1).strip("'\"")
+            if target:
+                return target
+
+    for script in soup.find_all('script'):
+        script_text = script.string or ''
+        if not script_text:
+            continue
+        for pattern in _JS_REDIRECT_PATTERNS:
+            m = pattern.search(script_text)
+            if m:
+                target = m.group(1)
+                if target.startswith(('http://', 'https://', '/')):
+                    return target
+        # Variable-indirect form: location call exists, but the URL is held
+        # in a const/let elsewhere. Grab the first URL-shaped literal.
+        if _LOCATION_CALL_RE.search(script_text):
+            url_m = _URL_LITERAL_RE.search(script_text)
+            if url_m:
+                return url_m.group(1)
+
+    return None
+
 
 class WebCrawler:
     """Async BFS web crawler with httpx for lightweight HTTP fetching."""
@@ -261,9 +341,32 @@ class WebCrawler:
                     redirect_chain = [str(r.url) for r in response.history] + [str(response.url)]
                 final_url = str(response.url)
 
-                response_headers = dict(response.headers)
+                # Trim response headers to the SEO/security set we actually use.
+                response_headers = {
+                    k: v for k, v in response.headers.items()
+                    if k.lower() in _HEADER_ALLOWLIST
+                }
 
                 soup = BeautifulSoup(html, 'lxml')
+
+                # JS/meta-refresh redirect stub — enqueue the real target and
+                # drop the stub so analyzers don't flag a phantom "missing title".
+                redirect_target = _detect_redirect_stub(soup, html)
+                if redirect_target:
+                    target_abs = (
+                        redirect_target
+                        if redirect_target.startswith(('http://', 'https://'))
+                        else urljoin(url, redirect_target)
+                    )
+                    target_norm = self._normalize_url(target_abs)
+                    if (
+                        self._is_valid_url(target_norm)
+                        and target_norm not in self.visited
+                    ):
+                        self.visited.add(target_norm)
+                        self.queue.append((target_norm, depth))
+                    logger.info(f"Redirect stub at {url} → {target_abs}")
+                    return None
 
                 # Extract title
                 title_tag = soup.find('title')

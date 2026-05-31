@@ -3,7 +3,7 @@
 import { Link, localePath } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useSession, signIn } from "next-auth/react";
-import { ArrowRight, Zap } from "lucide-react";
+import { Zap } from "lucide-react";
 import Image from "next/image";
 
 export function AuditorHeroSection() {
@@ -41,12 +41,6 @@ export function AuditorHeroSection() {
                 {t("ctaPrimary")}
               </button>
             )}
-            <a
-              href="#pricing"
-              className="landing-btn-outline inline-flex items-center justify-center gap-2 rounded-md border border-gray-700 px-8 py-3.5 text-center text-sm font-semibold text-white transition-colors hover:border-copper-light"
-            >
-              {t("ctaSecondary")} <ArrowRight className="ml-1 inline h-4 w-4" />
-            </a>
           </div>
         </div>
 

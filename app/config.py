@@ -49,7 +49,12 @@ class Settings(BaseSettings):
     MAX_SSE_DURATION: int = 900  # max SSE stream duration in seconds
     ANALYZER_TIMEOUT: int = 60  # per-analyzer timeout in seconds
     MAX_IMAGE_CHECKS: int = 50  # max images to check size for
-    MAX_CONCURRENT_AUDITS: int = 3  # parallel audits; RAM-bound (each holds crawled pages), tune per server
+    # Serialize audits at the process level. The watchdog is per-process, so two
+    # concurrent heavy audits (e.g. cnn.com × 2) cannibalize each other's RAM
+    # budget and both get cancelled. With queue size 1, the second audit waits
+    # politely; combined with the per-user same-URL block in /api/audit/start
+    # the user almost never notices the serialization.
+    MAX_CONCURRENT_AUDITS: int = 1
     SCREENSHOT_TIMEOUT: int = 60  # max seconds for the homepage screenshot
     REPORT_TIMEOUT: int = 180  # max seconds for report generation
     # Per-process RSS ceiling (MiB) before the watchdog cancels the running

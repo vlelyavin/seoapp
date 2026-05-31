@@ -410,11 +410,12 @@ class SpeedAnalyzer(BaseAnalyzer):
                     errors.append(error_msg)
                     return None
                 except asyncio.TimeoutError:
+                    # Don't retry timeouts: each retry sits on an outbound 90s
+                    # buffer, and PageSpeed timing out usually means either the
+                    # target site is genuinely slow (retry won't help) or the
+                    # PSI service is under load (retry stacks pressure).
                     error_msg = f"{strategy}: Timeout (90s exceeded)"
-                    logger.error(f"PageSpeed API timeout for {strategy} (60s exceeded)")
-                    if attempt < max_retries - 1:
-                        await asyncio.sleep((attempt + 1) * 3)
-                        continue
+                    logger.error(f"PageSpeed API timeout for {strategy} (90s exceeded), giving up")
                     errors.append(error_msg)
                     return None
                 except Exception as e:

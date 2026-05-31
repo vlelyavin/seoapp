@@ -49,7 +49,7 @@ class MetaTagsAnalyzer(BaseAnalyzer):
         long_descriptions = []
 
         for url, page in pages.items():
-            if page.status_code != 200:
+            if page.status_code != 200 or page.is_redirect_stub:
                 continue
 
             # Check title

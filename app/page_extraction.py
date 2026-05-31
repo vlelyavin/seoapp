@@ -8,12 +8,15 @@ instead of holding 3-5 MB lxml soup objects per crawled page.
 
 from __future__ import annotations
 
+import hashlib
+import json
 import re
-from typing import List, Tuple
+from typing import Any, List, Tuple
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 
+from . import minhash
 from .models import PageData
 
 
@@ -172,6 +175,23 @@ def _extract_main_content(soup: BeautifulSoup) -> Tuple[str, str]:
     return text, mode
 
 
+def _collect_jsonld_types(data: Any, sink: List[str]) -> None:
+    """Recursively walk a parsed JSON-LD document and collect @type values."""
+    if isinstance(data, dict):
+        graph = data.get("@graph")
+        if isinstance(graph, list):
+            for item in graph:
+                _collect_jsonld_types(item, sink)
+        schema_type = data.get("@type")
+        if isinstance(schema_type, list):
+            sink.extend(t for t in schema_type if isinstance(t, str))
+        elif isinstance(schema_type, str):
+            sink.append(schema_type)
+    elif isinstance(data, list):
+        for item in data:
+            _collect_jsonld_types(item, sink)
+
+
 def _extract_meta_dict(soup: BeautifulSoup, attr: str, prefix: str) -> dict:
     """Collect meta[attr] values whose attr starts with prefix. Key is the suffix."""
     result: dict = {}
@@ -201,13 +221,23 @@ def extract_analyzer_fields(soup: BeautifulSoup, page: PageData, base_url: str) 
     page.og_tags = _extract_meta_dict(soup, "property", "og:")
     page.twitter_tags = _extract_meta_dict(soup, "name", "twitter:")
 
-    # JSON-LD blocks + Microdata itemtypes — used by schema analyzer.
-    json_ld: List[str] = []
+    # JSON-LD: parse once at extraction time and keep only the @type values.
+    # Raw scripts can be hundreds of KB on news sites (CNN article + organization
+    # + newsArticle + breadcrumbs + …) — analyzers only ever look at @type.
+    types: List[str] = []
+    parse_errors = 0
     for script in soup.find_all("script", type="application/ld+json"):
         content = script.string
-        if content and content.strip():
-            json_ld.append(content)
-    page.json_ld_scripts = json_ld
+        if not content or not content.strip():
+            continue
+        try:
+            data = json.loads(content)
+        except (json.JSONDecodeError, ValueError):
+            parse_errors += 1
+            continue
+        _collect_jsonld_types(data, types)
+    page.json_ld_types = types
+    page.json_ld_parse_errors = parse_errors
 
     itemtypes: List[str] = []
     for el in soup.find_all(attrs={"itemscope": True}):
@@ -294,13 +324,16 @@ def extract_analyzer_fields(soup: BeautifulSoup, page: PageData, base_url: str) 
         }
         page.section_signals = section_signals
 
-    # Main-content text (for the duplicates analyzer's MinHash). Mirrors
-    # DuplicatesAnalyzer._extract_text exactly so behavior is unchanged.
+    # Main-content fingerprints for the duplicates analyzer. The raw text isn't
+    # retained — we keep the MinHash signature (50 ints) for near-duplicate
+    # detection plus a sha256 prefix for exact-match. On a CNN article this
+    # collapses ~30 KB of text into ~0.5 KB of stable hashes.
     try:
         text, mode = _extract_main_content(soup)
     except Exception:
         text, mode = "", "fallback"
     if text:
-        page.main_content_text = text
         page.main_content_mode = mode
         page.main_content_word_count = len(text.split())
+        page.main_content_minhash = minhash.signature(text)
+        page.main_content_hash = hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]

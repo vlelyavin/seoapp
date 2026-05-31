@@ -1,6 +1,10 @@
-"""Schema.org structured data analyzer."""
+"""Schema.org structured data analyzer.
 
-import json
+JSON-LD scripts are parsed once at crawl time (see app/page_extraction.py);
+this analyzer consumes the resulting list of @type values plus a parse-error
+count, so it never has to keep raw JSON in memory.
+"""
+
 from collections import Counter
 from typing import Any, Dict, List
 
@@ -44,25 +48,29 @@ class SchemaAnalyzer(BaseAnalyzer):
         schema_type_examples: Dict[str, str] = {}  # type -> first example URL
         pages_with_json_ld: set = set()
         pages_with_microdata: set = set()
-        json_ld_errors: List[Dict[str, str]] = []
+        json_ld_error_urls: List[str] = []
+        total_json_ld_errors = 0
 
         total_pages = 0
 
         for url, page in pages.items():
-            if page.status_code != 200:
+            if page.status_code != 200 or page.is_redirect_stub:
                 continue
 
             total_pages += 1
             page_has_schema = False
 
-            for script_text in page.json_ld_scripts:
-                try:
-                    data = json.loads(script_text)
-                    pages_with_json_ld.add(url)
-                    page_has_schema = True
-                    self._extract_types(data, url, schema_types, schema_type_examples)
-                except (json.JSONDecodeError, ValueError) as e:
-                    json_ld_errors.append({"url": url, "error": str(e)})
+            if page.json_ld_types:
+                pages_with_json_ld.add(url)
+                page_has_schema = True
+                for schema_type in page.json_ld_types:
+                    schema_types[schema_type] += 1
+                    if schema_type not in schema_type_examples:
+                        schema_type_examples[schema_type] = url
+
+            if page.json_ld_parse_errors:
+                total_json_ld_errors += page.json_ld_parse_errors
+                json_ld_error_urls.append(url)
 
             if page.microdata_itemtypes:
                 pages_with_microdata.add(url)
@@ -127,16 +135,15 @@ class SchemaAnalyzer(BaseAnalyzer):
             ))
 
         # JSON-LD parsing errors
-        if json_ld_errors:
-            error_urls = list(set(e['url'] for e in json_ld_errors))
+        if json_ld_error_urls:
             issues.append(self.create_issue(
                 category="json_ld_errors",
                 severity=SeverityLevel.WARNING,
-                message=self.t("analyzer_content.schema.issues.json_ld_errors", count=len(error_urls)),
+                message=self.t("analyzer_content.schema.issues.json_ld_errors", count=len(json_ld_error_urls)),
                 details=self.t("analyzer_content.schema.details.json_ld_errors"),
-                affected_urls=error_urls[:20],
+                affected_urls=json_ld_error_urls[:20],
                 recommendation=self.t("analyzer_content.schema.recommendations.json_ld_errors"),
-                count=len(json_ld_errors),
+                count=total_json_ld_errors,
             ))
 
         # Create table with schema types
@@ -179,38 +186,7 @@ class SchemaAnalyzer(BaseAnalyzer):
                 "pages_with_json_ld": len(pages_with_json_ld),
                 "pages_with_microdata": len(pages_with_microdata),
                 "schema_types": dict(schema_types),
-                "json_ld_errors": len(json_ld_errors),
+                "json_ld_errors": total_json_ld_errors,
             },
             tables=tables,
         )
-
-    def _extract_types(
-        self,
-        data: Any,
-        url: str,
-        schema_types: Counter,
-        schema_type_examples: Dict[str, str],
-    ) -> None:
-        """Recursively extract @type values from JSON-LD data."""
-        if isinstance(data, dict):
-            # Handle @graph arrays
-            if '@graph' in data:
-                for item in data['@graph']:
-                    self._extract_types(item, url, schema_types, schema_type_examples)
-
-            # Extract @type
-            schema_type = data.get('@type')
-            if schema_type:
-                if isinstance(schema_type, list):
-                    for t in schema_type:
-                        schema_types[t] += 1
-                        if t not in schema_type_examples:
-                            schema_type_examples[t] = url
-                elif isinstance(schema_type, str):
-                    schema_types[schema_type] += 1
-                    if schema_type not in schema_type_examples:
-                        schema_type_examples[schema_type] = url
-
-        elif isinstance(data, list):
-            for item in data:
-                self._extract_types(item, url, schema_types, schema_type_examples)
